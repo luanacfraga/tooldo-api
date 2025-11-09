@@ -1,11 +1,16 @@
 import { Plan } from '@/core/domain/plan.entity';
-import type { PlanRepository } from '@/core/ports/plan.repository';
-import { Injectable } from '@nestjs/common';
+import { PlanRepository } from '@/core/ports/plan.repository';
+import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
+
+export const PLAN_REPOSITORY = 'PlanRepository';
 
 @Injectable()
 export class CreatePlanService {
-  constructor(private readonly planRepository: PlanRepository) {}
+  constructor(
+    @Inject(PLAN_REPOSITORY)
+    private readonly planRepository: PlanRepository,
+  ) {}
 
   async execute(input: Omit<Plan, 'id'>): Promise<Plan> {
     const plan = new Plan(
