@@ -48,5 +48,84 @@ model User {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
+  subscriptions Subscription[]
+  companies     Company[]      @relation("CompanyAdmin")
+
+  companyMemberships CompanyUser[]
+
   @@map("users")
+}
+
+model Plan {
+  id             String   @id @default(uuid())
+  name           String
+  maxCompanies   Int      @map("max_companies")
+  maxManagers    Int      @map("max_managers")
+  maxExecutors   Int      @map("max_executors")
+  maxConsultants Int      @map("max_consultants")
+  iaCallsLimit   Int      @map("ia_calls_limit")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id        String   @id @default(uuid())
+  adminId   String   @map("admin_id")
+  planId    String   @map("plan_id")
+  startedAt DateTime @default(now()) @map("started_at")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  admin    User      @relation(fields: [adminId], references: [id])
+  plan     Plan      @relation(fields: [planId], references: [id])
+  iaUsages IAUsage[]
+
+  @@map("subscriptions")
+}
+
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  adminId     String   @map("admin_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  admin   User          @relation("CompanyAdmin", fields: [adminId], references: [id])
+  members CompanyUser[]
+
+  @@map("companies")
+}
+
+model CompanyUser {
+  id        String   @id @default(uuid())
+  companyId String   @map("company_id")
+  userId    String   @map("user_id")
+  role      UserRole
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+  @@map("company_users")
+}
+
+model IAUsage {
+  id             String   @id @default(uuid())
+  subscriptionId String   @map("subscription_id")
+  userId         String?  @map("user_id")
+  companyId      String?  @map("company_id")
+  tokensUsed     Int      @map("tokens_used")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+
+  @@map("ia_usages")
 }
