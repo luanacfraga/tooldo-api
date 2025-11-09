@@ -9,8 +9,8 @@ import {
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { PlanResponseDto } from './dto/plan-response.dto';
 
-@ApiTags('Plans')
-@Controller('plans')
+@ApiTags('Plan')
+@Controller('plan')
 export class PlanController {
   constructor(private readonly createPlanService: CreatePlanService) {}
 
