@@ -315,41 +315,9 @@ User (admin)
 4. Se `count >= maxCompanies` → **ERRO**
 5. Se `count < maxCompanies` → **PERMITIR**
 
-**Código de Exemplo**:
+**Comportamento**:
 
-```typescript
-async function createCompany(adminId: string, companyData: CreateCompanyDto) {
-  // 1. Buscar subscription ativa
-  const subscription = await prisma.subscription.findFirst({
-    where: { adminId, isActive: true },
-    include: { plan: true },
-  });
-
-  if (!subscription) {
-    throw new Error('Admin não possui subscription ativa');
-  }
-
-  // 2. Contar empresas existentes
-  const companiesCount = await prisma.company.count({
-    where: { adminId },
-  });
-
-  // 3. Validar limite
-  if (companiesCount >= subscription.plan.maxCompanies) {
-    throw new Error(
-      `Limite de empresas atingido. Máximo permitido: ${subscription.plan.maxCompanies}`,
-    );
-  }
-
-  // 4. Criar empresa
-  return await prisma.company.create({
-    data: {
-      ...companyData,
-      adminId,
-    },
-  });
-}
-```
+O sistema verifica se o admin já atingiu o limite máximo de empresas permitidas pelo seu plano. Se o limite foi atingido, a criação da nova empresa é bloqueada. Caso contrário, a empresa é criada normalmente e vinculada ao admin.
 
 ---
 
@@ -368,89 +336,9 @@ async function createCompany(adminId: string, companyData: CreateCompanyDto) {
 4. Se `count >= limit` → **ERRO**
 5. Se `count < limit` → **PERMITIR**
 
-**Código de Exemplo**:
+**Comportamento**:
 
-```typescript
-async function addCompanyMember(
-  companyId: string,
-  userId: string,
-  role: UserRole,
-) {
-  // 1. Buscar empresa e admin
-  const company = await prisma.company.findUnique({
-    where: { id: companyId },
-    include: {
-      admin: {
-        include: {
-          subscriptions: {
-            where: { isActive: true },
-            include: { plan: true },
-          },
-        },
-      },
-    },
-  });
-
-  if (!company) {
-    throw new Error('Empresa não encontrada');
-  }
-
-  const subscription = company.admin.subscriptions[0];
-  if (!subscription) {
-    throw new Error('Admin não possui subscription ativa');
-  }
-
-  // 2. Definir limite baseado no role
-  const limits = {
-    manager: subscription.plan.maxManagers,
-    executor: subscription.plan.maxExecutors,
-    consultant: subscription.plan.maxConsultants,
-  };
-
-  const limit = limits[role];
-  if (!limit) {
-    throw new Error(`Role inválido: ${role}`);
-  }
-
-  // 3. Contar membros existentes com o mesmo role (em todas as empresas do admin)
-  const currentCount = await prisma.companyUser.count({
-    where: {
-      company: {
-        adminId: company.adminId,
-      },
-      role,
-    },
-  });
-
-  // 4. Validar limite
-  if (currentCount >= limit) {
-    throw new Error(`Limite de ${role}s atingido. Máximo permitido: ${limit}`);
-  }
-
-  // 5. Verificar se usuário já não está na empresa
-  const existing = await prisma.companyUser.findUnique({
-    where: {
-      companyId_userId: {
-        companyId,
-        userId,
-      },
-    },
-  });
-
-  if (existing) {
-    throw new Error('Usuário já é membro desta empresa');
-  }
-
-  // 6. Adicionar membro
-  return await prisma.companyUser.create({
-    data: {
-      companyId,
-      userId,
-      role,
-    },
-  });
-}
-```
+O sistema verifica o limite global de membros por role considerando todas as empresas do admin. A contagem é feita somando todos os membros com o mesmo role em todas as empresas, não apenas na empresa atual. Se o limite global foi atingido, a adição do novo membro é bloqueada. O sistema também verifica se o usuário já não está cadastrado na empresa para evitar duplicatas.
 
 ---
 
@@ -465,34 +353,9 @@ async function addCompanyMember(
 3. Se não encontrado ou role incorreto → **ERRO**
 4. Se válido → **PERMITIR**
 
-**Código de Exemplo**:
+**Comportamento**:
 
-```typescript
-async function createTeam(companyId: string, teamData: CreateTeamDto) {
-  // 1. Verificar se o gestor está cadastrado na empresa como manager
-  const companyUser = await prisma.companyUser.findFirst({
-    where: {
-      companyId,
-      userId: teamData.managerId,
-      role: 'manager',
-    },
-  });
-
-  if (!companyUser) {
-    throw new Error(
-      'O gestor deve estar cadastrado na empresa com role = manager',
-    );
-  }
-
-  // 2. Criar equipe
-  return await prisma.team.create({
-    data: {
-      ...teamData,
-      companyId,
-    },
-  });
-}
-```
+O sistema garante que apenas usuários que já estão cadastrados na empresa com o papel de gestor podem ser designados como gestores de equipes. Isso mantém a integridade hierárquica: primeiro o usuário deve ser membro da empresa como gestor, depois pode ser designado para liderar uma equipe.
 
 ---
 
@@ -510,58 +373,9 @@ async function createTeam(companyId: string, teamData: CreateTeamDto) {
 
 **Nota**: O limite de executores já foi validado ao adicionar o usuário como `CompanyUser`.
 
-**Código de Exemplo**:
+**Comportamento**:
 
-```typescript
-async function addTeamMember(teamId: string, userId: string) {
-  // 1. Buscar equipe e empresa
-  const team = await prisma.team.findUnique({
-    where: { id: teamId },
-    include: { company: true },
-  });
-
-  if (!team) {
-    throw new Error('Equipe não encontrada');
-  }
-
-  // 2. Verificar se o executor está cadastrado na empresa como executor
-  const companyUser = await prisma.companyUser.findFirst({
-    where: {
-      companyId: team.companyId,
-      userId,
-      role: 'executor',
-    },
-  });
-
-  if (!companyUser) {
-    throw new Error(
-      'O executor deve estar cadastrado na empresa com role = executor',
-    );
-  }
-
-  // 3. Verificar se já não está na equipe
-  const existing = await prisma.teamUser.findUnique({
-    where: {
-      teamId_userId: {
-        teamId,
-        userId,
-      },
-    },
-  });
-
-  if (existing) {
-    throw new Error('Executor já é membro desta equipe');
-  }
-
-  // 4. Adicionar à equipe
-  return await prisma.teamUser.create({
-    data: {
-      teamId,
-      userId,
-    },
-  });
-}
-```
+O sistema garante que apenas executores cadastrados na empresa podem ser adicionados às equipes. A validação verifica se o usuário já está na empresa com o papel correto antes de permitir sua inclusão na equipe. O sistema também previne duplicatas, impedindo que o mesmo executor seja adicionado duas vezes à mesma equipe.
 
 ---
 
@@ -577,53 +391,9 @@ async function addTeamMember(teamId: string, userId: string) {
 4. Se `total >= limit` → **ERRO**
 5. Se `total < limit` → **PERMITIR** e registrar uso
 
-**Código de Exemplo**:
+**Comportamento**:
 
-```typescript
-async function useIA(
-  adminId: string,
-  tokensUsed: number,
-  userId?: string,
-  companyId?: string,
-) {
-  // 1. Buscar subscription ativa
-  const subscription = await prisma.subscription.findFirst({
-    where: { adminId, isActive: true },
-    include: {
-      plan: true,
-      iaUsages: true,
-    },
-  });
-
-  if (!subscription) {
-    throw new Error('Admin não possui subscription ativa');
-  }
-
-  // 2. Calcular total de tokens usados
-  const totalTokensUsed = subscription.iaUsages.reduce(
-    (sum, usage) => sum + usage.tokensUsed,
-    0,
-  );
-
-  // 3. Validar limite
-  if (totalTokensUsed + tokensUsed > subscription.plan.iaCallsLimit) {
-    throw new Error(
-      `Limite de chamadas IA atingido. ` +
-        `Usado: ${totalTokensUsed}/${subscription.plan.iaCallsLimit} tokens`,
-    );
-  }
-
-  // 4. Registrar uso
-  return await prisma.iAUsage.create({
-    data: {
-      subscriptionId: subscription.id,
-      userId,
-      companyId,
-      tokensUsed,
-    },
-  });
-}
-```
+O sistema rastreia cada uso de IA registrando a quantidade de tokens consumidos. Antes de processar uma nova chamada, o sistema soma todos os tokens já utilizados na subscription e verifica se o novo uso não excederá o limite do plano. Se o limite for atingido, a chamada é bloqueada. Caso contrário, o uso é processado e registrado para controle futuro.
 
 ---
 
@@ -768,37 +538,9 @@ O campo `iaContext` no modelo `Team` permite que cada equipe defina um contexto 
 
 ### Exemplo de Uso
 
-#### Contexto salvo na equipe:
+Quando uma equipe define um contexto, por exemplo: "Equipe responsável por campanhas de mídia paga no setor de varejo. Foco em performance, conversão e otimização de ROI com base em dados semanais.", esse contexto é automaticamente incluído no prompt enviado à IA ao gerar tarefas para essa equipe.
 
-```text
-"Equipe responsável por campanhas de mídia paga no setor de varejo. 
-Foco em performance, conversão e otimização de ROI com base em dados semanais."
-```
-
-#### Prompt gerado para a IA:
-
-```typescript
-async function generateTaskWithIA(teamId: string, userPrompt: string) {
-  // 1. Buscar equipe com contexto
-  const team = await prisma.team.findUnique({
-    where: { id: teamId },
-  });
-
-  // 2. Montar prompt com contexto
-  const prompt = `
-Baseado no contexto da equipe:
-
-"${team.iaContext || 'Sem contexto definido'}"
-
-Crie uma tarefa clara e objetiva para o executor, com base na seguinte instrução:
-
-"${userPrompt}"
-`;
-
-  // 3. Chamar IA e processar
-  // ... implementação da chamada à IA
-}
-```
+O sistema combina o contexto da equipe com a instrução do usuário para criar prompts mais precisos e personalizados, resultando em tarefas mais relevantes e alinhadas com o trabalho específico da equipe.
 
 ### Regras de Acesso
 
@@ -808,91 +550,15 @@ Crie uma tarefa clara e objetiva para o executor, com base na seguinte instruç�
 
 ### Implementação Futura
 
-1. **Endpoint**: `PUT /teams/:id/context`
-   - Autorização: Gestor da equipe ou Admin da empresa
-   - Body: `{ iaContext: string }`
-   - Validação: Limite de caracteres (sugestão: 1000 caracteres)
-
-2. **Validação de Tamanho**:
-   ```typescript
-   if (iaContext && iaContext.length > 1000) {
-     throw new Error('Contexto de IA não pode exceder 1000 caracteres');
-   }
-   ```
-
-3. **Uso na Geração de Tarefas**:
-   - Sempre incluir o `iaContext` no prompt quando disponível
-   - Se não houver contexto, usar um contexto genérico ou avisar o usuário
+1. **Endpoint para atualização**: Será criado um endpoint que permite gestores e admins atualizarem o contexto da equipe
+2. **Validação de tamanho**: O sistema validará que o contexto não exceda um limite de caracteres (sugestão: 1000 caracteres)
+3. **Uso na geração de tarefas**: O sistema sempre incluirá o contexto no prompt quando disponível, e usará um contexto genérico quando não houver contexto definido
 
 ### Benefícios
 
 - **Personalização**: Cada equipe pode ter tarefas geradas com base no seu contexto específico
 - **Relevância**: Tarefas mais precisas e alinhadas com o trabalho da equipe
 - **Flexibilidade**: Contexto pode ser atualizado conforme a equipe evolui
-
----
-
-## 🔍 Queries Úteis
-
-### Buscar todas as empresas de um admin com contagem de membros
-
-```typescript
-const companies = await prisma.company.findMany({
-  where: { adminId },
-  include: {
-    members: {
-      include: {
-        user: true,
-      },
-    },
-    teams: {
-      include: {
-        manager: true,
-        members: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    },
-  },
-});
-```
-
-### Verificar limites atuais do admin
-
-```typescript
-const subscription = await prisma.subscription.findFirst({
-  where: { adminId, isActive: true },
-  include: {
-    plan: true,
-    admin: {
-      include: {
-        companies: {
-          include: {
-            members: true,
-          },
-        },
-      },
-    },
-  },
-});
-
-const limits = {
-  companies: subscription.admin.companies.length,
-  maxCompanies: subscription.plan.maxCompanies,
-  managers: subscription.admin.companies.reduce(
-    (sum, c) => sum + c.members.filter((m) => m.role === 'manager').length,
-    0,
-  ),
-  maxManagers: subscription.plan.maxManagers,
-  executors: subscription.admin.companies.reduce(
-    (sum, c) => sum + c.members.filter((m) => m.role === 'executor').length,
-    0,
-  ),
-  maxExecutors: subscription.plan.maxExecutors,
-};
-```
 
 ---
 
