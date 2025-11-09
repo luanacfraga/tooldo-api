@@ -6,7 +6,7 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../../../generated/prisma"
+  output   = "../../../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -22,12 +22,31 @@ enum UserRole {
   consultant
 }
 
+enum DocumentType {
+  CPF  @map("cpf")
+  CNPJ @map("cnpj")
+}
+
+enum UserStatus {
+  ACTIVE  @map("active")
+  DELETED @map("deleted")
+  PENDING @map("pending")
+}
+
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      UserRole
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String       @id @default(uuid())
+  firstName       String       @map("first_name")
+  lastName        String       @map("last_name")
+  email           String       @unique
+  phone           String       @unique @map("phone")
+  document        String       @unique @map("document")
+  documentType    DocumentType @map("document_type")
+  profileImageUrl String?      @map("profile_image_url")
+  status          UserStatus   @default(PENDING) @map("status")
+  password        String
+  role            UserRole
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("users")
 }
