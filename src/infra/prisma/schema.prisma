@@ -53,6 +53,10 @@ model User {
 
   companyMemberships CompanyUser[]
 
+  // Relações com equipes
+  teamsManaged    Team[]     @relation("TeamManager")
+  teamMemberships TeamUser[]
+
   @@map("users")
 }
 
@@ -98,6 +102,7 @@ model Company {
 
   admin   User          @relation("CompanyAdmin", fields: [adminId], references: [id])
   members CompanyUser[]
+  teams   Team[]
 
   @@map("companies")
 }
@@ -128,4 +133,34 @@ model IAUsage {
   subscription Subscription @relation(fields: [subscriptionId], references: [id])
 
   @@map("ia_usages")
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  companyId   String   @map("company_id")
+  managerId   String   @map("manager_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  manager User       @relation("TeamManager", fields: [managerId], references: [id])
+  members TeamUser[]
+
+  @@map("teams")
+}
+
+model TeamUser {
+  id        String   @id @default(uuid())
+  teamId    String   @map("team_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@map("team_users")
 }
