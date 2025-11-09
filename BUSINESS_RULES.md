@@ -168,6 +168,7 @@ O sistema Weedu é uma plataforma de gestão que permite:
 - `managerId`: Gestor responsável pela equipe
 - `name`: Nome da equipe
 - `description`: Descrição opcional
+- `iaContext`: Contexto descritivo para uso da IA (opcional)
 
 **Relações**:
 
@@ -180,6 +181,8 @@ O sistema Weedu é uma plataforma de gestão que permite:
 - Uma equipe pertence a apenas uma empresa
 - Uma equipe tem exatamente um gestor
 - O gestor deve estar cadastrado na empresa como `CompanyUser` com `role = manager`
+- O `iaContext` é um texto livre que pode ser usado pela IA para gerar tarefas personalizadas para a equipe
+- Gestores e admins podem definir/atualizar o `iaContext` da equipe
 - Ao deletar a empresa, remove todas as equipes (cascade)
 
 ---
@@ -748,6 +751,84 @@ Tentar adicionar manager na Empresa A → ERRO (10 >= 10)
 5. **Consultores não participam de equipes**: Apenas managers e executors podem estar em equipes
 6. **Subscription ativa**: Sempre buscar a subscription com `isActive = true`
 7. **Validações em cascata**: Validações devem ser feitas na ordem correta (empresa → membro → equipe → membro de equipe)
+
+---
+
+## 🤖 Contexto de IA para Equipes
+
+### Descrição
+
+O campo `iaContext` no modelo `Team` permite que cada equipe defina um contexto descritivo personalizado que será usado pela IA ao gerar tarefas e demandas.
+
+### Funcionalidade
+
+- **Campo opcional**: `iaContext` é um campo de texto livre (TEXT no banco)
+- **Personalização**: Cada equipe pode ter seu próprio contexto específico
+- **Uso na IA**: O contexto é incluído no prompt enviado ao modelo de IA ao gerar tarefas
+
+### Exemplo de Uso
+
+#### Contexto salvo na equipe:
+
+```text
+"Equipe responsável por campanhas de mídia paga no setor de varejo. 
+Foco em performance, conversão e otimização de ROI com base em dados semanais."
+```
+
+#### Prompt gerado para a IA:
+
+```typescript
+async function generateTaskWithIA(teamId: string, userPrompt: string) {
+  // 1. Buscar equipe com contexto
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+  });
+
+  // 2. Montar prompt com contexto
+  const prompt = `
+Baseado no contexto da equipe:
+
+"${team.iaContext || 'Sem contexto definido'}"
+
+Crie uma tarefa clara e objetiva para o executor, com base na seguinte instrução:
+
+"${userPrompt}"
+`;
+
+  // 3. Chamar IA e processar
+  // ... implementação da chamada à IA
+}
+```
+
+### Regras de Acesso
+
+- **Gestor da equipe**: Pode atualizar o `iaContext` da sua equipe
+- **Admin da empresa**: Pode atualizar o `iaContext` de qualquer equipe da empresa
+- **Outros usuários**: Não têm permissão para modificar
+
+### Implementação Futura
+
+1. **Endpoint**: `PUT /teams/:id/context`
+   - Autorização: Gestor da equipe ou Admin da empresa
+   - Body: `{ iaContext: string }`
+   - Validação: Limite de caracteres (sugestão: 1000 caracteres)
+
+2. **Validação de Tamanho**:
+   ```typescript
+   if (iaContext && iaContext.length > 1000) {
+     throw new Error('Contexto de IA não pode exceder 1000 caracteres');
+   }
+   ```
+
+3. **Uso na Geração de Tarefas**:
+   - Sempre incluir o `iaContext` no prompt quando disponível
+   - Se não houver contexto, usar um contexto genérico ou avisar o usuário
+
+### Benefícios
+
+- **Personalização**: Cada equipe pode ter tarefas geradas com base no seu contexto específico
+- **Relevância**: Tarefas mais precisas e alinhadas com o trabalho da equipe
+- **Flexibilidade**: Contexto pode ser atualizado conforme a equipe evolui
 
 ---
 

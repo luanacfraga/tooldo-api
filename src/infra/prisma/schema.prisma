@@ -139,6 +139,7 @@ model Team {
   id          String   @id @default(uuid())
   name        String
   description String?
+  iaContext   String?  @map("ia_context")
   companyId   String   @map("company_id")
   managerId   String   @map("manager_id")
   createdAt   DateTime @default(now()) @map("created_at")
