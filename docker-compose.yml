@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: weedu-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: weedu
+      POSTGRES_PASSWORD: weedu123
+      POSTGRES_DB: weedu_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U weedu -d weedu_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
