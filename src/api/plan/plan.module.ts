@@ -1,20 +1,11 @@
-import { AppModule } from '@/app.module';
-import {
-  CreatePlanService,
-  PLAN_REPOSITORY,
-} from '@/application/services/create-plan';
-import { PlanPrismaRepository } from '@/infra/database/repositories/plan.prisma.repository';
-import { ClassProvider, Module, forwardRef } from '@nestjs/common';
+import { CreatePlanService } from '@/application/services/create-plan';
+import { DatabaseModule } from '@/infra/database/database.module';
+import { Module } from '@nestjs/common';
 import { PlanController } from './plan.controller';
 
-const planRepositoryProvider: ClassProvider = {
-  provide: PLAN_REPOSITORY as string,
-  useClass: PlanPrismaRepository,
-};
-
 @Module({
-  imports: [forwardRef(() => AppModule)],
+  imports: [DatabaseModule],
   controllers: [PlanController],
-  providers: [CreatePlanService, PlanPrismaRepository, planRepositoryProvider],
+  providers: [CreatePlanService],
 })
 export class PlanModule {}

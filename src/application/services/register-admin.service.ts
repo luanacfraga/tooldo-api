@@ -12,15 +12,16 @@ import type { SubscriptionRepository } from '@/core/ports/repositories/subscript
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { IdGenerator } from '@/core/ports/services/id-generator.port';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
+import {
+  COMPANY_REPOSITORY,
+  ID_GENERATOR,
+  PASSWORD_HASHER,
+  PLAN_REPOSITORY,
+  SUBSCRIPTION_REPOSITORY,
+  USER_REPOSITORY,
+} from '@/core/di/tokens';
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Inject, Injectable } from '@nestjs/common';
-
-export const USER_REPOSITORY = 'UserRepository';
-export const COMPANY_REPOSITORY = 'CompanyRepository';
-export const SUBSCRIPTION_REPOSITORY = 'SubscriptionRepository';
-export const PLAN_REPOSITORY = 'PlanRepository';
-export const PASSWORD_HASHER = 'PasswordHasher';
-export const ID_GENERATOR = 'IdGenerator';
 
 export interface RegisterAdminInput {
   firstName: string;
