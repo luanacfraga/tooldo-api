@@ -52,7 +52,6 @@ model User {
 
   companyMemberships CompanyUser[]
 
-  // Relações com equipes
   teamsManaged    Team[]     @relation("TeamManager")
   teamMemberships TeamUser[]
 
