@@ -1,17 +1,17 @@
 import { Company } from '@/core/domain/company.entity';
 import { DocumentType } from '@/core/domain/enums';
+import {
+  EntityNotFoundException,
+  UniqueConstraintException,
+} from '@/core/domain/exceptions/domain.exception';
 import { Subscription } from '@/core/domain/subscription.entity';
 import { User } from '@/core/domain/user.entity';
 import type { CompanyRepository } from '@/core/ports/company.repository';
 import type { PlanRepository } from '@/core/ports/plan.repository';
 import type { SubscriptionRepository } from '@/core/ports/subscription.repository';
 import type { UserRepository } from '@/core/ports/user.repository';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ErrorMessages } from '@/shared/constants/error-messages';
+import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
 export const USER_REPOSITORY = 'UserRepository';
@@ -103,28 +103,26 @@ export class RegisterAdminService {
   ): Promise<void> {
     const existingEmail = await this.userRepository.findByEmail(input.email);
     if (existingEmail) {
-      throw new BadRequestException('Email already registered');
+      throw new UniqueConstraintException('Email', input.email);
     }
 
     const existingPhone = await this.userRepository.findByPhone(input.phone);
     if (existingPhone) {
-      throw new BadRequestException('Phone already registered');
+      throw new UniqueConstraintException('Telefone', input.phone);
     }
 
     const existingDocument = await this.userRepository.findByDocument(
       input.document,
     );
     if (existingDocument) {
-      throw new BadRequestException('Document already registered');
+      throw new UniqueConstraintException('Documento', input.document);
     }
   }
 
   private async findDefaultPlan() {
     const defaultPlan = await this.planRepository.findByName('default');
     if (!defaultPlan) {
-      throw new NotFoundException(
-        'Default plan not found. Please create a default plan first.',
-      );
+      throw new EntityNotFoundException(ErrorMessages.PLAN.DEFAULT_NOT_FOUND);
     }
     return defaultPlan;
   }

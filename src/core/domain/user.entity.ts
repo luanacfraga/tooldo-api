@@ -1,4 +1,6 @@
+import { ErrorMessages } from '@/shared/constants/error-messages';
 import { DocumentType, UserRole, UserStatus } from './enums';
+import { DomainValidationException } from './exceptions/domain.exception';
 
 export class User {
   constructor(
@@ -19,25 +21,29 @@ export class User {
 
   private validate(): void {
     if (!this.id?.trim()) {
-      throw new Error('User id is required');
+      throw new DomainValidationException(ErrorMessages.USER.ID_REQUIRED);
     }
     if (!this.firstName?.trim()) {
-      throw new Error('User first name is required');
+      throw new DomainValidationException(
+        ErrorMessages.USER.FIRST_NAME_REQUIRED,
+      );
     }
     if (!this.lastName?.trim()) {
-      throw new Error('User last name is required');
+      throw new DomainValidationException(
+        ErrorMessages.USER.LAST_NAME_REQUIRED,
+      );
     }
     if (!this.email?.trim()) {
-      throw new Error('User email is required');
+      throw new DomainValidationException(ErrorMessages.USER.EMAIL_REQUIRED);
     }
     if (!this.phone?.trim()) {
-      throw new Error('User phone is required');
+      throw new DomainValidationException(ErrorMessages.USER.PHONE_REQUIRED);
     }
     if (!this.document?.trim()) {
-      throw new Error('User document is required');
+      throw new DomainValidationException(ErrorMessages.USER.DOCUMENT_REQUIRED);
     }
     if (!this._password?.trim()) {
-      throw new Error('User password is required');
+      throw new DomainValidationException(ErrorMessages.USER.PASSWORD_REQUIRED);
     }
   }
 

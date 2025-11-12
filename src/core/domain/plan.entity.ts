@@ -1,3 +1,6 @@
+import { ErrorMessages } from '@/shared/constants/error-messages';
+import { DomainValidationException } from './exceptions/domain.exception';
+
 export class Plan {
   constructor(
     public readonly id: string,
@@ -13,25 +16,35 @@ export class Plan {
 
   private validate(): void {
     if (!this.id?.trim()) {
-      throw new Error('Plan id is required');
+      throw new DomainValidationException(ErrorMessages.PLAN.ID_REQUIRED);
     }
     if (!this.name?.trim()) {
-      throw new Error('Plan name is required');
+      throw new DomainValidationException(ErrorMessages.PLAN.NAME_REQUIRED);
     }
     if (this.maxCompanies < 0) {
-      throw new Error('Plan maxCompanies must be greater than or equal to 0');
+      throw new DomainValidationException(
+        ErrorMessages.PLAN.MAX_COMPANIES_INVALID,
+      );
     }
     if (this.maxManagers < 0) {
-      throw new Error('Plan maxManagers must be greater than or equal to 0');
+      throw new DomainValidationException(
+        ErrorMessages.PLAN.MAX_MANAGERS_INVALID,
+      );
     }
     if (this.maxExecutors < 0) {
-      throw new Error('Plan maxExecutors must be greater than or equal to 0');
+      throw new DomainValidationException(
+        ErrorMessages.PLAN.MAX_EXECUTORS_INVALID,
+      );
     }
     if (this.maxConsultants < 0) {
-      throw new Error('Plan maxConsultants must be greater than or equal to 0');
+      throw new DomainValidationException(
+        ErrorMessages.PLAN.MAX_CONSULTANTS_INVALID,
+      );
     }
     if (this.iaCallsLimit < 0) {
-      throw new Error('Plan iaCallsLimit must be greater than or equal to 0');
+      throw new DomainValidationException(
+        ErrorMessages.PLAN.IA_CALLS_LIMIT_INVALID,
+      );
     }
   }
 }

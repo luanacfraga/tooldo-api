@@ -11,41 +11,41 @@ import {
 } from 'class-validator';
 
 export class CompanyDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'O nome da empresa deve ser uma string' })
+  @IsNotEmpty({ message: 'O nome da empresa é obrigatório' })
   name: string;
 
   @IsOptional()
-  @IsString()
+  @IsString({ message: 'A descrição da empresa deve ser uma string' })
   description?: string;
 }
 
 export class RegisterAdminDto {
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'O primeiro nome deve ser uma string' })
+  @IsNotEmpty({ message: 'O primeiro nome é obrigatório' })
   firstName: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'O sobrenome deve ser uma string' })
+  @IsNotEmpty({ message: 'O sobrenome é obrigatório' })
   lastName: string;
 
-  @IsEmail()
+  @IsEmail({}, { message: 'O email deve ser válido' })
   email: string;
 
-  @IsString()
-  @MinLength(6)
+  @IsString({ message: 'A senha deve ser uma string' })
+  @MinLength(6, { message: 'A senha deve ter pelo menos 6 caracteres' })
   password: string;
 
-  @IsString()
+  @IsString({ message: 'O telefone deve ser uma string' })
   phone: string;
 
-  @IsString()
+  @IsString({ message: 'O documento deve ser uma string' })
   document: string;
 
-  @IsEnum(DocumentType)
+  @IsEnum(DocumentType, { message: 'O tipo de documento deve ser CPF ou CNPJ' })
   documentType: DocumentType;
 
-  @ValidateNested()
+  @ValidateNested({ message: 'Os dados da empresa são inválidos' })
   @Type(() => CompanyDto)
   company: CompanyDto;
 }

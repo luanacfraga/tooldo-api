@@ -1,3 +1,6 @@
+import { ErrorMessages } from '@/shared/constants/error-messages';
+import { DomainValidationException } from './exceptions/domain.exception';
+
 export class Subscription {
   constructor(
     public readonly id: string,
@@ -11,16 +14,24 @@ export class Subscription {
 
   private validate(): void {
     if (!this.id?.trim()) {
-      throw new Error('Subscription id is required');
+      throw new DomainValidationException(
+        ErrorMessages.SUBSCRIPTION.ID_REQUIRED,
+      );
     }
     if (!this.adminId?.trim()) {
-      throw new Error('Subscription adminId is required');
+      throw new DomainValidationException(
+        ErrorMessages.SUBSCRIPTION.ADMIN_ID_REQUIRED,
+      );
     }
     if (!this.planId?.trim()) {
-      throw new Error('Subscription planId is required');
+      throw new DomainValidationException(
+        ErrorMessages.SUBSCRIPTION.PLAN_ID_REQUIRED,
+      );
     }
     if (!(this.startedAt instanceof Date) || isNaN(this.startedAt.getTime())) {
-      throw new Error('Subscription startedAt must be a valid date');
+      throw new DomainValidationException(
+        ErrorMessages.SUBSCRIPTION.STARTED_AT_INVALID,
+      );
     }
   }
 

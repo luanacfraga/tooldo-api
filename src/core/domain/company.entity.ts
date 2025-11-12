@@ -1,3 +1,6 @@
+import { ErrorMessages } from '@/shared/constants/error-messages';
+import { DomainValidationException } from './exceptions/domain.exception';
+
 export class Company {
   constructor(
     public readonly id: string,
@@ -10,13 +13,15 @@ export class Company {
 
   private validate(): void {
     if (!this.id?.trim()) {
-      throw new Error('Company id is required');
+      throw new DomainValidationException(ErrorMessages.COMPANY.ID_REQUIRED);
     }
     if (!this.name?.trim()) {
-      throw new Error('Company name is required');
+      throw new DomainValidationException(ErrorMessages.COMPANY.NAME_REQUIRED);
     }
     if (!this.adminId?.trim()) {
-      throw new Error('Company adminId is required');
+      throw new DomainValidationException(
+        ErrorMessages.COMPANY.ADMIN_ID_REQUIRED,
+      );
     }
   }
 }
