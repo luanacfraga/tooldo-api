@@ -1,6 +1,6 @@
 import { Subscription } from '@/core/domain/subscription.entity';
 import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';
-import { PrismaService } from '@/infra/prisma/prisma.service';
+import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Subscription as PrismaSubscription } from '@prisma/client';
 

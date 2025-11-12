@@ -1,6 +1,6 @@
 import { Company } from '@/core/domain/company.entity';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
-import { PrismaService } from '@/infra/prisma/prisma.service';
+import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Company as PrismaCompany } from '@prisma/client';
 

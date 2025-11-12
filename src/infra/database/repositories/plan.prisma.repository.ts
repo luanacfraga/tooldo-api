@@ -1,6 +1,6 @@
 import { Plan } from '@/core/domain/plan.entity';
 import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
-import { PrismaService } from '@/infra/prisma/prisma.service';
+import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Plan as PrismaPlan } from '@prisma/client';
 
@@ -8,15 +8,16 @@ import { Plan as PrismaPlan } from '@prisma/client';
 export class PlanPrismaRepository implements PlanRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(data: Omit<Plan, 'id'>): Promise<Plan> {
+  async create(plan: Plan): Promise<Plan> {
     const created = await this.prisma.plan.create({
       data: {
-        name: data.name,
-        maxCompanies: data.maxCompanies,
-        maxManagers: data.maxManagers,
-        maxExecutors: data.maxExecutors,
-        maxConsultants: data.maxConsultants,
-        iaCallsLimit: data.iaCallsLimit,
+        id: plan.id,
+        name: plan.name,
+        maxCompanies: plan.maxCompanies,
+        maxManagers: plan.maxManagers,
+        maxExecutors: plan.maxExecutors,
+        maxConsultants: plan.maxConsultants,
+        iaCallsLimit: plan.iaCallsLimit,
       },
     });
 

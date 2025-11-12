@@ -12,14 +12,6 @@ import type { SubscriptionRepository } from '@/core/ports/repositories/subscript
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { IdGenerator } from '@/core/ports/services/id-generator.port';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
-import {
-  COMPANY_REPOSITORY,
-  ID_GENERATOR,
-  PASSWORD_HASHER,
-  PLAN_REPOSITORY,
-  SUBSCRIPTION_REPOSITORY,
-  USER_REPOSITORY,
-} from '@/core/di/tokens';
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -46,17 +38,17 @@ export interface RegisterAdminOutput {
 @Injectable()
 export class RegisterAdminService {
   constructor(
-    @Inject(USER_REPOSITORY)
+    @Inject('UserRepository')
     private readonly userRepository: UserRepository,
-    @Inject(COMPANY_REPOSITORY)
+    @Inject('CompanyRepository')
     private readonly companyRepository: CompanyRepository,
-    @Inject(SUBSCRIPTION_REPOSITORY)
+    @Inject('SubscriptionRepository')
     private readonly subscriptionRepository: SubscriptionRepository,
-    @Inject(PLAN_REPOSITORY)
+    @Inject('PlanRepository')
     private readonly planRepository: PlanRepository,
-    @Inject(PASSWORD_HASHER)
+    @Inject('PasswordHasher')
     private readonly passwordHasher: PasswordHasher,
-    @Inject(ID_GENERATOR)
+    @Inject('IdGenerator')
     private readonly idGenerator: IdGenerator,
   ) {}
 
