@@ -11,6 +11,7 @@ import type { PlanRepository } from '@/core/ports/plan.repository';
 import type { SubscriptionRepository } from '@/core/ports/subscription.repository';
 import type { UserRepository } from '@/core/ports/user.repository';
 import { ErrorMessages } from '@/shared/constants/error-messages';
+import { PasswordHashService } from '@/shared/services/password-hash.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
@@ -50,6 +51,7 @@ export class RegisterAdminService {
     private readonly subscriptionRepository: SubscriptionRepository,
     @Inject(PLAN_REPOSITORY)
     private readonly planRepository: PlanRepository,
+    private readonly passwordHashService: PasswordHashService,
   ) {}
 
   async execute(input: RegisterAdminInput): Promise<RegisterAdminOutput> {
@@ -59,6 +61,8 @@ export class RegisterAdminService {
 
     const userId = randomUUID();
 
+    const hashedPassword = await this.passwordHashService.hash(input.password);
+
     const user = User.createAdmin(
       userId,
       input.firstName,
@@ -67,7 +71,7 @@ export class RegisterAdminService {
       input.phone,
       input.document,
       input.documentType,
-      input.password,
+      hashedPassword,
       null,
     );
 

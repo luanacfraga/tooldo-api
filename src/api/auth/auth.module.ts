@@ -10,6 +10,7 @@ import { CompanyPrismaRepository } from '@/infra/database/repositories/company.p
 import { PlanPrismaRepository } from '@/infra/database/repositories/plan.prisma.repository';
 import { SubscriptionPrismaRepository } from '@/infra/database/repositories/subscription.prisma.repository';
 import { UserPrismaRepository } from '@/infra/database/repositories/user.prisma.repository';
+import { PasswordHashService } from '@/shared/services/password-hash.service';
 import { ClassProvider, Module, forwardRef } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 
@@ -38,6 +39,7 @@ const planRepositoryProvider: ClassProvider = {
   controllers: [AuthController],
   providers: [
     RegisterAdminService,
+    PasswordHashService,
     UserPrismaRepository,
     CompanyPrismaRepository,
     SubscriptionPrismaRepository,
