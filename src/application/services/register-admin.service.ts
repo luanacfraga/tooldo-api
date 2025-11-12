@@ -6,19 +6,21 @@ import {
 } from '@/core/domain/exceptions/domain.exception';
 import { Subscription } from '@/core/domain/subscription.entity';
 import { User } from '@/core/domain/user.entity';
-import type { CompanyRepository } from '@/core/ports/company.repository';
-import type { PlanRepository } from '@/core/ports/plan.repository';
-import type { SubscriptionRepository } from '@/core/ports/subscription.repository';
-import type { UserRepository } from '@/core/ports/user.repository';
+import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
+import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
+import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';
+import type { UserRepository } from '@/core/ports/repositories/user.repository';
+import type { IdGenerator } from '@/core/ports/services/id-generator.port';
+import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
 import { ErrorMessages } from '@/shared/constants/error-messages';
-import { PasswordHashService } from '@/shared/services/password-hash.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
 
 export const USER_REPOSITORY = 'UserRepository';
 export const COMPANY_REPOSITORY = 'CompanyRepository';
 export const SUBSCRIPTION_REPOSITORY = 'SubscriptionRepository';
 export const PLAN_REPOSITORY = 'PlanRepository';
+export const PASSWORD_HASHER = 'PasswordHasher';
+export const ID_GENERATOR = 'IdGenerator';
 
 export interface RegisterAdminInput {
   firstName: string;
@@ -51,7 +53,10 @@ export class RegisterAdminService {
     private readonly subscriptionRepository: SubscriptionRepository,
     @Inject(PLAN_REPOSITORY)
     private readonly planRepository: PlanRepository,
-    private readonly passwordHashService: PasswordHashService,
+    @Inject(PASSWORD_HASHER)
+    private readonly passwordHasher: PasswordHasher,
+    @Inject(ID_GENERATOR)
+    private readonly idGenerator: IdGenerator,
   ) {}
 
   async execute(input: RegisterAdminInput): Promise<RegisterAdminOutput> {
@@ -59,9 +64,9 @@ export class RegisterAdminService {
 
     const defaultPlan = await this.findDefaultPlan();
 
-    const userId = randomUUID();
+    const userId = this.idGenerator.generate();
 
-    const hashedPassword = await this.passwordHashService.hash(input.password);
+    const hashedPassword = await this.passwordHasher.hash(input.password);
 
     const user = User.createAdmin(
       userId,
@@ -78,7 +83,7 @@ export class RegisterAdminService {
     const createdUser = await this.userRepository.create(user);
 
     const company = new Company(
-      randomUUID(),
+      this.idGenerator.generate(),
       input.company.name,
       input.company.description ?? null,
       userId,
@@ -87,7 +92,7 @@ export class RegisterAdminService {
     const createdCompany = await this.companyRepository.create(company);
 
     const subscription = Subscription.create(
-      randomUUID(),
+      this.idGenerator.generate(),
       userId,
       defaultPlan.id,
     );

@@ -1,5 +1,5 @@
 import { Company } from '@/core/domain/company.entity';
-import type { CompanyRepository } from '@/core/ports/company.repository';
+import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { Company as PrismaCompany } from '@prisma/client';
@@ -8,9 +8,10 @@ import { Company as PrismaCompany } from '@prisma/client';
 export class CompanyPrismaRepository implements CompanyRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(company: Omit<Company, 'id'>): Promise<Company> {
+  async create(company: Company): Promise<Company> {
     const created = await this.prisma.company.create({
       data: {
+        id: company.id,
         name: company.name,
         description: company.description,
         adminId: company.adminId,

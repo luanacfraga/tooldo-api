@@ -6,3 +6,4 @@ export interface UserRepository {
   findByDocument(document: string): Promise<User | null>;
   create(user: User): Promise<User>;
 }
+

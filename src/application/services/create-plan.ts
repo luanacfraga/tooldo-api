@@ -1,5 +1,5 @@
 import { Plan } from '@/core/domain/plan.entity';
-import { PlanRepository } from '@/core/ports/plan.repository';
+import { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
