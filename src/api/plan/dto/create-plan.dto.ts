@@ -8,7 +8,7 @@ export class CreatePlanDto {
   })
   @IsString({ message: 'O nome do plano deve ser uma string' })
   @IsNotEmpty({ message: 'O nome do plano é obrigatório' })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     description: 'Número máximo de empresas permitidas',
@@ -16,7 +16,7 @@ export class CreatePlanDto {
   })
   @IsInt({ message: 'O número máximo de empresas deve ser um inteiro' })
   @IsPositive({ message: 'O número máximo de empresas deve ser positivo' })
-  maxCompanies: number;
+  maxCompanies!: number;
 
   @ApiProperty({
     description: 'Número máximo de gerentes permitidos',
@@ -24,7 +24,7 @@ export class CreatePlanDto {
   })
   @IsInt({ message: 'O número máximo de gerentes deve ser um inteiro' })
   @IsPositive({ message: 'O número máximo de gerentes deve ser positivo' })
-  maxManagers: number;
+  maxManagers!: number;
 
   @ApiProperty({
     description: 'Número máximo de executores permitidos',
@@ -32,7 +32,7 @@ export class CreatePlanDto {
   })
   @IsInt({ message: 'O número máximo de executores deve ser um inteiro' })
   @IsPositive({ message: 'O número máximo de executores deve ser positivo' })
-  maxExecutors: number;
+  maxExecutors!: number;
 
   @ApiProperty({
     description: 'Número máximo de consultores permitidos',
@@ -40,7 +40,7 @@ export class CreatePlanDto {
   })
   @IsInt({ message: 'O número máximo de consultores deve ser um inteiro' })
   @IsPositive({ message: 'O número máximo de consultores deve ser positivo' })
-  maxConsultants: number;
+  maxConsultants!: number;
 
   @ApiProperty({
     description: 'Limite de chamadas de IA por mês',
@@ -48,5 +48,5 @@ export class CreatePlanDto {
   })
   @IsInt({ message: 'O limite de chamadas de IA deve ser um inteiro' })
   @IsPositive({ message: 'O limite de chamadas de IA deve ser positivo' })
-  iaCallsLimit: number;
+  iaCallsLimit!: number;
 }

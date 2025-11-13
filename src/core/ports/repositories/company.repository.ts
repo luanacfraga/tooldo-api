@@ -1,6 +1,5 @@
 import { Company } from '@/core/domain/company.entity';
 
 export interface CompanyRepository {
-  create(company: Company): Promise<Company>;
+  create(company: Company, tx?: unknown): Promise<Company>;
 }
-

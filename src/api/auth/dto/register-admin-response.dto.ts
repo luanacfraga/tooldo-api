@@ -2,31 +2,31 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponseDto {
   @ApiProperty()
-  id: string;
+  id!: string;
 
   @ApiProperty()
-  firstName: string;
+  firstName!: string;
 
   @ApiProperty()
-  lastName: string;
+  lastName!: string;
 
   @ApiProperty()
-  email: string;
+  email!: string;
 
   @ApiProperty()
-  phone: string;
+  phone!: string;
 
   @ApiProperty()
-  document: string;
+  document!: string;
 
   @ApiProperty()
-  documentType: string;
+  documentType!: string;
 
   @ApiProperty()
-  role: string;
+  role!: string;
 
   @ApiProperty()
-  status: string;
+  status!: string;
 
   @ApiProperty({ required: false })
   profileImageUrl?: string | null;
@@ -34,42 +34,42 @@ export class UserResponseDto {
 
 export class CompanyResponseDto {
   @ApiProperty()
-  id: string;
+  id!: string;
 
   @ApiProperty()
-  name: string;
+  name!: string;
 
   @ApiProperty({ required: false })
   description?: string | null;
 
   @ApiProperty()
-  adminId: string;
+  adminId!: string;
 }
 
 export class SubscriptionResponseDto {
   @ApiProperty()
-  id: string;
+  id!: string;
 
   @ApiProperty()
-  adminId: string;
+  adminId!: string;
 
   @ApiProperty()
-  planId: string;
+  planId!: string;
 
   @ApiProperty()
-  startedAt: Date;
+  startedAt!: Date;
 
   @ApiProperty()
-  isActive: boolean;
+  isActive!: boolean;
 }
 
 export class RegisterAdminResponseDto {
   @ApiProperty({ type: UserResponseDto })
-  user: UserResponseDto;
+  user!: UserResponseDto;
 
   @ApiProperty({ type: CompanyResponseDto })
-  company: CompanyResponseDto;
+  company!: CompanyResponseDto;
 
   @ApiProperty({ type: SubscriptionResponseDto })
-  subscription: SubscriptionResponseDto;
+  subscription!: SubscriptionResponseDto;
 }

@@ -8,8 +8,9 @@ import { Company as PrismaCompany } from '@prisma/client';
 export class CompanyPrismaRepository implements CompanyRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(company: Company): Promise<Company> {
-    const created = await this.prisma.company.create({
+  async create(company: Company, tx?: unknown): Promise<Company> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const created = await client.company.create({
       data: {
         id: company.id,
         name: company.name,

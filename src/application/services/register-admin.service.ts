@@ -12,6 +12,7 @@ import type { SubscriptionRepository } from '@/core/ports/repositories/subscript
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { IdGenerator } from '@/core/ports/services/id-generator.port';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
+import type { TransactionManager } from '@/core/ports/services/transaction-manager.port';
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -50,54 +51,65 @@ export class RegisterAdminService {
     private readonly passwordHasher: PasswordHasher,
     @Inject('IdGenerator')
     private readonly idGenerator: IdGenerator,
+    @Inject('TransactionManager')
+    private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: RegisterAdminInput): Promise<RegisterAdminOutput> {
+    // Validações fora da transação (não modificam dados)
     await this.validateUniqueConstraints(input);
-
     const defaultPlan = await this.findDefaultPlan();
 
+    // Gerar IDs fora da transação
     const userId = this.idGenerator.generate();
+    const companyId = this.idGenerator.generate();
+    const subscriptionId = this.idGenerator.generate();
 
+    // Hash de senha fora da transação
     const hashedPassword = await this.passwordHasher.hash(input.password);
 
-    const user = User.createAdmin(
-      userId,
-      input.firstName,
-      input.lastName,
-      input.email,
-      input.phone,
-      input.document,
-      input.documentType,
-      hashedPassword,
-      null,
-    );
+    // Executar criações dentro de uma transação atômica
+    return await this.transactionManager.execute(async (tx) => {
+      // Criar usuário
+      const user = User.createAdmin(
+        userId,
+        input.firstName,
+        input.lastName,
+        input.email,
+        input.phone,
+        input.document,
+        input.documentType,
+        hashedPassword,
+        null,
+      );
+      const createdUser = await this.userRepository.create(user, tx);
 
-    const createdUser = await this.userRepository.create(user);
+      // Criar empresa
+      const company = new Company(
+        companyId,
+        input.company.name,
+        input.company.description ?? null,
+        userId,
+      );
+      const createdCompany = await this.companyRepository.create(company, tx);
 
-    const company = new Company(
-      this.idGenerator.generate(),
-      input.company.name,
-      input.company.description ?? null,
-      userId,
-    );
+      // Criar assinatura
+      const subscription = Subscription.create(
+        subscriptionId,
+        userId,
+        defaultPlan.id,
+      );
+      const createdSubscription = await this.subscriptionRepository.create(
+        subscription,
+        tx,
+      );
 
-    const createdCompany = await this.companyRepository.create(company);
-
-    const subscription = Subscription.create(
-      this.idGenerator.generate(),
-      userId,
-      defaultPlan.id,
-    );
-
-    const createdSubscription =
-      await this.subscriptionRepository.create(subscription);
-
-    return {
-      user: createdUser,
-      company: createdCompany,
-      subscription: createdSubscription,
-    };
+      return {
+        user: createdUser,
+        company: createdCompany,
+        subscription: createdSubscription,
+      };
+    });
   }
 
   private async validateUniqueConstraints(

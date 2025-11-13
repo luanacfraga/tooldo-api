@@ -1,14 +1,41 @@
+import { AuthService } from '@/application/services/auth.service';
 import { RegisterAdminService } from '@/application/services/register-admin.service';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Public } from './decorators/public.decorator';
+import { LoginResponseDto } from './dto/login-response.dto';
+import { LoginDto } from './dto/login.dto';
 import { RegisterAdminResponseDto } from './dto/register-admin-response.dto';
 import { RegisterAdminDto } from './dto/register-admin.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly registerAdminService: RegisterAdminService) {}
+  constructor(
+    private readonly registerAdminService: RegisterAdminService,
+    private readonly authService: AuthService,
+  ) {}
 
+  @Public()
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Login with email and password',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid credentials',
+  })
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+    return this.authService.login(loginDto);
+  }
+
+  @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({

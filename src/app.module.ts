@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './api/auth/auth.module';
+import { JwtAuthGuard } from './api/auth/guards/jwt-auth.guard';
+import { RolesGuard } from './api/auth/guards/roles.guard';
 import { DomainExceptionFilter } from './api/filters/domain-exception.filter';
 import { PlanModule } from './api/plan/plan.module';
 
@@ -11,6 +13,14 @@ import { PlanModule } from './api/plan/plan.module';
     {
       provide: APP_FILTER,
       useClass: DomainExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

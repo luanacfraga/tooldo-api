@@ -9,32 +9,36 @@ import { User as PrismaUser } from '@prisma/client';
 export class UserPrismaRepository implements UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+  async findByEmail(email: string, tx?: unknown): Promise<User | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const user = await client.user.findUnique({
       where: { email },
     });
 
     return user ? this.mapToDomain(user) : null;
   }
 
-  async findByPhone(phone: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+  async findByPhone(phone: string, tx?: unknown): Promise<User | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const user = await client.user.findUnique({
       where: { phone },
     });
 
     return user ? this.mapToDomain(user) : null;
   }
 
-  async findByDocument(document: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
+  async findByDocument(document: string, tx?: unknown): Promise<User | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const user = await client.user.findUnique({
       where: { document },
     });
 
     return user ? this.mapToDomain(user) : null;
   }
 
-  async create(user: User): Promise<User> {
-    const created = await this.prisma.user.create({
+  async create(user: User, tx?: unknown): Promise<User> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const created = await client.user.create({
       data: {
         id: user.id,
         firstName: user.firstName,

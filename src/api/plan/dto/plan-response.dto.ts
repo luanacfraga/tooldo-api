@@ -1,45 +1,58 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Plan } from '@/core/domain/plan.entity';
 
 export class PlanResponseDto {
   @ApiProperty({
-    description: 'Unique identifier of the plan',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'ID do plano',
+    example: 'uuid-v4',
   })
-  id: string;
+  id!: string;
 
   @ApiProperty({
-    description: 'Name of the plan',
-    example: 'Premium Plan',
+    description: 'Nome do plano',
+    example: 'Plano Premium',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty({
-    description: 'Maximum number of companies allowed',
+    description: 'Número máximo de empresas permitidas',
     example: 10,
   })
-  maxCompanies: number;
+  maxCompanies!: number;
 
   @ApiProperty({
-    description: 'Maximum number of managers allowed',
+    description: 'Número máximo de gerentes permitidos',
     example: 50,
   })
-  maxManagers: number;
+  maxManagers!: number;
 
   @ApiProperty({
-    description: 'Maximum number of executors allowed',
+    description: 'Número máximo de executores permitidos',
     example: 100,
   })
-  maxExecutors: number;
+  maxExecutors!: number;
 
   @ApiProperty({
-    description: 'Maximum number of consultants allowed',
+    description: 'Número máximo de consultores permitidos',
     example: 30,
   })
-  maxConsultants: number;
+  maxConsultants!: number;
 
   @ApiProperty({
-    description: 'IA calls limit per month',
+    description: 'Limite de chamadas de IA por mês',
     example: 1000,
   })
-  iaCallsLimit: number;
+  iaCallsLimit!: number;
+
+  static fromDomain(plan: Plan): PlanResponseDto {
+    const response = new PlanResponseDto();
+    response.id = plan.id;
+    response.name = plan.name;
+    response.maxCompanies = plan.maxCompanies;
+    response.maxManagers = plan.maxManagers;
+    response.maxExecutors = plan.maxExecutors;
+    response.maxConsultants = plan.maxConsultants;
+    response.iaCallsLimit = plan.iaCallsLimit;
+    return response;
+  }
 }

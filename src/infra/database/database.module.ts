@@ -3,6 +3,7 @@ import { PlanPrismaRepository } from '@/infra/database/repositories/plan.prisma.
 import { SubscriptionPrismaRepository } from '@/infra/database/repositories/subscription.prisma.repository';
 import { UserPrismaRepository } from '@/infra/database/repositories/user.prisma.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
+import { PrismaTransactionManager } from '@/infra/database/prisma/transaction-manager.service';
 import { ClassProvider, Module } from '@nestjs/common';
 
 const userRepositoryProvider: ClassProvider = {
@@ -25,6 +26,11 @@ const planRepositoryProvider: ClassProvider = {
   useClass: PlanPrismaRepository,
 };
 
+const transactionManagerProvider: ClassProvider = {
+  provide: 'TransactionManager',
+  useClass: PrismaTransactionManager,
+};
+
 @Module({
   providers: [
     PrismaService,
@@ -32,6 +38,7 @@ const planRepositoryProvider: ClassProvider = {
     companyRepositoryProvider,
     subscriptionRepositoryProvider,
     planRepositoryProvider,
+    transactionManagerProvider,
   ],
   exports: [
     PrismaService,
@@ -39,6 +46,7 @@ const planRepositoryProvider: ClassProvider = {
     'CompanyRepository',
     'SubscriptionRepository',
     'PlanRepository',
+    'TransactionManager',
   ],
 })
 export class DatabaseModule {}

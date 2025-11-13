@@ -8,8 +8,12 @@ import { Subscription as PrismaSubscription } from '@prisma/client';
 export class SubscriptionPrismaRepository implements SubscriptionRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(subscription: Subscription): Promise<Subscription> {
-    const created = await this.prisma.subscription.create({
+  async create(
+    subscription: Subscription,
+    tx?: unknown,
+  ): Promise<Subscription> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const created = await client.subscription.create({
       data: {
         id: subscription.id,
         adminId: subscription.adminId,
