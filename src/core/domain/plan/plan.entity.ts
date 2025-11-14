@@ -13,6 +13,7 @@ export class Plan extends Entity {
     public readonly iaCallsLimit: number,
   ) {
     super(id);
+    this.validate();
   }
 
   protected getIdErrorMessage(): string {

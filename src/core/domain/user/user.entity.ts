@@ -18,6 +18,7 @@ export class User extends Entity {
     public readonly profileImageUrl: string | null = null,
   ) {
     super(id);
+    this.validate();
   }
 
   protected getIdErrorMessage(): string {

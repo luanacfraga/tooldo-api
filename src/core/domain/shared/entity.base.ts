@@ -3,7 +3,6 @@ import { DomainValidator } from './validators/domain.validator';
 export abstract class Entity {
   constructor(public readonly id: string) {
     this.validateId();
-    this.validate();
   }
 
   private validateId(): void {
@@ -13,4 +12,3 @@ export abstract class Entity {
   protected abstract getIdErrorMessage(): string;
   protected abstract validate(): void;
 }
-

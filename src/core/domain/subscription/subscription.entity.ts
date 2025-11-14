@@ -11,6 +11,7 @@ export class Subscription extends Entity {
     public readonly isActive: boolean,
   ) {
     super(id);
+    this.validate();
   }
 
   protected getIdErrorMessage(): string {

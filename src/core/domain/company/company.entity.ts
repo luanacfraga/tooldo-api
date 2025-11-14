@@ -10,6 +10,7 @@ export class Company extends Entity {
     public readonly adminId: string,
   ) {
     super(id);
+    this.validate();
   }
 
   protected getIdErrorMessage(): string {
