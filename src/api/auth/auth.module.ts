@@ -1,9 +1,8 @@
-import { SubscriptionFactory } from '@/application/factories/subscription.factory';
-import { UserFactory } from '@/application/factories/user.factory';
-import { AuthService } from '@/application/services/auth/auth.service';
-import { RegisterAdminService } from '@/application/services/admin/register-admin.service';
-import { DatabaseModule } from '@/infra/database/database.module';
-import { SharedServicesModule } from '@/infra/services/shared-services.module';
+import {
+  AdminApplicationModule,
+  AuthApplicationModule,
+} from '@/application/modules';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -12,25 +11,23 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
-    DatabaseModule,
-    SharedServicesModule,
+    AuthApplicationModule,
+    AdminApplicationModule,
     PassportModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET ?? 'your-secret-key-change-me',
-      signOptions: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expiresIn: (process.env.JWT_EXPIRES_IN ?? '7d') as any,
-      },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET', 'your-secret-key-change-me'),
+        signOptions: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d') as any,
+        },
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    RegisterAdminService,
-    AuthService,
-    JwtStrategy,
-    UserFactory,
-    SubscriptionFactory,
-  ],
-  exports: [AuthService, JwtStrategy, PassportModule],
+  providers: [JwtStrategy],
+  exports: [AuthApplicationModule, JwtStrategy, PassportModule],
 })
 export class AuthModule {}

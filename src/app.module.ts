@@ -5,9 +5,10 @@ import { JwtAuthGuard } from './api/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './api/auth/guards/roles.guard';
 import { DomainExceptionFilter } from './api/filters/domain-exception.filter';
 import { PlanModule } from './api/plan/plan.module';
+import { ConfigModule } from './infra/config/config.module';
 
 @Module({
-  imports: [PlanModule, AuthModule],
+  imports: [ConfigModule, PlanModule, AuthModule],
   controllers: [],
   providers: [
     {

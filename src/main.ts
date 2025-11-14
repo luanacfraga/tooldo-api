@@ -1,4 +1,5 @@
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -9,13 +10,15 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
+  const configService = app.get(ConfigService);
+
   // Security - Helmet (instalar: npm install helmet)
   // app.use(helmet());
 
   // CORS
-  const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') ?? [
-    'http://localhost:3000',
-  ];
+  const allowedOrigins = configService
+    .get<string>('ALLOWED_ORIGINS')
+    ?.split(',') ?? ['http://localhost:3000'];
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
@@ -41,7 +44,8 @@ async function bootstrap() {
   });
 
   // Swagger (apenas em desenvolvimento)
-  if (process.env.NODE_ENV !== 'production') {
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+  if (nodeEnv !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Weedu API')
       .setDescription('API documentation for Weedu')
@@ -52,9 +56,9 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  const port = process.env.PORT ?? 3000;
+  const port = configService.get<number>('PORT', 3000);
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`);
-  logger.log(`Environment: ${process.env.NODE_ENV ?? 'development'}`);
+  logger.log(`Environment: ${nodeEnv}`);
 }
 void bootstrap();

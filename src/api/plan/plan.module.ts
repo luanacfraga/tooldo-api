@@ -1,12 +1,9 @@
-import { CreatePlanService } from '@/application/services/plan/create-plan.service';
-import { DatabaseModule } from '@/infra/database/database.module';
-import { SharedServicesModule } from '@/infra/services/shared-services.module';
+import { PlanApplicationModule } from '@/application/modules';
 import { Module } from '@nestjs/common';
 import { PlanController } from './plan.controller';
 
 @Module({
-  imports: [DatabaseModule, SharedServicesModule],
+  imports: [PlanApplicationModule],
   controllers: [PlanController],
-  providers: [CreatePlanService],
 })
 export class PlanModule {}
