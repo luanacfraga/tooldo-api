@@ -1,27 +1,29 @@
 import { ErrorMessages } from '@/shared/constants/error-messages';
-import { DomainValidationException } from '../shared/exceptions/domain.exception';
+import { Entity } from '../shared/entity.base';
+import { DomainValidator } from '../shared/validators/domain.validator';
 
-export class Company {
+export class Company extends Entity {
   constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly description: string | null,
     public readonly adminId: string,
   ) {
-    this.validate();
+    super(id);
   }
 
-  private validate(): void {
-    if (!this.id?.trim()) {
-      throw new DomainValidationException(ErrorMessages.COMPANY.ID_REQUIRED);
-    }
-    if (!this.name?.trim()) {
-      throw new DomainValidationException(ErrorMessages.COMPANY.NAME_REQUIRED);
-    }
-    if (!this.adminId?.trim()) {
-      throw new DomainValidationException(
-        ErrorMessages.COMPANY.ADMIN_ID_REQUIRED,
-      );
-    }
+  protected getIdErrorMessage(): string {
+    return ErrorMessages.COMPANY.ID_REQUIRED;
+  }
+
+  protected validate(): void {
+    DomainValidator.validateRequiredString(
+      this.name,
+      ErrorMessages.COMPANY.NAME_REQUIRED,
+    );
+    DomainValidator.validateRequiredId(
+      this.adminId,
+      ErrorMessages.COMPANY.ADMIN_ID_REQUIRED,
+    );
   }
 }

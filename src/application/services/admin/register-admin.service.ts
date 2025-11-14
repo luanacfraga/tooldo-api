@@ -1,3 +1,5 @@
+import { SubscriptionFactory } from '@/application/factories/subscription.factory';
+import { UserFactory } from '@/application/factories/user.factory';
 import { Company } from '@/core/domain/company/company.entity';
 import { DocumentType } from '@/core/domain/shared/enums';
 import {
@@ -52,6 +54,8 @@ export class RegisterAdminService {
     private readonly idGenerator: IdGenerator,
     @Inject('TransactionManager')
     private readonly transactionManager: TransactionManager,
+    private readonly userFactory: UserFactory,
+    private readonly subscriptionFactory: SubscriptionFactory,
   ) {}
 
   async execute(input: RegisterAdminInput): Promise<RegisterAdminOutput> {
@@ -65,17 +69,17 @@ export class RegisterAdminService {
     const hashedPassword = await this.passwordHasher.hash(input.password);
 
     return await this.transactionManager.execute(async (tx) => {
-      const user = User.createAdmin(
-        userId,
-        input.firstName,
-        input.lastName,
-        input.email,
-        input.phone,
-        input.document,
-        input.documentType,
+      const user = this.userFactory.createAdmin({
+        id: userId,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+        phone: input.phone,
+        document: input.document,
+        documentType: input.documentType,
         hashedPassword,
-        null,
-      );
+        profileImageUrl: null,
+      });
       const createdUser = await this.userRepository.create(user, tx);
 
       const company = new Company(
@@ -86,11 +90,11 @@ export class RegisterAdminService {
       );
       const createdCompany = await this.companyRepository.create(company, tx);
 
-      const subscription = Subscription.create(
-        subscriptionId,
-        userId,
-        defaultPlan.id,
-      );
+      const subscription = this.subscriptionFactory.create({
+        id: subscriptionId,
+        adminId: userId,
+        planId: defaultPlan.id,
+      });
       const createdSubscription = await this.subscriptionRepository.create(
         subscription,
         tx,

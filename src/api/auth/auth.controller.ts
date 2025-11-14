@@ -1,3 +1,6 @@
+import { CompanyMapper } from '@/application/mappers/company.mapper';
+import { SubscriptionMapper } from '@/application/mappers/subscription.mapper';
+import { UserMapper } from '@/application/mappers/user.mapper';
 import { RegisterAdminService } from '@/application/services/admin/register-admin.service';
 import { AuthService } from '@/application/services/auth/auth.service';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
@@ -59,26 +62,10 @@ export class AuthController {
   ): Promise<RegisterAdminResponseDto> {
     const result = await this.registerAdminService.execute(registerDto);
 
-    const publicUser = result.user.toPublic();
-
     return {
-      user: {
-        ...publicUser,
-        documentType: publicUser.documentType,
-      },
-      company: {
-        id: result.company.id,
-        name: result.company.name,
-        description: result.company.description,
-        adminId: result.company.adminId,
-      },
-      subscription: {
-        id: result.subscription.id,
-        adminId: result.subscription.adminId,
-        planId: result.subscription.planId,
-        startedAt: result.subscription.startedAt,
-        isActive: result.subscription.isActive,
-      },
+      user: UserMapper.toResponseDto(result.user),
+      company: CompanyMapper.toResponseDto(result.company),
+      subscription: SubscriptionMapper.toResponseDto(result.subscription),
     };
   }
 }

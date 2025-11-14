@@ -1,3 +1,5 @@
+import { SubscriptionFactory } from '@/application/factories/subscription.factory';
+import { UserFactory } from '@/application/factories/user.factory';
 import { AuthService } from '@/application/services/auth/auth.service';
 import { RegisterAdminService } from '@/application/services/admin/register-admin.service';
 import { DatabaseModule } from '@/infra/database/database.module';
@@ -22,7 +24,13 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [RegisterAdminService, AuthService, JwtStrategy],
+  providers: [
+    RegisterAdminService,
+    AuthService,
+    JwtStrategy,
+    UserFactory,
+    SubscriptionFactory,
+  ],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}

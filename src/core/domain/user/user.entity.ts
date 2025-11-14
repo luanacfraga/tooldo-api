@@ -1,8 +1,9 @@
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { DocumentType, UserRole, UserStatus } from '../shared/enums';
-import { DomainValidationException } from '../shared/exceptions/domain.exception';
+import { Entity } from '../shared/entity.base';
+import { DomainValidator } from '../shared/validators/domain.validator';
 
-export class User {
+export class User extends Entity {
   constructor(
     public readonly id: string,
     public readonly firstName: string,
@@ -16,79 +17,41 @@ export class User {
     public readonly status: UserStatus,
     public readonly profileImageUrl: string | null = null,
   ) {
-    this.validate();
+    super(id);
   }
 
-  private validate(): void {
-    if (!this.id?.trim()) {
-      throw new DomainValidationException(ErrorMessages.USER.ID_REQUIRED);
-    }
-    if (!this.firstName?.trim()) {
-      throw new DomainValidationException(
-        ErrorMessages.USER.FIRST_NAME_REQUIRED,
-      );
-    }
-    if (!this.lastName?.trim()) {
-      throw new DomainValidationException(
-        ErrorMessages.USER.LAST_NAME_REQUIRED,
-      );
-    }
-    if (!this.email?.trim()) {
-      throw new DomainValidationException(ErrorMessages.USER.EMAIL_REQUIRED);
-    }
-    if (!this.phone?.trim()) {
-      throw new DomainValidationException(ErrorMessages.USER.PHONE_REQUIRED);
-    }
-    if (!this.document?.trim()) {
-      throw new DomainValidationException(ErrorMessages.USER.DOCUMENT_REQUIRED);
-    }
-    if (!this._password?.trim()) {
-      throw new DomainValidationException(ErrorMessages.USER.PASSWORD_REQUIRED);
-    }
+  protected getIdErrorMessage(): string {
+    return ErrorMessages.USER.ID_REQUIRED;
+  }
+
+  protected validate(): void {
+    DomainValidator.validateRequiredString(
+      this.firstName,
+      ErrorMessages.USER.FIRST_NAME_REQUIRED,
+    );
+    DomainValidator.validateRequiredString(
+      this.lastName,
+      ErrorMessages.USER.LAST_NAME_REQUIRED,
+    );
+    DomainValidator.validateRequiredString(
+      this.email,
+      ErrorMessages.USER.EMAIL_REQUIRED,
+    );
+    DomainValidator.validateRequiredString(
+      this.phone,
+      ErrorMessages.USER.PHONE_REQUIRED,
+    );
+    DomainValidator.validateRequiredString(
+      this.document,
+      ErrorMessages.USER.DOCUMENT_REQUIRED,
+    );
+    DomainValidator.validateRequiredString(
+      this._password,
+      ErrorMessages.USER.PASSWORD_REQUIRED,
+    );
   }
 
   get password(): string {
     return this._password;
-  }
-
-  static createAdmin(
-    id: string,
-    firstName: string,
-    lastName: string,
-    email: string,
-    phone: string,
-    document: string,
-    documentType: DocumentType,
-    hashedPassword: string,
-    profileImageUrl: string | null = null,
-  ): User {
-    return new User(
-      id,
-      firstName,
-      lastName,
-      email,
-      phone,
-      document,
-      documentType,
-      hashedPassword,
-      UserRole.ADMIN,
-      UserStatus.ACTIVE,
-      profileImageUrl,
-    );
-  }
-
-  toPublic(): Omit<User, '_password' | 'password' | 'validate' | 'toPublic'> {
-    return {
-      id: this.id,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      phone: this.phone,
-      document: this.document,
-      documentType: this.documentType,
-      role: this.role,
-      status: this.status,
-      profileImageUrl: this.profileImageUrl,
-    };
   }
 }
