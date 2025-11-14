@@ -1,5 +1,5 @@
-import { CreatePlanService } from '@/application/services/create-plan';
-import { Plan } from '@/core/domain/plan.entity';
+import { CreatePlanService } from '@/application/services/plan/create-plan.service';
+import { Plan } from '@/core/domain/plan/plan.entity';
 import { Body, Controller, Post } from '@nestjs/common';
 import {
   ApiBadRequestResponse,

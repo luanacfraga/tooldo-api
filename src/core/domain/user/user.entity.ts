@@ -1,6 +1,6 @@
 import { ErrorMessages } from '@/shared/constants/error-messages';
-import { DocumentType, UserRole, UserStatus } from './enums';
-import { DomainValidationException } from './exceptions/domain.exception';
+import { DocumentType, UserRole, UserStatus } from '../shared/enums';
+import { DomainValidationException } from '../shared/exceptions/domain.exception';
 
 export class User {
   constructor(

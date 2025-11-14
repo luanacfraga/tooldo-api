@@ -1,4 +1,4 @@
-import { DocumentType } from '@/core/domain/enums';
+import { DocumentType } from '@/core/domain/shared/enums';
 import { Type } from 'class-transformer';
 import {
   IsEmail,

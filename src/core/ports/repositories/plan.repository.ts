@@ -1,4 +1,4 @@
-import { Plan } from '@/core/domain/plan.entity';
+import { Plan } from '@/core/domain/plan/plan.entity';
 
 export interface PlanRepository {
   create(plan: Plan): Promise<Plan>;

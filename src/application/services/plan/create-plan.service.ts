@@ -1,4 +1,4 @@
-import { Plan } from '@/core/domain/plan.entity';
+import { Plan } from '@/core/domain/plan/plan.entity';
 import { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import type { IdGenerator } from '@/core/ports/services/id-generator.port';
 import { Inject, Injectable } from '@nestjs/common';

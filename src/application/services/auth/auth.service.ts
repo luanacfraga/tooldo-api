@@ -1,4 +1,4 @@
-import { UserRole } from '@/core/domain/enums';
+import { UserRole } from '@/core/domain/shared/enums';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';

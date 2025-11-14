@@ -1,11 +1,11 @@
-import { Company } from '@/core/domain/company.entity';
-import { DocumentType } from '@/core/domain/enums';
+import { Company } from '@/core/domain/company/company.entity';
+import { DocumentType } from '@/core/domain/shared/enums';
 import {
   EntityNotFoundException,
   UniqueConstraintException,
-} from '@/core/domain/exceptions/domain.exception';
-import { Subscription } from '@/core/domain/subscription.entity';
-import { User } from '@/core/domain/user.entity';
+} from '@/core/domain/shared/exceptions/domain.exception';
+import { Subscription } from '@/core/domain/subscription/subscription.entity';
+import { User } from '@/core/domain/user/user.entity';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';

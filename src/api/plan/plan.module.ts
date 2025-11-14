@@ -1,4 +1,4 @@
-import { CreatePlanService } from '@/application/services/create-plan';
+import { CreatePlanService } from '@/application/services/plan/create-plan.service';
 import { DatabaseModule } from '@/infra/database/database.module';
 import { SharedServicesModule } from '@/infra/services/shared-services.module';
 import { Module } from '@nestjs/common';

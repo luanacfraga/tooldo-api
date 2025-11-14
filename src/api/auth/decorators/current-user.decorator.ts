@@ -1,4 +1,4 @@
-import type { JwtPayload } from '@/application/services/auth.service';
+import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 /**

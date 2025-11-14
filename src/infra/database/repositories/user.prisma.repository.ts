@@ -1,5 +1,5 @@
-import { DocumentType, UserRole, UserStatus } from '@/core/domain/enums';
-import { User } from '@/core/domain/user.entity';
+import { DocumentType, UserRole, UserStatus } from '@/core/domain/shared/enums';
+import { User } from '@/core/domain/user/user.entity';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';

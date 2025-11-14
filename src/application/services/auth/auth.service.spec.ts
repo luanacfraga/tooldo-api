@@ -2,8 +2,8 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { DocumentType, UserRole, UserStatus } from '@/core/domain/enums';
-import { User } from '@/core/domain/user.entity';
+import { DocumentType, UserRole, UserStatus } from '@/core/domain/shared/enums';
+import { User } from '@/core/domain/user/user.entity';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
 import { AuthService, type LoginInput } from './auth.service';

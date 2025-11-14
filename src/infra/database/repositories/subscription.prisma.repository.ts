@@ -1,4 +1,4 @@
-import { Subscription } from '@/core/domain/subscription.entity';
+import { Subscription } from '@/core/domain/subscription/subscription.entity';
 import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';

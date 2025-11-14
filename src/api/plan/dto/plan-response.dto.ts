@@ -1,5 +1,5 @@
+import { Plan } from '@/core/domain/plan/plan.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { Plan } from '@/core/domain/plan.entity';
 
 export class PlanResponseDto {
   @ApiProperty({

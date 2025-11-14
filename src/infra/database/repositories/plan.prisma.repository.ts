@@ -1,4 +1,4 @@
-import { Plan } from '@/core/domain/plan.entity';
+import { Plan } from '@/core/domain/plan/plan.entity';
 import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';

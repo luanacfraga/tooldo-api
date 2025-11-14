@@ -1,5 +1,5 @@
 import { ErrorMessages } from '@/shared/constants/error-messages';
-import { DomainValidationException } from './exceptions/domain.exception';
+import { DomainValidationException } from '../shared/exceptions/domain.exception';
 
 export class Plan {
   constructor(

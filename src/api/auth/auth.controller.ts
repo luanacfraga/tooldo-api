@@ -1,5 +1,5 @@
-import { AuthService } from '@/application/services/auth.service';
-import { RegisterAdminService } from '@/application/services/register-admin.service';
+import { RegisterAdminService } from '@/application/services/admin/register-admin.service';
+import { AuthService } from '@/application/services/auth/auth.service';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from './decorators/public.decorator';

@@ -3,7 +3,7 @@ import {
   DomainValidationException,
   EntityNotFoundException,
   UniqueConstraintException,
-} from '@/core/domain/exceptions/domain.exception';
+} from '@/core/domain/shared/exceptions/domain.exception';
 import {
   ArgumentsHost,
   Catch,

@@ -1,6 +1,6 @@
-import type { JwtPayload } from '@/application/services/auth.service';
+import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { ROLES_KEY } from '@/api/auth/decorators/roles.decorator';
-import { UserRole } from '@/core/domain/enums';
+import { UserRole } from '@/core/domain/shared/enums';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
