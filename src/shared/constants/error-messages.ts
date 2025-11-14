@@ -44,6 +44,9 @@ export const ErrorMessages = {
     STARTED_AT_INVALID: 'O startedAt da assinatura deve ser uma data válida',
   },
 
+  AUTH: {
+    INVALID_CREDENTIALS: 'Credenciais inválidas',
+  },
   VALIDATION: {
     STRING_REQUIRED: 'Este campo deve ser uma string',
     NOT_EMPTY: 'Este campo é obrigatório',

@@ -1,7 +1,9 @@
 import { UserRole } from '@/core/domain/shared/enums';
+import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ErrorMessages } from '@/shared/constants/error-messages';
+import { Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 export interface LoginInput {
@@ -10,7 +12,7 @@ export interface LoginInput {
 }
 
 export interface JwtPayload {
-  sub: string; // user id
+  sub: string;
   email: string;
   role: UserRole;
 }
@@ -37,24 +39,21 @@ export class AuthService {
   ) {}
 
   async login(input: LoginInput): Promise<LoginOutput> {
-    // Buscar usuário por email
     const user = await this.userRepository.findByEmail(input.email);
 
     if (!user) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new AuthenticationException(ErrorMessages.AUTH.INVALID_CREDENTIALS);
     }
 
-    // Verificar senha
     const isPasswordValid = await this.passwordHasher.compare(
       input.password,
       user.password,
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciais inválidas');
+      throw new AuthenticationException(ErrorMessages.AUTH.INVALID_CREDENTIALS);
     }
 
-    // Gerar token JWT
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,

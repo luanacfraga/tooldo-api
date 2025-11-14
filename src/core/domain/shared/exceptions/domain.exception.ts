@@ -29,3 +29,9 @@ export class UniqueConstraintException extends DomainException {
     super(message);
   }
 }
+
+export class AuthenticationException extends DomainException {
+  constructor(message: string) {
+    super(message);
+  }
+}

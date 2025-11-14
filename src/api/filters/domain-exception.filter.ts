@@ -1,4 +1,5 @@
 import {
+  AuthenticationException,
   DomainException,
   DomainValidationException,
   EntityNotFoundException,
@@ -27,6 +28,8 @@ export class DomainExceptionFilter implements ExceptionFilter {
       status = HttpStatus.NOT_FOUND;
     } else if (exception instanceof UniqueConstraintException) {
       status = HttpStatus.CONFLICT;
+    } else if (exception instanceof AuthenticationException) {
+      status = HttpStatus.UNAUTHORIZED;
     }
 
     response.status(status).json({

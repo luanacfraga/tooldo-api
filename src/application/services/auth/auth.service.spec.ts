@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentType, UserRole, UserStatus } from '@/core/domain/shared/enums';
+import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
 import { User } from '@/core/domain/user/user.entity';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
+import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService, type LoginInput } from './auth.service';
 
 describe('AuthService', () => {
@@ -115,13 +115,13 @@ describe('AuthService', () => {
       });
     });
 
-    it('should throw UnauthorizedException when user does not exist', async () => {
+    it('should throw AuthenticationException when user does not exist', async () => {
       // Arrange
       userRepository.findByEmail.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.login(loginInput)).rejects.toThrow(
-        UnauthorizedException,
+        AuthenticationException,
       );
       await expect(service.login(loginInput)).rejects.toThrow(
         'Credenciais inválidas',
@@ -131,14 +131,14 @@ describe('AuthService', () => {
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
-    it('should throw UnauthorizedException when password is invalid', async () => {
+    it('should throw AuthenticationException when password is invalid', async () => {
       // Arrange
       userRepository.findByEmail.mockResolvedValue(mockUser);
       passwordHasher.compare.mockResolvedValue(false);
 
       // Act & Assert
       await expect(service.login(loginInput)).rejects.toThrow(
-        UnauthorizedException,
+        AuthenticationException,
       );
       await expect(service.login(loginInput)).rejects.toThrow(
         'Credenciais inválidas',
