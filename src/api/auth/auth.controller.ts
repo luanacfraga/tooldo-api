@@ -2,6 +2,7 @@ import { CompanyMapper } from '@/application/mappers/company.mapper';
 import { SubscriptionMapper } from '@/application/mappers/subscription.mapper';
 import { UserMapper } from '@/application/mappers/user.mapper';
 import { RegisterAdminService } from '@/application/services/admin/register-admin.service';
+import { RegisterMasterService } from '@/application/services/admin/register-master.service';
 import { AuthService } from '@/application/services/auth/auth.service';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -10,12 +11,15 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterAdminResponseDto } from './dto/register-admin-response.dto';
 import { RegisterAdminDto } from './dto/register-admin.dto';
+import { RegisterMasterResponseDto } from './dto/register-master-response.dto';
+import { RegisterMasterDto } from './dto/register-master.dto';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly registerAdminService: RegisterAdminService,
+    private readonly registerMasterService: RegisterMasterService,
     private readonly authService: AuthService,
   ) {}
 
@@ -66,6 +70,33 @@ export class AuthController {
       user: UserMapper.toResponseDto(result.user),
       company: CompanyMapper.toResponseDto(result.company),
       subscription: SubscriptionMapper.toResponseDto(result.subscription),
+    };
+  }
+
+  @Public()
+  @Post('register-master')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Register a new master user',
+    description:
+      'Cria um usuário master responsável por criar e editar planos e limites',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Master user successfully registered',
+    type: RegisterMasterResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - Email, phone or document already registered',
+  })
+  async registerMaster(
+    @Body() registerDto: RegisterMasterDto,
+  ): Promise<RegisterMasterResponseDto> {
+    const result = await this.registerMasterService.execute(registerDto);
+
+    return {
+      user: UserMapper.toResponseDto(result.user),
     };
   }
 }

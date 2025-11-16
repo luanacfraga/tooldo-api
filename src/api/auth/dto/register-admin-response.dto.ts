@@ -1,75 +1,149 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'ID único do usuário',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   id!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Primeiro nome do usuário',
+    example: 'João',
+  })
   firstName!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Sobrenome do usuário',
+    example: 'Silva',
+  })
   lastName!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Email do usuário',
+    example: 'joao.silva@example.com',
+  })
   email!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Telefone do usuário',
+    example: '11987654321',
+  })
   phone!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Documento do usuário (CPF ou CNPJ)',
+    example: '12345678900',
+  })
   document!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Tipo de documento',
+    example: 'CPF',
+    enum: ['CPF', 'CNPJ'],
+  })
   documentType!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Papel do usuário no sistema',
+    example: 'admin',
+    enum: ['master', 'admin', 'manager', 'executor', 'consultant'],
+  })
   role!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Status do usuário',
+    example: 'ACTIVE',
+    enum: ['ACTIVE', 'DELETED', 'PENDING'],
+  })
   status!: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    description: 'URL da imagem de perfil do usuário',
+    example: 'https://example.com/profile.jpg',
+    required: false,
+    nullable: true,
+  })
   profileImageUrl?: string | null;
 }
 
 export class CompanyResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'ID único da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174001',
+  })
   id!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Nome da empresa',
+    example: 'Weedu Tecnologia',
+  })
   name!: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    description: 'Descrição da empresa',
+    example: 'Empresa de tecnologia focada em educação',
+    required: false,
+    nullable: true,
+  })
   description?: string | null;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'ID do administrador responsável pela empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   adminId!: string;
 }
 
 export class SubscriptionResponseDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'ID único da assinatura',
+    example: '123e4567-e89b-12d3-a456-426614174002',
+  })
   id!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'ID do administrador da assinatura',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   adminId!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'ID do plano associado à assinatura',
+    example: '123e4567-e89b-12d3-a456-426614174003',
+  })
   planId!: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Data de início da assinatura',
+    example: '2025-11-14T20:00:00.000Z',
+    type: Date,
+  })
   startedAt!: Date;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Indica se a assinatura está ativa',
+    example: true,
+  })
   isActive!: boolean;
 }
 
 export class RegisterAdminResponseDto {
-  @ApiProperty({ type: UserResponseDto })
+  @ApiProperty({
+    description: 'Dados do usuário administrador criado',
+    type: UserResponseDto,
+  })
   user!: UserResponseDto;
 
-  @ApiProperty({ type: CompanyResponseDto })
+  @ApiProperty({
+    description: 'Dados da empresa criada',
+    type: CompanyResponseDto,
+  })
   company!: CompanyResponseDto;
 
-  @ApiProperty({ type: SubscriptionResponseDto })
+  @ApiProperty({
+    description: 'Dados da assinatura criada',
+    type: SubscriptionResponseDto,
+  })
   subscription!: SubscriptionResponseDto;
 }

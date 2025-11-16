@@ -34,6 +34,22 @@ export class UserFactory {
     );
   }
 
+  createMaster(input: Omit<CreateUserInput, 'role' | 'status'>): User {
+    return new User(
+      input.id,
+      input.firstName,
+      input.lastName,
+      input.email,
+      input.phone,
+      input.document,
+      input.documentType,
+      input.hashedPassword,
+      UserRole.MASTER,
+      UserStatus.ACTIVE,
+      input.profileImageUrl ?? null,
+    );
+  }
+
   create(input: CreateUserInput): User {
     return new User(
       input.id,
