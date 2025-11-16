@@ -2,12 +2,12 @@
 import { SubscriptionFactory } from '@/application/factories/subscription.factory';
 import { UserFactory } from '@/application/factories/user.factory';
 import { Company } from '@/core/domain/company/company.entity';
+import { Plan } from '@/core/domain/plan/plan.entity';
 import { DocumentType, UserRole, UserStatus } from '@/core/domain/shared/enums';
 import {
   EntityNotFoundException,
   UniqueConstraintException,
 } from '@/core/domain/shared/exceptions/domain.exception';
-import { Plan } from '@/core/domain/plan/plan.entity';
 import { Subscription } from '@/core/domain/subscription/subscription.entity';
 import { User } from '@/core/domain/user/user.entity';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
@@ -153,7 +153,6 @@ describe('RegisterAdminService', () => {
 
   describe('execute', () => {
     it('should register admin successfully', async () => {
-      // Arrange
       const mockUser = new User(
         mockUserId,
         mockInput.firstName,
@@ -198,10 +197,8 @@ describe('RegisterAdminService', () => {
       companyRepository.create.mockResolvedValue(mockCompany);
       subscriptionRepository.create.mockResolvedValue(mockSubscription);
 
-      // Act
       const result = await service.execute(mockInput);
 
-      // Assert
       expect(result).toEqual({
         user: mockUser,
         company: mockCompany,
@@ -231,7 +228,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should create user with correct properties', async () => {
-      // Arrange
       const mockUser = new User(
         mockUserId,
         mockInput.firstName,
@@ -276,10 +272,8 @@ describe('RegisterAdminService', () => {
       companyRepository.create.mockResolvedValue(mockCompany);
       subscriptionRepository.create.mockResolvedValue(mockSubscription);
 
-      // Act
       await service.execute(mockInput);
 
-      // Assert
       const createdUser = userRepository.create.mock.calls[0][0];
       expect(createdUser).toBeInstanceOf(User);
       expect(createdUser.id).toBe(mockUserId);
@@ -296,7 +290,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should create company with correct properties', async () => {
-      // Arrange
       const mockUser = new User(
         mockUserId,
         mockInput.firstName,
@@ -341,10 +334,8 @@ describe('RegisterAdminService', () => {
       companyRepository.create.mockResolvedValue(mockCompany);
       subscriptionRepository.create.mockResolvedValue(mockSubscription);
 
-      // Act
       await service.execute(mockInput);
 
-      // Assert
       const createdCompany = companyRepository.create.mock.calls[0][0];
       expect(createdCompany).toBeInstanceOf(Company);
       expect(createdCompany.id).toBe(mockCompanyId);
@@ -354,7 +345,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should create company with null description when not provided', async () => {
-      // Arrange
       const inputWithoutDescription: RegisterAdminInput = {
         ...mockInput,
         company: {
@@ -405,16 +395,13 @@ describe('RegisterAdminService', () => {
       companyRepository.create.mockResolvedValue(mockCompany);
       subscriptionRepository.create.mockResolvedValue(mockSubscription);
 
-      // Act
       await service.execute(inputWithoutDescription);
 
-      // Assert
       const createdCompany = companyRepository.create.mock.calls[0][0];
       expect(createdCompany.description).toBeNull();
     });
 
     it('should create subscription with correct properties', async () => {
-      // Arrange
       const mockUser = new User(
         mockUserId,
         mockInput.firstName,
@@ -459,11 +446,10 @@ describe('RegisterAdminService', () => {
       companyRepository.create.mockResolvedValue(mockCompany);
       subscriptionRepository.create.mockResolvedValue(mockSubscription);
 
-      // Act
       await service.execute(mockInput);
 
-      // Assert
-      const createdSubscription = subscriptionRepository.create.mock.calls[0][0];
+      const createdSubscription =
+        subscriptionRepository.create.mock.calls[0][0];
       expect(createdSubscription).toBeInstanceOf(Subscription);
       expect(createdSubscription.id).toBe(mockSubscriptionId);
       expect(createdSubscription.adminId).toBe(mockUserId);
@@ -473,7 +459,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should throw UniqueConstraintException when email already exists', async () => {
-      // Arrange
       const existingUser = new User(
         'existing-id',
         'Existing',
@@ -490,7 +475,6 @@ describe('RegisterAdminService', () => {
 
       userRepository.findByEmail.mockResolvedValue(existingUser);
 
-      // Act & Assert
       await expect(service.execute(mockInput)).rejects.toThrow(
         UniqueConstraintException,
       );
@@ -501,7 +485,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should throw UniqueConstraintException when phone already exists', async () => {
-      // Arrange
       const existingUser = new User(
         'existing-id',
         'Existing',
@@ -519,7 +502,6 @@ describe('RegisterAdminService', () => {
       userRepository.findByEmail.mockResolvedValue(null);
       userRepository.findByPhone.mockResolvedValue(existingUser);
 
-      // Act & Assert
       await expect(service.execute(mockInput)).rejects.toThrow(
         UniqueConstraintException,
       );
@@ -530,7 +512,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should throw UniqueConstraintException when document already exists', async () => {
-      // Arrange
       const existingUser = new User(
         'existing-id',
         'Existing',
@@ -549,7 +530,6 @@ describe('RegisterAdminService', () => {
       userRepository.findByPhone.mockResolvedValue(null);
       userRepository.findByDocument.mockResolvedValue(existingUser);
 
-      // Act & Assert
       await expect(service.execute(mockInput)).rejects.toThrow(
         UniqueConstraintException,
       );
@@ -562,13 +542,11 @@ describe('RegisterAdminService', () => {
     });
 
     it('should throw EntityNotFoundException when default plan does not exist', async () => {
-      // Arrange
       userRepository.findByEmail.mockResolvedValue(null);
       userRepository.findByPhone.mockResolvedValue(null);
       userRepository.findByDocument.mockResolvedValue(null);
       planRepository.findByName.mockResolvedValue(null);
 
-      // Act & Assert
       await expect(service.execute(mockInput)).rejects.toThrow(
         EntityNotFoundException,
       );
@@ -577,7 +555,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should hash password before creating user', async () => {
-      // Arrange
       const mockUser = new User(
         mockUserId,
         mockInput.firstName,
@@ -622,10 +599,8 @@ describe('RegisterAdminService', () => {
       companyRepository.create.mockResolvedValue(mockCompany);
       subscriptionRepository.create.mockResolvedValue(mockSubscription);
 
-      // Act
       await service.execute(mockInput);
 
-      // Assert
       expect(passwordHasher.hash).toHaveBeenCalledWith(mockInput.password);
       expect(passwordHasher.hash).toHaveBeenCalledTimes(1);
       const createdUser = userRepository.create.mock.calls[0][0];
@@ -633,7 +608,6 @@ describe('RegisterAdminService', () => {
     });
 
     it('should execute all operations within a transaction', async () => {
-      // Arrange
       const mockUser = new User(
         mockUserId,
         mockInput.firstName,
@@ -680,10 +654,8 @@ describe('RegisterAdminService', () => {
       companyRepository.create.mockResolvedValue(mockCompany);
       subscriptionRepository.create.mockResolvedValue(mockSubscription);
 
-      // Act
       await service.execute(mockInput);
 
-      // Assert
       expect(transactionManager.execute).toHaveBeenCalledTimes(1);
       expect(userRepository.create).toHaveBeenCalledWith(
         expect.any(User),
@@ -700,4 +672,3 @@ describe('RegisterAdminService', () => {
     });
   });
 });
-

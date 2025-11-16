@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsPositive, IsString, IsUUID } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsPositive,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class UpdatePlanDto {
   @ApiProperty({
@@ -58,4 +64,3 @@ export class UpdatePlanDto {
   @IsPositive({ message: 'O limite de chamadas de IA deve ser positivo' })
   iaCallsLimit!: number;
 }
-

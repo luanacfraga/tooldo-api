@@ -83,16 +83,13 @@ describe('AuthService', () => {
     };
 
     it('should successfully login with valid credentials', async () => {
-      // Arrange
       const expectedToken = 'jwt_token_123';
       userRepository.findByEmail.mockResolvedValue(mockUser);
       passwordHasher.compare.mockResolvedValue(true);
       jwtService.signAsync.mockResolvedValue(expectedToken);
 
-      // Act
       const result = await service.login(loginInput);
 
-      // Assert
       expect(result).toEqual({
         access_token: expectedToken,
         user: {
@@ -116,10 +113,8 @@ describe('AuthService', () => {
     });
 
     it('should throw AuthenticationException when user does not exist', async () => {
-      // Arrange
       userRepository.findByEmail.mockResolvedValue(null);
 
-      // Act & Assert
       await expect(service.login(loginInput)).rejects.toThrow(
         AuthenticationException,
       );
@@ -132,11 +127,9 @@ describe('AuthService', () => {
     });
 
     it('should throw AuthenticationException when password is invalid', async () => {
-      // Arrange
       userRepository.findByEmail.mockResolvedValue(mockUser);
       passwordHasher.compare.mockResolvedValue(false);
 
-      // Act & Assert
       await expect(service.login(loginInput)).rejects.toThrow(
         AuthenticationException,
       );
@@ -152,16 +145,13 @@ describe('AuthService', () => {
     });
 
     it('should return correct JWT payload structure', async () => {
-      // Arrange
       const expectedToken = 'jwt_token_xyz';
       userRepository.findByEmail.mockResolvedValue(mockUser);
       passwordHasher.compare.mockResolvedValue(true);
       jwtService.signAsync.mockResolvedValue(expectedToken);
 
-      // Act
       await service.login(loginInput);
 
-      // Assert
       expect(jwtService.signAsync).toHaveBeenCalledWith(
         expect.objectContaining({
           sub: expect.any(String),

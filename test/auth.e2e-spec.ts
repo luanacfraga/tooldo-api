@@ -18,7 +18,6 @@ describe('Authentication (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
 
-    // Apply the same configuration as main.ts
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -144,9 +143,6 @@ describe('Authentication (e2e)', () => {
 
   describe('Public endpoints', () => {
     it('should allow access to login endpoint without authentication', () => {
-      // This test confirms the login endpoint is public
-      // Even though it will fail with 401 (invalid credentials),
-      // it proves the endpoint is accessible without a JWT token
       return request(app.getHttpServer())
         .post('/api/v1/auth/login')
         .send({
@@ -154,14 +150,12 @@ describe('Authentication (e2e)', () => {
           password: 'test123',
         })
         .expect((res) => {
-          // Should get 401 for invalid credentials, not 401 for missing token
           expect(res.statusCode).toBe(401);
           expect(res.body.message).toBe('Credenciais inválidas');
         });
     });
 
     it('should allow access to register endpoint without authentication', () => {
-      // This test confirms the register endpoint is public
       return request(app.getHttpServer())
         .post('/api/v1/auth/register')
         .send({
@@ -178,8 +172,6 @@ describe('Authentication (e2e)', () => {
           },
         })
         .expect((res) => {
-          // Will likely fail due to validation or business logic,
-          // but proves the endpoint is accessible
           expect([400, 404, 409]).toContain(res.statusCode);
         });
     });
@@ -187,7 +179,6 @@ describe('Authentication (e2e)', () => {
 
   describe('JWT Token validation', () => {
     it('should reject expired JWT tokens', async () => {
-      // Create a JWT token that is expired
       const expiredToken =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzkwMjJ9.invalid';
 

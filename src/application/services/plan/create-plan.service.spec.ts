@@ -55,14 +55,11 @@ describe('CreatePlanService', () => {
 
   describe('execute', () => {
     it('should create a plan successfully', async () => {
-      // Arrange
       idGenerator.generate.mockReturnValue(mockPlanId);
       planRepository.create.mockImplementation(async (plan: Plan) => plan);
 
-      // Act
       const result = await service.execute(mockPlanInput);
 
-      // Assert
       expect(result).toBeInstanceOf(Plan);
       expect(result.id).toBe(mockPlanId);
       expect(result.name).toBe(mockPlanInput.name);
@@ -85,7 +82,6 @@ describe('CreatePlanService', () => {
     });
 
     it('should generate a unique ID for each plan', async () => {
-      // Arrange
       const firstPlanId = 'first-plan-id';
       const secondPlanId = 'second-plan-id';
 
@@ -94,14 +90,12 @@ describe('CreatePlanService', () => {
         .mockReturnValueOnce(secondPlanId);
       planRepository.create.mockImplementation(async (plan: Plan) => plan);
 
-      // Act
       const result1 = await service.execute(mockPlanInput);
       const result2 = await service.execute({
         ...mockPlanInput,
         name: 'Plano Premium',
       });
 
-      // Assert
       expect(result1.id).toBe(firstPlanId);
       expect(result2.id).toBe(secondPlanId);
       expect(idGenerator.generate).toHaveBeenCalledTimes(2);
@@ -109,7 +103,6 @@ describe('CreatePlanService', () => {
     });
 
     it('should pass all plan properties correctly to repository', async () => {
-      // Arrange
       const customInput = {
         name: 'Plano Enterprise',
         maxCompanies: 100,
@@ -122,10 +115,8 @@ describe('CreatePlanService', () => {
       idGenerator.generate.mockReturnValue(mockPlanId);
       planRepository.create.mockImplementation(async (plan: Plan) => plan);
 
-      // Act
       const result = await service.execute(customInput);
 
-      // Assert
       expect(result).toBeInstanceOf(Plan);
       expect(result.id).toBe(mockPlanId);
       expect(result.name).toBe(customInput.name);
@@ -146,7 +137,6 @@ describe('CreatePlanService', () => {
     });
 
     it('should handle plan with zero limits', async () => {
-      // Arrange
       const zeroLimitsInput = {
         name: 'Plano Grátis',
         maxCompanies: 0,
@@ -159,10 +149,8 @@ describe('CreatePlanService', () => {
       idGenerator.generate.mockReturnValue(mockPlanId);
       planRepository.create.mockImplementation(async (plan: Plan) => plan);
 
-      // Act
       const result = await service.execute(zeroLimitsInput);
 
-      // Assert
       expect(result).toBeInstanceOf(Plan);
       expect(result.name).toBe(zeroLimitsInput.name);
       expect(result.maxCompanies).toBe(0);
