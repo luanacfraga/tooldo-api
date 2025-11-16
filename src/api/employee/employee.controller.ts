@@ -205,7 +205,8 @@ export class EmployeeController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Remove an employee',
-    description: 'Remove um funcionário da empresa (soft delete). Apenas admins e managers.',
+    description:
+      'Remove um funcionário da empresa (soft delete). Apenas admins e managers.',
   })
   @ApiParam({
     name: 'id',
