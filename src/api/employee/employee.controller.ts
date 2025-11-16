@@ -28,7 +28,6 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { AcceptInviteDto } from './dto/accept-invite.dto';
 import { AcceptInviteByTokenDto } from './dto/accept-invite-by-token.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
@@ -75,32 +74,6 @@ export class EmployeeController {
       ...inviteEmployeeDto,
       invitedById,
     });
-
-    return EmployeeResponseDto.fromDomain(result.companyUser);
-  }
-
-  @Post('accept-invite')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Accept an employee invitation (deprecated)',
-    description:
-      'Aceita um convite de funcionário. Atualiza o usuário e marca o convite como aceito. Use accept-invite-by-token para aceitar via JWT.',
-    deprecated: true,
-  })
-  @ApiOkResponse({
-    description: 'Invite successfully accepted',
-    type: EmployeeResponseDto,
-  })
-  @ApiBadRequestResponse({
-    description: 'Bad Request - Invalid input or invite already accepted',
-  })
-  @ApiNotFoundResponse({
-    description: 'Not Found - Invite not found',
-  })
-  async acceptInvite(
-    @Body() acceptInviteDto: AcceptInviteDto,
-  ): Promise<EmployeeResponseDto> {
-    const result = await this.acceptInviteService.execute(acceptInviteDto);
 
     return EmployeeResponseDto.fromDomain(result.companyUser);
   }
