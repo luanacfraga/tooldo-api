@@ -1,11 +1,28 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { AuthModule } from './api/auth/auth.module';
+import { JwtAuthGuard } from './api/auth/guards/jwt-auth.guard';
+import { RolesGuard } from './api/auth/guards/roles.guard';
 import { PlanModule } from './api/plan/plan.module';
-import { PrismaService } from './infra/prisma/prisma.service';
+import { DomainExceptionFilter } from './api/shared/filters/domain-exception.filter';
+import { ConfigModule } from './infra/config/config.module';
 
 @Module({
-  imports: [PlanModule],
+  imports: [ConfigModule, PlanModule, AuthModule],
   controllers: [],
-  providers: [PrismaService],
-  exports: [PrismaService],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: DomainExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}

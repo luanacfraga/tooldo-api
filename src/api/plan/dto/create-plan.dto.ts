@@ -3,50 +3,50 @@ import { IsInt, IsNotEmpty, IsPositive, IsString } from 'class-validator';
 
 export class CreatePlanDto {
   @ApiProperty({
-    description: 'Name of the plan',
-    example: 'Premium Plan',
+    description: 'Nome do plano',
+    example: 'Plano Premium',
   })
-  @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsString({ message: 'O nome do plano deve ser uma string' })
+  @IsNotEmpty({ message: 'O nome do plano é obrigatório' })
+  name!: string;
 
   @ApiProperty({
-    description: 'Maximum number of companies allowed',
+    description: 'Número máximo de empresas permitidas',
     example: 10,
   })
-  @IsInt()
-  @IsPositive()
-  maxCompanies: number;
+  @IsInt({ message: 'O número máximo de empresas deve ser um inteiro' })
+  @IsPositive({ message: 'O número máximo de empresas deve ser positivo' })
+  maxCompanies!: number;
 
   @ApiProperty({
-    description: 'Maximum number of managers allowed',
+    description: 'Número máximo de gerentes permitidos',
     example: 50,
   })
-  @IsInt()
-  @IsPositive()
-  maxManagers: number;
+  @IsInt({ message: 'O número máximo de gerentes deve ser um inteiro' })
+  @IsPositive({ message: 'O número máximo de gerentes deve ser positivo' })
+  maxManagers!: number;
 
   @ApiProperty({
-    description: 'Maximum number of executors allowed',
+    description: 'Número máximo de executores permitidos',
     example: 100,
   })
-  @IsInt()
-  @IsPositive()
-  maxExecutors: number;
+  @IsInt({ message: 'O número máximo de executores deve ser um inteiro' })
+  @IsPositive({ message: 'O número máximo de executores deve ser positivo' })
+  maxExecutors!: number;
 
   @ApiProperty({
-    description: 'Maximum number of consultants allowed',
+    description: 'Número máximo de consultores permitidos',
     example: 30,
   })
-  @IsInt()
-  @IsPositive()
-  maxConsultants: number;
+  @IsInt({ message: 'O número máximo de consultores deve ser um inteiro' })
+  @IsPositive({ message: 'O número máximo de consultores deve ser positivo' })
+  maxConsultants!: number;
 
   @ApiProperty({
-    description: 'IA calls limit per month',
+    description: 'Limite de chamadas de IA por mês',
     example: 1000,
   })
-  @IsInt()
-  @IsPositive()
-  iaCallsLimit: number;
+  @IsInt({ message: 'O limite de chamadas de IA deve ser um inteiro' })
+  @IsPositive({ message: 'O limite de chamadas de IA deve ser positivo' })
+  iaCallsLimit!: number;
 }

@@ -1,18 +1,64 @@
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
 
-  const config = new DocumentBuilder()
-    .setTitle('Weedu API')
-    .setDescription('API documentation for Weedu')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  const configService = app.get(ConfigService);
 
-  await app.listen(process.env.PORT ?? 3000);
+  // Security - Helmet (instalar: npm install helmet)
+  // app.use(helmet());
+
+  // CORS
+  const allowedOrigins = configService
+    .get<string>('ALLOWED_ORIGINS')
+    ?.split(',') ?? ['http://localhost:3000'];
+  app.enableCors({
+    origin: allowedOrigins,
+    credentials: true,
+  });
+
+  // Global validation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Remove propriedades não definidas no DTO
+      forbidNonWhitelisted: true, // Rejeita requisições com propriedades extras
+      transform: true, // Transforma automaticamente tipos
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  // API Versioning
+  app.setGlobalPrefix('api');
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
+
+  // Swagger (apenas em desenvolvimento)
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+  if (nodeEnv !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Weedu API')
+      .setDescription('API documentation for Weedu')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+  }
+
+  const port = configService.get<number>('PORT', 3000);
+  await app.listen(port);
+  logger.log(`Application is running on: http://localhost:${port}`);
+  logger.log(`Environment: ${nodeEnv}`);
 }
-bootstrap();
+void bootstrap();
