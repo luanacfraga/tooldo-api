@@ -22,6 +22,14 @@ export class CompanyPrismaRepository implements CompanyRepository {
     return this.mapToDomain(created);
   }
 
+  async countByAdminId(adminId: string): Promise<number> {
+    return this.prisma.company.count({
+      where: {
+        adminId,
+      },
+    });
+  }
+
   private mapToDomain(prismaCompany: PrismaCompany): Company {
     return new Company(
       prismaCompany.id,

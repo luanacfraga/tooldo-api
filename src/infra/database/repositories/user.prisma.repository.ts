@@ -36,6 +36,15 @@ export class UserPrismaRepository implements UserRepository {
     return user ? this.mapToDomain(user) : null;
   }
 
+  async findById(id: string, tx?: unknown): Promise<User | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const user = await client.user.findUnique({
+      where: { id },
+    });
+
+    return user ? this.mapToDomain(user) : null;
+  }
+
   async create(user: User, tx?: unknown): Promise<User> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
     const created = await client.user.create({

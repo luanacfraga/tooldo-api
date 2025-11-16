@@ -18,6 +18,10 @@ export const ErrorMessages = {
     ID_REQUIRED: 'O id da empresa é obrigatório',
     NAME_REQUIRED: 'O nome da empresa é obrigatório',
     ADMIN_ID_REQUIRED: 'O adminId da empresa é obrigatório',
+    ADMIN_NOT_FOUND: 'Administrador não encontrado',
+    SUBSCRIPTION_NOT_FOUND:
+      'Assinatura ativa não encontrada para o administrador',
+    MAX_COMPANIES_EXCEEDED: 'Limite máximo de empresas do plano foi excedido',
   },
 
   PLAN: {
