@@ -1,4 +1,5 @@
 import { CompanyPrismaRepository } from '@/infra/database/repositories/company.prisma.repository';
+import { CompanyUserPrismaRepository } from '@/infra/database/repositories/company-user.prisma.repository';
 import { PlanPrismaRepository } from '@/infra/database/repositories/plan.prisma.repository';
 import { SubscriptionPrismaRepository } from '@/infra/database/repositories/subscription.prisma.repository';
 import { UserPrismaRepository } from '@/infra/database/repositories/user.prisma.repository';
@@ -26,6 +27,11 @@ const planRepositoryProvider: ClassProvider = {
   useClass: PlanPrismaRepository,
 };
 
+const companyUserRepositoryProvider: ClassProvider = {
+  provide: 'CompanyUserRepository',
+  useClass: CompanyUserPrismaRepository,
+};
+
 const transactionManagerProvider: ClassProvider = {
   provide: 'TransactionManager',
   useClass: PrismaTransactionManager,
@@ -36,6 +42,7 @@ const transactionManagerProvider: ClassProvider = {
     PrismaService,
     userRepositoryProvider,
     companyRepositoryProvider,
+    companyUserRepositoryProvider,
     subscriptionRepositoryProvider,
     planRepositoryProvider,
     transactionManagerProvider,
@@ -44,6 +51,7 @@ const transactionManagerProvider: ClassProvider = {
     PrismaService,
     'UserRepository',
     'CompanyRepository',
+    'CompanyUserRepository',
     'SubscriptionRepository',
     'PlanRepository',
     'TransactionManager',

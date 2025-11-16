@@ -48,6 +48,23 @@ export const ErrorMessages = {
     STARTED_AT_INVALID: 'O startedAt da assinatura deve ser uma data válida',
   },
 
+  COMPANY_USER: {
+    ID_REQUIRED: 'O id do funcionário é obrigatório',
+    COMPANY_ID_REQUIRED: 'O companyId do funcionário é obrigatório',
+    USER_ID_REQUIRED: 'O userId do funcionário é obrigatório',
+    ROLE_REQUIRED: 'O cargo do funcionário é obrigatório',
+    STATUS_REQUIRED: 'O status do funcionário é obrigatório',
+    ALREADY_EXISTS: 'Este usuário já faz parte desta empresa',
+    NOT_FOUND: 'Funcionário não encontrado',
+    INVITE_EXPIRED: 'Este convite expirou',
+    ALREADY_ACCEPTED: 'Este convite já foi aceito',
+    ALREADY_REJECTED: 'Este convite já foi rejeitado',
+    MAX_MANAGERS_EXCEEDED: 'Limite máximo de gerentes do plano foi excedido',
+    MAX_EXECUTORS_EXCEEDED: 'Limite máximo de executores do plano foi excedido',
+    MAX_CONSULTANTS_EXCEEDED:
+      'Limite máximo de consultores do plano foi excedido',
+  },
+
   AUTH: {
     INVALID_CREDENTIALS: 'Credenciais inválidas',
   },

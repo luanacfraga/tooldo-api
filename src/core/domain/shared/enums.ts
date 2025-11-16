@@ -16,3 +16,11 @@ export enum UserStatus {
   DELETED = 'DELETED',
   PENDING = 'PENDING',
 }
+
+export enum CompanyUserStatus {
+  INVITED = 'INVITED',
+  ACTIVE = 'ACTIVE',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+  REMOVED = 'REMOVED',
+}
