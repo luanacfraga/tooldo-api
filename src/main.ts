@@ -16,12 +16,35 @@ async function bootstrap() {
   // app.use(helmet());
 
   // CORS
-  const allowedOrigins = configService
-    .get<string>('ALLOWED_ORIGINS')
-    ?.split(',') ?? ['http://localhost:3000'];
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+  const allowedOriginsEnv = configService.get<string>('ALLOWED_ORIGINS');
+  
+  let allowedOrigins: string[] | boolean;
+  
+  if (nodeEnv === 'production') {
+    // Em produção, usar apenas origens permitidas
+    allowedOrigins = allowedOriginsEnv
+      ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
+      : [];
+  } else {
+    // Em desenvolvimento, permitir todas as origens ou usar a variável de ambiente
+    allowedOrigins = allowedOriginsEnv
+      ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
+      : true; // Permite todas as origens em desenvolvimento
+  }
+
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
+    exposedHeaders: ['Authorization'],
   });
 
   // Global validation
@@ -44,7 +67,6 @@ async function bootstrap() {
   });
 
   // Swagger (apenas em desenvolvimento)
-  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
   if (nodeEnv !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Weedu API')
