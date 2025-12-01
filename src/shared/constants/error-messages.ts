@@ -65,6 +65,27 @@ export const ErrorMessages = {
       'Limite máximo de consultores do plano foi excedido',
   },
 
+  TEAM: {
+    ID_REQUIRED: 'O id da equipe é obrigatório',
+    NAME_REQUIRED: 'O nome da equipe é obrigatório',
+    COMPANY_ID_REQUIRED: 'O companyId da equipe é obrigatório',
+    MANAGER_ID_REQUIRED: 'O managerId da equipe é obrigatório',
+    NOT_FOUND: 'Equipe não encontrada',
+    MANAGER_NOT_FOUND: 'Gestor não encontrado na empresa',
+    MANAGER_NOT_MANAGER_ROLE: 'O gestor deve ter o papel de manager na empresa',
+    EXECUTOR_NOT_FOUND: 'Executor não encontrado na empresa',
+    EXECUTOR_NOT_EXECUTOR_ROLE: 'O executor deve ter o papel de executor na empresa',
+    EXECUTOR_ALREADY_IN_TEAM: 'Este executor já faz parte desta equipe',
+  },
+
+  TEAM_USER: {
+    ID_REQUIRED: 'O id do membro da equipe é obrigatório',
+    TEAM_ID_REQUIRED: 'O teamId do membro da equipe é obrigatório',
+    USER_ID_REQUIRED: 'O userId do membro da equipe é obrigatório',
+    NOT_FOUND: 'Membro da equipe não encontrado',
+    ALREADY_EXISTS: 'Este executor já faz parte desta equipe',
+  },
+
   AUTH: {
     INVALID_CREDENTIALS: 'Credenciais inválidas',
   },

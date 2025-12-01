@@ -6,6 +6,7 @@ import { RolesGuard } from './api/auth/guards/roles.guard';
 import { CompanyModule } from './api/company/company.module';
 import { EmployeeModule } from './api/employee/employee.module';
 import { PlanModule } from './api/plan/plan.module';
+import { TeamModule } from './api/team/team.module';
 import { DomainExceptionFilter } from './api/shared/filters/domain-exception.filter';
 import { ConfigModule } from './infra/config/config.module';
 
@@ -16,6 +17,7 @@ import { ConfigModule } from './infra/config/config.module';
     AuthModule,
     CompanyModule,
     EmployeeModule,
+    TeamModule,
   ],
   controllers: [],
   providers: [

@@ -1,4 +1,4 @@
-import { Company } from '@/core/domain/company/company.entity';
+import { Company, UpdateCompanyData } from '@/core/domain/company/company.entity';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
@@ -31,11 +31,44 @@ export class CompanyPrismaRepository implements CompanyRepository {
     return company ? this.mapToDomain(company) : null;
   }
 
+  async findByAdminId(adminId: string, tx?: unknown): Promise<Company[]> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const companies = await client.company.findMany({
+      where: { adminId },
+    });
+
+    return companies.map((company) => this.mapToDomain(company));
+  }
+
   async countByAdminId(adminId: string): Promise<number> {
     return this.prisma.company.count({
       where: {
         adminId,
       },
+    });
+  }
+
+  async update(
+    id: string,
+    data: Partial<UpdateCompanyData>,
+    tx?: unknown,
+  ): Promise<Company> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const updated = await client.company.update({
+      where: { id },
+      data: {
+        name: data.name,
+        description: data.description,
+      },
+    });
+
+    return this.mapToDomain(updated);
+  }
+
+  async delete(id: string, tx?: unknown): Promise<void> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    await client.company.delete({
+      where: { id },
     });
   }
 
