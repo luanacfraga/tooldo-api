@@ -1,5 +1,6 @@
-import { Roles } from '@/api/auth/decorators/roles.decorator';
 import { CurrentUser } from '@/api/auth/decorators/current-user.decorator';
+import { Roles } from '@/api/auth/decorators/roles.decorator';
+import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { CreateCompanyService } from '@/application/services/company/create-company.service';
 import { DeleteCompanyService } from '@/application/services/company/delete-company.service';
 import { ListCompaniesService } from '@/application/services/company/list-companies.service';
@@ -59,10 +60,10 @@ export class CompanyController {
   })
   async create(
     @Body() createCompanyDto: CreateCompanyDto,
-    @CurrentUser() user: any,
+    @CurrentUser() user: JwtPayload,
   ): Promise<CompanyResponseDto> {
     // Use adminId from authenticated user if not provided
-    const adminId = createCompanyDto.adminId || user?.id;
+    const adminId = createCompanyDto.adminId ?? user?.sub;
     const result = await this.createCompanyService.execute({
       name: createCompanyDto.name,
       description: createCompanyDto.description,
@@ -70,6 +71,32 @@ export class CompanyController {
     });
 
     return CompanyResponseDto.fromDomain(result.company);
+  }
+
+  @Get('me')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List companies of authenticated admin',
+    description:
+      'Lista todas as empresas do administrador autenticado. Apenas admins podem acessar.',
+  })
+  @ApiOkResponse({
+    description: 'Companies successfully retrieved',
+    type: [CompanyResponseDto],
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Admin not found',
+  })
+  async listMyCompanies(
+    @CurrentUser() user: JwtPayload,
+  ): Promise<CompanyResponseDto[]> {
+    const adminId = user.sub;
+    const result = await this.listCompaniesService.execute({ adminId });
+
+    return result.companies.map((company) =>
+      CompanyResponseDto.fromDomain(company),
+    );
   }
 
   @Get('admin/:adminId')

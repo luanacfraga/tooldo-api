@@ -150,6 +150,7 @@ export class InviteEmployeeService {
           userId: user.id,
           email: user.email,
           role: updatedCompanyUser.role,
+          document: user.document,
         });
 
         // Get inviter info
@@ -205,6 +206,7 @@ export class InviteEmployeeService {
       userId: user.id,
       email: user.email,
       role: createdCompanyUser.role,
+      document: user.document,
     });
 
     // Get inviter info

@@ -63,6 +63,10 @@ export const ErrorMessages = {
     MAX_EXECUTORS_EXCEEDED: 'Limite máximo de executores do plano foi excedido',
     MAX_CONSULTANTS_EXCEEDED:
       'Limite máximo de consultores do plano foi excedido',
+    TOKEN_OR_COMPANY_USER_ID_REQUIRED:
+      'Nem token nem companyUserId foram fornecidos',
+    INVITE_CANNOT_BE_ACCEPTED: 'Este convite não pode mais ser aceito',
+    DOCUMENT_MISMATCH: 'O CPF informado não corresponde ao CPF do convite',
   },
 
   TEAM: {
@@ -74,7 +78,8 @@ export const ErrorMessages = {
     MANAGER_NOT_FOUND: 'Gestor não encontrado na empresa',
     MANAGER_NOT_MANAGER_ROLE: 'O gestor deve ter o papel de manager na empresa',
     EXECUTOR_NOT_FOUND: 'Executor não encontrado na empresa',
-    EXECUTOR_NOT_EXECUTOR_ROLE: 'O executor deve ter o papel de executor na empresa',
+    EXECUTOR_NOT_EXECUTOR_ROLE:
+      'O executor deve ter o papel de executor na empresa',
     EXECUTOR_ALREADY_IN_TEAM: 'Este executor já faz parte desta equipe',
   },
 
@@ -88,6 +93,10 @@ export const ErrorMessages = {
 
   AUTH: {
     INVALID_CREDENTIALS: 'Credenciais inválidas',
+    INVALID_TOKEN: 'Token inválido',
+    INVALID_OR_EXPIRED_INVITE_TOKEN: 'Token de convite inválido ou expirado',
+    LEGACY_INVITE_TOKEN:
+      'Token de convite inválido. Este token foi gerado antes da atualização do sistema. Por favor, solicite um novo convite.',
   },
   VALIDATION: {
     STRING_REQUIRED: 'Este campo deve ser uma string',

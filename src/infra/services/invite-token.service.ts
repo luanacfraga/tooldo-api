@@ -2,6 +2,7 @@ import type {
   InviteTokenPayload,
   InviteTokenService,
 } from '@/core/ports/services/invite-token.port';
+import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
@@ -17,11 +18,12 @@ export class JwtInviteTokenService implements InviteTokenService {
         userId: payload.userId,
         email: payload.email,
         role: payload.role,
+        document: payload.document,
         type: 'employee_invite',
       },
       {
         expiresIn: '7d', // Invite expires in 7 days
-        secret: process.env.JWT_INVITE_SECRET || process.env.JWT_SECRET,
+        secret: process.env.JWT_INVITE_SECRET ?? process.env.JWT_SECRET,
       },
     );
   }
@@ -29,11 +31,16 @@ export class JwtInviteTokenService implements InviteTokenService {
   verifyInviteToken(token: string): InviteTokenPayload {
     try {
       const payload = this.jwtService.verify(token, {
-        secret: process.env.JWT_INVITE_SECRET || process.env.JWT_SECRET,
+        secret: process.env.JWT_INVITE_SECRET ?? process.env.JWT_SECRET,
       });
 
       if (payload.type !== 'employee_invite') {
-        throw new UnauthorizedException('Token inválido');
+        throw new UnauthorizedException(ErrorMessages.AUTH.INVALID_TOKEN);
+      }
+
+      // Handle legacy tokens without document field
+      if (!payload.document) {
+        throw new UnauthorizedException(ErrorMessages.AUTH.LEGACY_INVITE_TOKEN);
       }
 
       return {
@@ -42,9 +49,15 @@ export class JwtInviteTokenService implements InviteTokenService {
         userId: payload.userId,
         email: payload.email,
         role: payload.role,
+        document: payload.document,
       };
     } catch (error) {
-      throw new UnauthorizedException('Token de convite inválido ou expirado');
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException(
+        ErrorMessages.AUTH.INVALID_OR_EXPIRED_INVITE_TOKEN,
+      );
     }
   }
 }

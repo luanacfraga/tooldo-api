@@ -1,7 +1,11 @@
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import { EmployeeInviteAcceptedEvent } from '@/core/domain/events/employee.events';
 import { Plan } from '@/core/domain/plan/plan.entity';
-import { CompanyUserStatus, UserStatus } from '@/core/domain/shared/enums';
+import {
+  CompanyUserStatus,
+  UserRole,
+  UserStatus,
+} from '@/core/domain/shared/enums';
 import {
   DomainValidationException,
   EntityNotFoundException,
@@ -20,12 +24,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ValidatePlanLimitsService } from './validate-plan-limits.service';
 
+const TEMP_DOCUMENT_PREFIX = 'temp_';
+
 export interface AcceptInviteInput {
   companyUserId?: string;
   token?: string;
+  document: string;
   password: string;
-  phone?: string;
-  document?: string;
 }
 
 export interface AcceptInviteOutput {
@@ -57,17 +62,28 @@ export class AcceptInviteService {
   async execute(input: AcceptInviteInput): Promise<AcceptInviteOutput> {
     // Extract companyUserId from token if provided
     let companyUserId = input.companyUserId;
+    let tokenDocument: string | undefined;
 
     if (input.token) {
       const tokenPayload = this.inviteTokenService.verifyInviteToken(
         input.token,
       );
       companyUserId = tokenPayload.companyUserId;
+      tokenDocument = tokenPayload.document;
+
+      // Validate CPF early if we have token (fail fast)
+      if (tokenDocument && !this.isTemporaryDocument(tokenDocument)) {
+        if (input.document !== tokenDocument) {
+          throw new DomainValidationException(
+            ErrorMessages.COMPANY_USER.DOCUMENT_MISMATCH,
+          );
+        }
+      }
     }
 
     if (!companyUserId) {
       throw new DomainValidationException(
-        'Nem token nem companyUserId foram fornecidos',
+        ErrorMessages.COMPANY_USER.TOKEN_OR_COMPANY_USER_ID_REQUIRED,
       );
     }
 
@@ -90,7 +106,7 @@ export class AcceptInviteService {
         );
       }
       throw new DomainValidationException(
-        'Este convite não pode mais ser aceito',
+        ErrorMessages.COMPANY_USER.INVITE_CANNOT_BE_ACCEPTED,
       );
     }
 
@@ -125,6 +141,13 @@ export class AcceptInviteService {
       throw new EntityNotFoundException('Usuário', companyUser.userId);
     }
 
+    // Validate CPF matches the invite (from token or from user document if no token)
+    this.validateDocumentMatchesInvite(
+      input.document,
+      tokenDocument,
+      user.document,
+    );
+
     await this.validateUniqueConstraints(input, user.id);
 
     const hashedPassword = await this.passwordHasher.hash(input.password);
@@ -132,8 +155,7 @@ export class AcceptInviteService {
     const updatedUser = await this.userRepository.update(user.id, {
       password: hashedPassword,
       status: UserStatus.ACTIVE,
-      phone: input.phone ?? user.phone,
-      document: input.document ?? user.document,
+      document: input.document,
     } as Partial<User>);
 
     const updatedCompanyUser = await this.companyUserRepository.update(
@@ -162,13 +184,13 @@ export class AcceptInviteService {
     };
   }
 
-  private getMaxLimitForRole(role: string, plan: Plan): number {
+  private getMaxLimitForRole(role: UserRole, plan: Plan): number {
     switch (role) {
-      case 'manager':
+      case UserRole.MANAGER:
         return plan.maxManagers;
-      case 'executor':
+      case UserRole.EXECUTOR:
         return plan.maxExecutors;
-      case 'consultant':
+      case UserRole.CONSULTANT:
         return plan.maxConsultants;
       default:
         throw new DomainValidationException(
@@ -177,17 +199,59 @@ export class AcceptInviteService {
     }
   }
 
+  /**
+   * Validates that the provided document matches the invite document.
+   * Allows document update if the invite has a temporary document.
+   *
+   * @param inputDocument - Document provided by user
+   * @param tokenDocument - Document from invite token (if available)
+   * @param userDocument - Document stored in user entity
+   * @throws DomainValidationException if documents don't match
+   */
+  private validateDocumentMatchesInvite(
+    inputDocument: string,
+    tokenDocument: string | undefined,
+    userDocument: string,
+  ): void {
+    if (tokenDocument) {
+      // If we have token, validate against token document
+      // Allow update if token has temporary document
+      if (
+        !this.isTemporaryDocument(tokenDocument) &&
+        inputDocument !== tokenDocument
+      ) {
+        throw new DomainValidationException(
+          ErrorMessages.COMPANY_USER.DOCUMENT_MISMATCH,
+        );
+      }
+    } else {
+      // If no token, validate against user document
+      // Only validate if user document is not temporary
+      if (
+        !this.isTemporaryDocument(userDocument) &&
+        inputDocument !== userDocument
+      ) {
+        throw new DomainValidationException(
+          ErrorMessages.COMPANY_USER.DOCUMENT_MISMATCH,
+        );
+      }
+    }
+  }
+
+  /**
+   * Checks if a document is temporary (starts with temp_ prefix).
+   *
+   * @param document - Document to check
+   * @returns true if document is temporary
+   */
+  private isTemporaryDocument(document: string): boolean {
+    return document.startsWith(TEMP_DOCUMENT_PREFIX);
+  }
+
   private async validateUniqueConstraints(
     input: AcceptInviteInput,
     currentUserId: string,
   ): Promise<void> {
-    if (input.phone) {
-      const existingPhone = await this.userRepository.findByPhone(input.phone);
-      if (existingPhone && existingPhone.id !== currentUserId) {
-        throw new UniqueConstraintException('Telefone', input.phone);
-      }
-    }
-
     if (input.document) {
       const existingDocument = await this.userRepository.findByDocument(
         input.document,

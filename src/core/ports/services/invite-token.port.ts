@@ -9,4 +9,5 @@ export interface InviteTokenPayload {
   userId: string;
   email: string;
   role: string;
+  document: string;
 }
