@@ -8,10 +8,18 @@ import { Inject, Injectable } from '@nestjs/common';
 export interface ListEmployeesInput {
   companyId: string;
   status?: CompanyUserStatus;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface ListEmployeesOutput {
   employees: CompanyUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 @Injectable()
@@ -29,21 +37,30 @@ export class ListEmployeesService {
       throw new EntityNotFoundException('Empresa', input.companyId);
     }
 
-    let employees: CompanyUser[];
+    const page = input.page ?? 1;
+    const limit = input.limit ?? 10;
+    const sortBy = input.sortBy ?? 'createdAt';
+    const sortOrder = input.sortOrder ?? 'desc';
 
-    if (input.status) {
-      employees = await this.companyUserRepository.findByCompanyIdAndStatus(
-        input.companyId,
-        input.status,
-      );
-    } else {
-      employees = await this.companyUserRepository.findByCompanyId(
-        input.companyId,
-      );
-    }
+    const result = await this.companyUserRepository.findByCompanyIdPaginated(
+      input.companyId,
+      {
+        page,
+        limit,
+        sortBy,
+        sortOrder,
+        status: input.status,
+      },
+    );
+
+    const totalPages = Math.ceil(result.total / limit);
 
     return {
-      employees,
+      employees: result.employees,
+      total: result.total,
+      page,
+      limit,
+      totalPages,
     };
   }
 }

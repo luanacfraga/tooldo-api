@@ -1,11 +1,3 @@
-import { Roles } from '@/api/auth/decorators/roles.decorator';
-import { AcceptInviteService } from '@/application/services/employee/accept-invite.service';
-import { ActivateEmployeeService } from '@/application/services/employee/activate-employee.service';
-import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
-import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
-import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
-import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
-import { UserRole } from '@/core/domain/shared/enums';
 import {
   Body,
   Controller,
@@ -28,6 +20,18 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+
+import { UserRole } from '@/core/domain/shared/enums';
+
+import { AcceptInviteService } from '@/application/services/employee/accept-invite.service';
+import { ActivateEmployeeService } from '@/application/services/employee/activate-employee.service';
+import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
+import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
+import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
+import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
+
+import { Roles } from '@/api/auth/decorators/roles.decorator';
+import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
 import { AcceptInviteByTokenDto } from './dto/accept-invite-by-token.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
@@ -120,7 +124,7 @@ export class EmployeeController {
   })
   @ApiOkResponse({
     description: 'Employees successfully retrieved',
-    type: [EmployeeResponseDto],
+    type: PaginatedResponseDto<EmployeeResponseDto>,
   })
   @ApiNotFoundResponse({
     description: 'Not Found - Company not found',
@@ -128,15 +132,27 @@ export class EmployeeController {
   async list(
     @Param('companyId') companyId: string,
     @Query() query: ListEmployeesQueryDto,
-  ): Promise<EmployeeResponseDto[]> {
+  ): Promise<PaginatedResponseDto<EmployeeResponseDto>> {
     const result = await this.listEmployeesService.execute({
       companyId,
       status: query.status,
+      page: query.page,
+      limit: query.limit,
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
     });
 
-    return result.employees.map((employee: any) => {
-      return EmployeeResponseDto.fromDomain(employee);
-    });
+    return {
+      data: result.employees.map((employee: any) => {
+        return EmployeeResponseDto.fromDomain(employee);
+      }),
+      meta: {
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        totalPages: result.totalPages,
+      },
+    };
   }
 
   @Put(':id/suspend')
