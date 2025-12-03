@@ -1,4 +1,7 @@
-import { Company, UpdateCompanyData } from '@/core/domain/company/company.entity';
+import {
+  Company,
+  UpdateCompanyData,
+} from '@/core/domain/company/company.entity';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
@@ -73,11 +76,11 @@ export class CompanyPrismaRepository implements CompanyRepository {
   }
 
   private mapToDomain(prismaCompany: PrismaCompany): Company {
-    return new Company(
-      prismaCompany.id,
-      prismaCompany.name,
-      prismaCompany.description,
-      prismaCompany.adminId,
-    );
+    return Company.create({
+      id: prismaCompany.id,
+      name: prismaCompany.name,
+      description: prismaCompany.description,
+      adminId: prismaCompany.adminId,
+    });
   }
 }

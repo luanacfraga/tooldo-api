@@ -44,12 +44,12 @@ export class CreateCompanyService {
 
     const companyId = this.idGenerator.generate();
 
-    const company = new Company(
-      companyId,
-      input.name,
-      input.description ?? null,
-      input.adminId,
-    );
+    const company = Company.create({
+      id: companyId,
+      name: input.name,
+      description: input.description,
+      adminId: input.adminId,
+    });
 
     const createdCompany = await this.companyRepository.create(company);
 

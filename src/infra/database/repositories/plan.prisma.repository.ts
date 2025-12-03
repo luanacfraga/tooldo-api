@@ -65,14 +65,14 @@ export class PlanPrismaRepository implements PlanRepository {
   }
 
   private mapToDomain(prismaPlan: PrismaPlan): Plan {
-    return new Plan(
-      prismaPlan.id,
-      prismaPlan.name,
-      prismaPlan.maxCompanies,
-      prismaPlan.maxManagers,
-      prismaPlan.maxExecutors,
-      prismaPlan.maxConsultants,
-      prismaPlan.iaCallsLimit,
-    );
+    return Plan.create({
+      id: prismaPlan.id,
+      name: prismaPlan.name,
+      maxCompanies: prismaPlan.maxCompanies,
+      maxManagers: prismaPlan.maxManagers,
+      maxExecutors: prismaPlan.maxExecutors,
+      maxConsultants: prismaPlan.maxConsultants,
+      iaCallsLimit: prismaPlan.iaCallsLimit,
+    });
   }
 }

@@ -82,12 +82,12 @@ export class RegisterAdminService {
       });
       const createdUser = await this.userRepository.create(user, tx);
 
-      const company = new Company(
-        companyId,
-        input.company.name,
-        input.company.description ?? null,
-        userId,
-      );
+      const company = Company.create({
+        id: companyId,
+        name: input.company.name,
+        description: input.company.description,
+        adminId: userId,
+      });
       const createdCompany = await this.companyRepository.create(company, tx);
 
       const subscription = this.subscriptionFactory.create({
