@@ -3,7 +3,10 @@ import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { CompanyUser as PrismaCompanyUser } from '@prisma/client';
+import {
+  CompanyUser as PrismaCompanyUser,
+  User as PrismaUser,
+} from '@prisma/client';
 
 @Injectable()
 export class CompanyUserPrismaRepository implements CompanyUserRepository {
@@ -64,10 +67,27 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     const client = (tx as typeof this.prisma) ?? this.prisma;
     const companyUsers = await client.companyUser.findMany({
       where: { companyId },
+      include: { user: true },
       orderBy: { createdAt: 'desc' },
     });
 
-    return companyUsers.map((cu) => this.mapToDomain(cu));
+    // Log para debug
+    if (process.env.NODE_ENV === 'development' && companyUsers.length > 0) {
+      console.log('Prisma result sample:', {
+        hasUser: !!companyUsers[0].user,
+        userId: companyUsers[0].userId,
+        user: companyUsers[0].user
+          ? {
+              id: companyUsers[0].user.id,
+              firstName: companyUsers[0].user.firstName,
+            }
+          : null,
+      });
+    }
+
+    return companyUsers.map((cu) =>
+      this.mapToDomainWithUser(cu),
+    ) as CompanyUser[];
   }
 
   async findByCompanyIdAndStatus(
@@ -81,10 +101,13 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         companyId,
         status,
       },
+      include: { user: true },
       orderBy: { createdAt: 'desc' },
     });
 
-    return companyUsers.map((cu) => this.mapToDomain(cu));
+    return companyUsers.map((cu) =>
+      this.mapToDomainWithUser(cu),
+    ) as CompanyUser[];
   }
 
   async countByAdminIdAndRole(
@@ -167,5 +190,31 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       prismaCompanyUser.invitedBy,
       prismaCompanyUser.acceptedAt,
     );
+  }
+
+  private mapToDomainWithUser(
+    prismaCompanyUser: PrismaCompanyUser & { user?: PrismaUser | null },
+  ): any {
+    const companyUser = this.mapToDomain(prismaCompanyUser);
+    // Criar um novo objeto que inclui tanto o CompanyUser quanto o user
+    // Usar Object.assign para garantir que a propriedade user seja preservada
+    const result: any = Object.assign({}, companyUser);
+
+    // Adicionar user como propriedade enumerável
+    if (prismaCompanyUser.user) {
+      result.user = prismaCompanyUser.user;
+    }
+
+    // Log para debug (remover em produção)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('mapToDomainWithUser:', {
+        id: result.id,
+        hasUser: !!result.user,
+        userId: result.userId,
+        userKeys: result.user ? Object.keys(result.user) : [],
+      });
+    }
+
+    return result;
   }
 }

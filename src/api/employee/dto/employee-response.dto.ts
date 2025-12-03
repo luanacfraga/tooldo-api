@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class EmployeeResponseDto {
   @ApiProperty({
@@ -69,6 +69,19 @@ export class EmployeeResponseDto {
   })
   acceptedAt!: Date | null;
 
+  @ApiProperty({
+    description: 'Dados do usuário',
+    required: false,
+  })
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    role: string;
+  };
+
   static fromDomain(companyUser: any): EmployeeResponseDto {
     const dto = new EmployeeResponseDto();
     dto.id = companyUser.id;
@@ -81,6 +94,19 @@ export class EmployeeResponseDto {
     dto.invitedAt = companyUser.invitedAt;
     dto.invitedBy = companyUser.invitedBy;
     dto.acceptedAt = companyUser.acceptedAt;
+
+    // Incluir dados do usuário se disponível
+    if (companyUser.user) {
+      dto.user = {
+        id: companyUser.user.id,
+        firstName: companyUser.user.firstName,
+        lastName: companyUser.user.lastName,
+        email: companyUser.user.email,
+        phone: companyUser.user.phone,
+        role: companyUser.user.role,
+      };
+    }
+
     return dto;
   }
 }

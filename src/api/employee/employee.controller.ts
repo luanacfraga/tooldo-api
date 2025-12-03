@@ -135,9 +135,17 @@ export class EmployeeController {
       status: query.status,
     });
 
-    return result.employees.map((employee) =>
-      EmployeeResponseDto.fromDomain(employee),
-    );
+    return result.employees.map((employee: any) => {
+      // Log para debug (remover em produção)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Employee data:', {
+          id: employee.id,
+          hasUser: !!employee.user,
+          user: employee.user,
+        });
+      }
+      return EmployeeResponseDto.fromDomain(employee);
+    });
   }
 
   @Put(':id/suspend')
