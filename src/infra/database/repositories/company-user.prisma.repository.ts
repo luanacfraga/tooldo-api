@@ -1,12 +1,50 @@
-import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
+import {
+  CompanyUser,
+  type MetadataValue,
+} from '@/core/domain/company-user/company-user.entity';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import {
+  Prisma,
   CompanyUser as PrismaCompanyUser,
   User as PrismaUser,
 } from '@prisma/client';
+
+interface CompanyUserWhereInput {
+  companyId: string;
+  status?: CompanyUserStatus;
+}
+
+interface CompanyUserOrderByInput {
+  createdAt?: 'asc' | 'desc';
+  updatedAt?: 'asc' | 'desc';
+  role?: 'asc' | 'desc';
+  status?: 'asc' | 'desc';
+  user?: {
+    firstName?: 'asc' | 'desc';
+    lastName?: 'asc' | 'desc';
+    email?: 'asc' | 'desc';
+    [key: string]: 'asc' | 'desc' | undefined;
+  };
+  [key: string]:
+    | 'asc'
+    | 'desc'
+    | { [key: string]: 'asc' | 'desc' | undefined }
+    | undefined;
+}
+
+interface CompanyUserWithUser extends CompanyUser {
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    role: string;
+  };
+}
 
 @Injectable()
 export class CompanyUserPrismaRepository implements CompanyUserRepository {
@@ -23,7 +61,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         status: companyUser.status,
         position: companyUser.position,
         notes: companyUser.notes,
-        metadata: companyUser.metadata as any,
+        metadata: companyUser.metadata as Prisma.InputJsonValue,
         invitedAt: companyUser.invitedAt,
         invitedBy: companyUser.invitedBy,
         acceptedAt: companyUser.acceptedAt,
@@ -91,9 +129,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    return companyUsers.map((cu) =>
-      this.mapToDomainWithUser(cu),
-    ) as CompanyUser[];
+    return companyUsers.map((cu) => this.mapToDomainWithUser(cu));
   }
 
   async findByCompanyIdPaginated(
@@ -108,17 +144,23 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     tx?: unknown,
   ): Promise<{ employees: CompanyUser[]; total: number }> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
-    const { page, limit, sortBy = 'createdAt', sortOrder = 'desc', status } = options;
+    const {
+      page,
+      limit,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      status,
+    } = options;
 
-    const where: any = { companyId };
+    const where: CompanyUserWhereInput = { companyId };
     if (status) {
       where.status = status;
     }
 
-    const orderBy: any = {};
+    const orderBy: CompanyUserOrderByInput = {};
     const validSortFields = ['createdAt', 'updatedAt', 'role', 'status'];
     const userSortFields = ['firstName', 'lastName', 'email'];
-    
+
     if (userSortFields.includes(sortBy)) {
       orderBy.user = {};
       orderBy.user[sortBy] = sortOrder;
@@ -139,9 +181,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     ]);
 
     return {
-      employees: companyUsers.map((cu) =>
-        this.mapToDomainWithUser(cu),
-      ) as CompanyUser[],
+      employees: companyUsers.map((cu) => this.mapToDomainWithUser(cu)),
       total,
     };
   }
@@ -195,7 +235,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         status: data.status,
         position: data.position,
         notes: data.notes,
-        metadata: data.metadata as any,
+        metadata: data.metadata as Prisma.InputJsonValue,
         invitedAt: data.invitedAt,
         invitedBy: data.invitedBy,
         acceptedAt: data.acceptedAt,
@@ -221,7 +261,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       prismaCompanyUser.status as CompanyUserStatus,
       prismaCompanyUser.position,
       prismaCompanyUser.notes,
-      prismaCompanyUser.metadata as Record<string, any> | null,
+      prismaCompanyUser.metadata as Record<string, MetadataValue> | null,
       prismaCompanyUser.invitedAt,
       prismaCompanyUser.invitedBy,
       prismaCompanyUser.acceptedAt,
@@ -230,9 +270,12 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
 
   private mapToDomainWithUser(
     prismaCompanyUser: PrismaCompanyUser & { user?: PrismaUser | null },
-  ): any {
+  ): CompanyUserWithUser {
     const companyUser = this.mapToDomain(prismaCompanyUser);
-    const result: any = Object.assign({}, companyUser);
+    const result: CompanyUserWithUser = Object.assign(
+      {},
+      companyUser,
+    ) as CompanyUserWithUser;
 
     if (prismaCompanyUser.user) {
       result.user = prismaCompanyUser.user;
