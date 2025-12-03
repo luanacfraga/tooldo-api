@@ -1,7 +1,5 @@
-import {
-  AdminApplicationModule,
-  AuthApplicationModule,
-} from '@/application/modules';
+import { AdminApplicationModule } from '@/application/modules/admin.module'
+import { AuthApplicationModule } from '@/application/modules/auth.module'
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
