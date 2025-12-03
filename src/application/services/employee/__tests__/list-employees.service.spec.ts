@@ -11,12 +11,12 @@ describe('ListEmployeesService', () => {
   let companyRepository: jest.Mocked<CompanyRepository>;
   let companyUserRepository: jest.Mocked<CompanyUserRepository>;
 
-  const mockCompany = new Company(
-    'company-123',
-    'Test Company',
-    'Description',
-    'admin-123',
-  );
+  const mockCompany = Company.create({
+    id: 'company-123',
+    name: 'Test Company',
+    description: 'Description',
+    adminId: 'admin-123',
+  });
 
   const mockEmployees = [
     new CompanyUser(

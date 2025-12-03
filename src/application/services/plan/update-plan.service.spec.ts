@@ -10,15 +10,15 @@ describe('UpdatePlanService', () => {
   let planRepository: jest.Mocked<PlanRepository>;
 
   const mockPlanId = '123e4567-e89b-12d3-a456-426614174000';
-  const mockExistingPlan = new Plan(
-    mockPlanId,
-    'Plano Básico',
-    5,
-    10,
-    20,
-    15,
-    1000,
-  );
+  const mockExistingPlan = Plan.create({
+    id: mockPlanId,
+    name: 'Plano Básico',
+    maxCompanies: 5,
+    maxManagers: 10,
+    maxExecutors: 20,
+    maxConsultants: 15,
+    iaCallsLimit: 1000,
+  });
 
   const mockUpdateInput = {
     id: mockPlanId,

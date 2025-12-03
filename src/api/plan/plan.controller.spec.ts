@@ -17,15 +17,15 @@ describe('PlanController', () => {
   let updatePlanService: jest.Mocked<UpdatePlanService>;
 
   const mockPlanId = '123e4567-e89b-12d3-a456-426614174000';
-  const mockPlan = new Plan(
-    mockPlanId,
-    'Plano Premium',
-    50,
-    100,
-    200,
-    150,
-    10000,
-  );
+  const mockPlan = Plan.create({
+    id: mockPlanId,
+    name: 'Plano Premium',
+    maxCompanies: 50,
+    maxManagers: 100,
+    maxExecutors: 200,
+    maxConsultants: 150,
+    iaCallsLimit: 10000,
+  });
 
   const mockCreatePlanDto: CreatePlanDto = {
     name: 'Plano Premium',
@@ -88,7 +88,7 @@ describe('PlanController', () => {
 
   describe('create', () => {
     it('should create a plan and return PlanResponseDto', async () => {
-      createPlanService.execute.mockResolvedValue(mockPlan);
+      createPlanService.execute.mockResolvedValue({ plan: mockPlan });
 
       const result = await controller.create(mockCreatePlanDto);
 
@@ -105,16 +105,16 @@ describe('PlanController', () => {
     });
 
     it('should convert domain Plan to PlanResponseDto correctly', async () => {
-      const customPlan = new Plan(
-        'custom-id',
-        'Custom Plan',
-        10,
-        20,
-        30,
-        25,
-        5000,
-      );
-      createPlanService.execute.mockResolvedValue(customPlan);
+      const customPlan = Plan.create({
+        id: 'custom-id',
+        name: 'Custom Plan',
+        maxCompanies: 10,
+        maxManagers: 20,
+        maxExecutors: 30,
+        maxConsultants: 25,
+        iaCallsLimit: 5000,
+      });
+      createPlanService.execute.mockResolvedValue({ plan: customPlan });
 
       const result = await controller.create(mockCreatePlanDto);
 
@@ -144,15 +144,15 @@ describe('PlanController', () => {
     it('should return a list of plans as PlanResponseDto array', async () => {
       const mockPlans = [
         mockPlan,
-        new Plan(
-          '223e4567-e89b-12d3-a456-426614174001',
-          'Plano Básico',
-          5,
-          10,
-          20,
-          15,
-          1000,
-        ),
+        Plan.create({
+          id: '223e4567-e89b-12d3-a456-426614174001',
+          name: 'Plano Básico',
+          maxCompanies: 5,
+          maxManagers: 10,
+          maxExecutors: 20,
+          maxConsultants: 15,
+          iaCallsLimit: 1000,
+        }),
       ];
       listPlansService.execute.mockResolvedValue(mockPlans);
 
@@ -188,15 +188,15 @@ describe('PlanController', () => {
 
   describe('update', () => {
     it('should update a plan and return PlanResponseDto', async () => {
-      const updatedPlan = new Plan(
-        mockPlanId,
-        mockUpdatePlanDto.name,
-        mockUpdatePlanDto.maxCompanies,
-        mockUpdatePlanDto.maxManagers,
-        mockUpdatePlanDto.maxExecutors,
-        mockUpdatePlanDto.maxConsultants,
-        mockUpdatePlanDto.iaCallsLimit,
-      );
+      const updatedPlan = Plan.create({
+        id: mockPlanId,
+        name: mockUpdatePlanDto.name,
+        maxCompanies: mockUpdatePlanDto.maxCompanies,
+        maxManagers: mockUpdatePlanDto.maxManagers,
+        maxExecutors: mockUpdatePlanDto.maxExecutors,
+        maxConsultants: mockUpdatePlanDto.maxConsultants,
+        iaCallsLimit: mockUpdatePlanDto.iaCallsLimit,
+      });
       updatePlanService.execute.mockResolvedValue(updatedPlan);
 
       const result = await controller.update(mockPlanId, mockUpdatePlanDto);
@@ -218,15 +218,15 @@ describe('PlanController', () => {
 
     it('should combine id from param with dto body correctly', async () => {
       const customId = 'custom-plan-id';
-      const updatedPlan = new Plan(
-        customId,
-        mockUpdatePlanDto.name,
-        mockUpdatePlanDto.maxCompanies,
-        mockUpdatePlanDto.maxManagers,
-        mockUpdatePlanDto.maxExecutors,
-        mockUpdatePlanDto.maxConsultants,
-        mockUpdatePlanDto.iaCallsLimit,
-      );
+      const updatedPlan = Plan.create({
+        id: customId,
+        name: mockUpdatePlanDto.name,
+        maxCompanies: mockUpdatePlanDto.maxCompanies,
+        maxManagers: mockUpdatePlanDto.maxManagers,
+        maxExecutors: mockUpdatePlanDto.maxExecutors,
+        maxConsultants: mockUpdatePlanDto.maxConsultants,
+        iaCallsLimit: mockUpdatePlanDto.iaCallsLimit,
+      });
       updatePlanService.execute.mockResolvedValue(updatedPlan);
 
       await controller.update(customId, mockUpdatePlanDto);

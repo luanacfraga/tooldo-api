@@ -41,14 +41,22 @@ describe('InviteEmployeeService', () => {
   let inviteTokenService: jest.Mocked<InviteTokenService>;
   let validatePlanLimitsService: jest.Mocked<ValidatePlanLimitsService>;
 
-  const mockCompany = new Company(
-    'company-123',
-    'Test Company',
-    'Description',
-    'admin-123',
-  );
+  const mockCompany = Company.create({
+    id: 'company-123',
+    name: 'Test Company',
+    description: 'Description',
+    adminId: 'admin-123',
+  });
 
-  const mockPlan = new Plan('plan-123', 'Basic', 5, 10, 20, 5, 1000);
+  const mockPlan = Plan.create({
+    id: 'plan-123',
+    name: 'Basic',
+    maxCompanies: 5,
+    maxManagers: 10,
+    maxExecutors: 20,
+    maxConsultants: 5,
+    iaCallsLimit: 1000,
+  });
 
   const mockSubscription = new Subscription(
     'sub-123',
