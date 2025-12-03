@@ -15,6 +15,17 @@ export interface CompanyUserRepository {
     status: CompanyUserStatus,
     tx?: unknown,
   ): Promise<CompanyUser[]>;
+  findByCompanyIdPaginated(
+    companyId: string,
+    options: {
+      page: number;
+      limit: number;
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+      status?: CompanyUserStatus;
+    },
+    tx?: unknown,
+  ): Promise<{ employees: CompanyUser[]; total: number }>;
   countByAdminIdAndRole(
     adminId: string,
     role: UserRole,

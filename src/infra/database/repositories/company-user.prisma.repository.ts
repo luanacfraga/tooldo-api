@@ -96,6 +96,56 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     ) as CompanyUser[];
   }
 
+  async findByCompanyIdPaginated(
+    companyId: string,
+    options: {
+      page: number;
+      limit: number;
+      sortBy?: string;
+      sortOrder?: 'asc' | 'desc';
+      status?: CompanyUserStatus;
+    },
+    tx?: unknown,
+  ): Promise<{ employees: CompanyUser[]; total: number }> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const { page, limit, sortBy = 'createdAt', sortOrder = 'desc', status } = options;
+
+    const where: any = { companyId };
+    if (status) {
+      where.status = status;
+    }
+
+    const orderBy: any = {};
+    const validSortFields = ['createdAt', 'updatedAt', 'role', 'status'];
+    const userSortFields = ['firstName', 'lastName', 'email'];
+    
+    if (userSortFields.includes(sortBy)) {
+      orderBy.user = {};
+      orderBy.user[sortBy] = sortOrder;
+    } else {
+      const field = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
+      orderBy[field] = sortOrder;
+    }
+
+    const [companyUsers, total] = await Promise.all([
+      client.companyUser.findMany({
+        where,
+        include: { user: true },
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      client.companyUser.count({ where }),
+    ]);
+
+    return {
+      employees: companyUsers.map((cu) =>
+        this.mapToDomainWithUser(cu),
+      ) as CompanyUser[],
+      total,
+    };
+  }
+
   async countByAdminIdAndRole(
     adminId: string,
     role: UserRole,
