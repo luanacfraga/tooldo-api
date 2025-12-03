@@ -1,7 +1,9 @@
 import { ErrorMessages } from '@/shared/constants/error-messages';
-import { CompanyUserStatus, UserRole } from '../shared/enums';
 import { Entity } from '../shared/entity.base';
+import { CompanyUserStatus, UserRole } from '../shared/enums';
 import { DomainValidator } from '../shared/validators/domain.validator';
+
+export type MetadataValue = string | number | boolean | null;
 
 export class CompanyUser extends Entity {
   constructor(
@@ -12,7 +14,7 @@ export class CompanyUser extends Entity {
     public readonly status: CompanyUserStatus,
     public readonly position: string | null = null,
     public readonly notes: string | null = null,
-    public readonly metadata: Record<string, any> | null = null,
+    public readonly metadata: Record<string, MetadataValue> | null = null,
     public readonly invitedAt: Date | null = null,
     public readonly invitedBy: string | null = null,
     public readonly acceptedAt: Date | null = null,

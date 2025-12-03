@@ -3,7 +3,7 @@ import { Entity } from '../shared/entity.base';
 import { DomainValidator } from '../shared/validators/domain.validator';
 
 export class Company extends Entity {
-  constructor(
+  private constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly description: string | null,
@@ -11,6 +11,20 @@ export class Company extends Entity {
   ) {
     super(id);
     this.validate();
+  }
+
+  static create(params: {
+    id: string;
+    name: string;
+    description?: string | null;
+    adminId: string;
+  }): Company {
+    return new Company(
+      params.id,
+      params.name,
+      params.description ?? null,
+      params.adminId,
+    );
   }
 
   protected getIdErrorMessage(): string {
