@@ -67,8 +67,7 @@ export class EmployeeController {
     @Body() inviteEmployeeDto: InviteEmployeeDto,
     @Req() req: any,
   ): Promise<EmployeeResponseDto> {
-    // In a real implementation, get invitedById from authenticated user
-    const invitedById = req.user?.id ?? 'temp-admin-id';
+    const invitedById = req.user?.id ?? 'temp-admin-id'
 
     const result = await this.inviteEmployeeService.execute({
       ...inviteEmployeeDto,
@@ -99,9 +98,9 @@ export class EmployeeController {
     @Body() acceptInviteByTokenDto: AcceptInviteByTokenDto,
   ): Promise<EmployeeResponseDto> {
     const result = await this.acceptInviteService.execute({
-      companyUserId: '', // Will be extracted from token
+      companyUserId: '',
       ...acceptInviteByTokenDto,
-    });
+    })
 
     return EmployeeResponseDto.fromDomain(result.companyUser);
   }
@@ -136,16 +135,8 @@ export class EmployeeController {
     });
 
     return result.employees.map((employee: any) => {
-      // Log para debug (remover em produção)
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Employee data:', {
-          id: employee.id,
-          hasUser: !!employee.user,
-          user: employee.user,
-        });
-      }
-      return EmployeeResponseDto.fromDomain(employee);
-    });
+      return EmployeeResponseDto.fromDomain(employee)
+    })
   }
 
   @Put(':id/suspend')

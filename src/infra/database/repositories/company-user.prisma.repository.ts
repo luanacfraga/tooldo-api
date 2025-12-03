@@ -71,20 +71,6 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Log para debug
-    if (process.env.NODE_ENV === 'development' && companyUsers.length > 0) {
-      console.log('Prisma result sample:', {
-        hasUser: !!companyUsers[0].user,
-        userId: companyUsers[0].userId,
-        user: companyUsers[0].user
-          ? {
-              id: companyUsers[0].user.id,
-              firstName: companyUsers[0].user.firstName,
-            }
-          : null,
-      });
-    }
-
     return companyUsers.map((cu) =>
       this.mapToDomainWithUser(cu),
     ) as CompanyUser[];
@@ -195,26 +181,13 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
   private mapToDomainWithUser(
     prismaCompanyUser: PrismaCompanyUser & { user?: PrismaUser | null },
   ): any {
-    const companyUser = this.mapToDomain(prismaCompanyUser);
-    // Criar um novo objeto que inclui tanto o CompanyUser quanto o user
-    // Usar Object.assign para garantir que a propriedade user seja preservada
-    const result: any = Object.assign({}, companyUser);
+    const companyUser = this.mapToDomain(prismaCompanyUser)
+    const result: any = Object.assign({}, companyUser)
 
-    // Adicionar user como propriedade enumerável
     if (prismaCompanyUser.user) {
-      result.user = prismaCompanyUser.user;
+      result.user = prismaCompanyUser.user
     }
 
-    // Log para debug (remover em produção)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('mapToDomainWithUser:', {
-        id: result.id,
-        hasUser: !!result.user,
-        userId: result.userId,
-        userKeys: result.user ? Object.keys(result.user) : [],
-      });
-    }
-
-    return result;
+    return result
   }
 }

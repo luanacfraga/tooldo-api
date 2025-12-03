@@ -92,10 +92,9 @@ export class EmployeeResponseDto {
     dto.position = companyUser.position;
     dto.notes = companyUser.notes;
     dto.invitedAt = companyUser.invitedAt;
-    dto.invitedBy = companyUser.invitedBy;
-    dto.acceptedAt = companyUser.acceptedAt;
+    dto.invitedBy = companyUser.invitedBy
+    dto.acceptedAt = companyUser.acceptedAt
 
-    // Incluir dados do usuário se disponível
     if (companyUser.user) {
       dto.user = {
         id: companyUser.user.id,

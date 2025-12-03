@@ -60,18 +60,16 @@ export class AcceptInviteService {
   ) {}
 
   async execute(input: AcceptInviteInput): Promise<AcceptInviteOutput> {
-    // Extract companyUserId from token if provided
-    let companyUserId = input.companyUserId;
-    let tokenDocument: string | undefined;
+    let companyUserId = input.companyUserId
+    let tokenDocument: string | undefined
 
     if (input.token) {
       const tokenPayload = this.inviteTokenService.verifyInviteToken(
         input.token,
-      );
-      companyUserId = tokenPayload.companyUserId;
-      tokenDocument = tokenPayload.document;
+      )
+      companyUserId = tokenPayload.companyUserId
+      tokenDocument = tokenPayload.document
 
-      // Validate CPF early if we have token (fail fast)
       if (tokenDocument && !this.isTemporaryDocument(tokenDocument)) {
         if (input.document !== tokenDocument) {
           throw new DomainValidationException(
@@ -138,10 +136,9 @@ export class AcceptInviteService {
 
     const user = await this.userRepository.findById(companyUser.userId);
     if (!user) {
-      throw new EntityNotFoundException('Usuário', companyUser.userId);
+      throw new EntityNotFoundException('Usuário', companyUser.userId)
     }
 
-    // Validate CPF matches the invite (from token or from user document if no token)
     this.validateDocumentMatchesInvite(
       input.document,
       tokenDocument,
@@ -164,9 +161,8 @@ export class AcceptInviteService {
         status: CompanyUserStatus.ACTIVE,
         acceptedAt: new Date(),
       } as Partial<CompanyUser>,
-    );
+    )
 
-    // Emit event for invite accepted
     this.eventEmitter.emit(
       'employee.invite.accepted',
       new EmployeeInviteAcceptedEvent(
@@ -199,41 +195,28 @@ export class AcceptInviteService {
     }
   }
 
-  /**
-   * Validates that the provided document matches the invite document.
-   * Allows document update if the invite has a temporary document.
-   *
-   * @param inputDocument - Document provided by user
-   * @param tokenDocument - Document from invite token (if available)
-   * @param userDocument - Document stored in user entity
-   * @throws DomainValidationException if documents don't match
-   */
   private validateDocumentMatchesInvite(
     inputDocument: string,
     tokenDocument: string | undefined,
     userDocument: string,
   ): void {
     if (tokenDocument) {
-      // If we have token, validate against token document
-      // Allow update if token has temporary document
       if (
         !this.isTemporaryDocument(tokenDocument) &&
         inputDocument !== tokenDocument
       ) {
         throw new DomainValidationException(
           ErrorMessages.COMPANY_USER.DOCUMENT_MISMATCH,
-        );
+        )
       }
     } else {
-      // If no token, validate against user document
-      // Only validate if user document is not temporary
       if (
         !this.isTemporaryDocument(userDocument) &&
         inputDocument !== userDocument
       ) {
         throw new DomainValidationException(
           ErrorMessages.COMPANY_USER.DOCUMENT_MISMATCH,
-        );
+        )
       }
     }
   }
