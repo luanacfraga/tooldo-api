@@ -62,7 +62,6 @@ export class CompanyController {
     @Body() createCompanyDto: CreateCompanyDto,
     @CurrentUser() user: JwtPayload,
   ): Promise<CompanyResponseDto> {
-    // Use adminId from authenticated user if not provided
     const adminId = createCompanyDto.adminId ?? user?.sub;
     const result = await this.createCompanyService.execute({
       name: createCompanyDto.name,

@@ -6,6 +6,18 @@ import {
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
+interface PrismaQueryEvent {
+  query: string;
+  params: string;
+  duration: number;
+  target: string;
+}
+
+interface PrismaErrorEvent {
+  message: string;
+  target: string;
+}
+
 @Injectable()
 export class PrismaService
   extends PrismaClient
@@ -28,16 +40,15 @@ export class PrismaService
       },
     });
 
-    // Log queries em desenvolvimento
     if (process.env.NODE_ENV !== 'production') {
-      this.$on('query' as never, (e: any) => {
+      this.$on('query' as never, (e: PrismaQueryEvent) => {
         this.logger.debug(`Query: ${e.query}`);
         this.logger.debug(`Params: ${e.params}`);
         this.logger.debug(`Duration: ${e.duration}ms`);
       });
     }
 
-    this.$on('error' as never, (e: any) => {
+    this.$on('error' as never, (e: PrismaErrorEvent) => {
       this.logger.error('Prisma error:', e);
     });
   }

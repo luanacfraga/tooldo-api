@@ -13,10 +13,6 @@ import {
   type EmployeeInviteTemplateParams,
 } from './templates/employee-invite.template';
 
-/**
- * Console Email Service for development
- * In production, replace this with a real email service (Nodemailer, SendGrid, etc.)
- */
 @Injectable()
 export class ConsoleEmailService implements EmailService {
   private readonly logger = new Logger(ConsoleEmailService.name);
@@ -39,13 +35,6 @@ export class ConsoleEmailService implements EmailService {
     this.logger.log(`Token: ${params.inviteToken}`);
     this.logger.log('---');
 
-    // In production, send real email here
-    // await this.emailProvider.send({ to: params.to, subject: ..., html });
-
-    // For development, you can save to file or just log
-    // fs.writeFileSync('email-preview.html', html);
-
-    // Prevent unused variable warning
     void html;
 
     return Promise.resolve();
@@ -69,9 +58,6 @@ export class ConsoleEmailService implements EmailService {
     );
     this.logger.log('---');
 
-    // In production, send real email here
-
-    // Prevent unused variable warning
     void html;
 
     return Promise.resolve();

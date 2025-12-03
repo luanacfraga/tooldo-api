@@ -12,25 +12,19 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  // Security - Helmet (instalar: npm install helmet)
-  // app.use(helmet());
-
-  // CORS
   const nodeEnv = configService.get<string>('NODE_ENV', 'development');
   const allowedOriginsEnv = configService.get<string>('ALLOWED_ORIGINS');
-  
+
   let allowedOrigins: string[] | boolean;
-  
+
   if (nodeEnv === 'production') {
-    // Em produção, usar apenas origens permitidas
     allowedOrigins = allowedOriginsEnv
       ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
       : [];
   } else {
-    // Em desenvolvimento, permitir todas as origens ou usar a variável de ambiente
     allowedOrigins = allowedOriginsEnv
       ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
-      : true; // Permite todas as origens em desenvolvimento
+      : true;
   }
 
   app.enableCors({
@@ -47,26 +41,23 @@ async function bootstrap() {
     exposedHeaders: ['Authorization'],
   });
 
-  // Global validation
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Remove propriedades não definidas no DTO
-      forbidNonWhitelisted: true, // Rejeita requisições com propriedades extras
-      transform: true, // Transforma automaticamente tipos
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
       transformOptions: {
         enableImplicitConversion: true,
       },
     }),
   );
 
-  // API Versioning
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
 
-  // Swagger (apenas em desenvolvimento)
   if (nodeEnv !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('Weedu API')

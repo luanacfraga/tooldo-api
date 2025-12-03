@@ -1,6 +1,5 @@
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import { EmployeeInviteAcceptedEvent } from '@/core/domain/events/employee.events';
-import { Plan } from '@/core/domain/plan/plan.entity';
 import {
   CompanyUserStatus,
   UserRole,
@@ -23,6 +22,12 @@ import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ValidatePlanLimitsService } from './validate-plan-limits.service';
+
+export interface PlanLimits {
+  maxManagers: number;
+  maxExecutors: number;
+  maxConsultants: number;
+}
 
 const TEMP_DOCUMENT_PREFIX = 'temp_';
 
@@ -180,7 +185,7 @@ export class AcceptInviteService {
     };
   }
 
-  private getMaxLimitForRole(role: UserRole, plan: Plan): number {
+  private getMaxLimitForRole(role: UserRole, plan: PlanLimits): number {
     switch (role) {
       case UserRole.MANAGER:
         return plan.maxManagers;
@@ -221,12 +226,6 @@ export class AcceptInviteService {
     }
   }
 
-  /**
-   * Checks if a document is temporary (starts with temp_ prefix).
-   *
-   * @param document - Document to check
-   * @returns true if document is temporary
-   */
   private isTemporaryDocument(document: string): boolean {
     return document.startsWith(TEMP_DOCUMENT_PREFIX);
   }

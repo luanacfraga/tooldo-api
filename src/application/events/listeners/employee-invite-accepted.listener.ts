@@ -27,7 +27,6 @@ export class EmployeeInviteAcceptedListener {
         `Processing employee invite accepted event for user ${event.userId}`,
       );
 
-      // Get user and company info
       const [user, company] = await Promise.all([
         this.userRepository.findById(event.userId),
         this.companyRepository.findById(event.companyId),
@@ -38,14 +37,12 @@ export class EmployeeInviteAcceptedListener {
         return;
       }
 
-      // Get admin info
       const admin = await this.userRepository.findById(company.adminId);
       if (!admin) {
         this.logger.warn(`Admin not found for company ${company.id}`);
         return;
       }
 
-      // Send notification email to admin
       await this.emailService.sendEmployeeInviteAccepted({
         to: admin.email,
         employeeName: `${user.firstName} ${user.lastName}`,
@@ -60,7 +57,6 @@ export class EmployeeInviteAcceptedListener {
       this.logger.error(
         `Failed to process employee invite accepted event: ${error}`,
       );
-      // Don't throw error - we don't want to fail the main flow
     }
   }
 }

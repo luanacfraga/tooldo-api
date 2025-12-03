@@ -1,6 +1,7 @@
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import {
   CompanyUserStatus,
+  DocumentType,
   UserRole,
   UserStatus,
 } from '@/core/domain/shared/enums';
@@ -22,6 +23,12 @@ import type { PasswordHasher } from '@/core/ports/services/password-hasher.port'
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Inject, Injectable } from '@nestjs/common';
 import { ValidatePlanLimitsService } from './validate-plan-limits.service';
+
+export interface PlanLimits {
+  maxManagers: number;
+  maxExecutors: number;
+  maxConsultants: number;
+}
 
 export interface InviteEmployeeInput {
   companyId: string;
@@ -111,7 +118,7 @@ export class InviteEmployeeService {
         input.email,
         input.phone ?? `temp_${userId}`,
         input.document ?? `temp_${userId}`,
-        'CPF' as any,
+        DocumentType.CPF,
         tempPassword,
         input.role,
         UserStatus.PENDING,
@@ -143,7 +150,6 @@ export class InviteEmployeeService {
           } as Partial<CompanyUser>,
         );
 
-        // Generate invite token for re-invite
         const inviteToken = this.inviteTokenService.generateInviteToken({
           companyUserId: updatedCompanyUser.id,
           companyId: updatedCompanyUser.companyId,
@@ -153,13 +159,10 @@ export class InviteEmployeeService {
           document: user.document,
         });
 
-        // Get inviter info
         const inviter = await this.userRepository.findById(input.invitedById);
         const inviterName = inviter
           ? `${inviter.firstName} ${inviter.lastName}`
           : 'Administrador';
-
-        // Send re-invite email
         await this.emailService.sendEmployeeInvite({
           to: user.email,
           employeeName: `${user.firstName} ${user.lastName}`,
@@ -199,7 +202,6 @@ export class InviteEmployeeService {
     const createdCompanyUser =
       await this.companyUserRepository.create(companyUser);
 
-    // Generate invite token
     const inviteToken = this.inviteTokenService.generateInviteToken({
       companyUserId: createdCompanyUser.id,
       companyId: createdCompanyUser.companyId,
@@ -209,13 +211,11 @@ export class InviteEmployeeService {
       document: user.document,
     });
 
-    // Get inviter info
     const inviter = await this.userRepository.findById(input.invitedById);
     const inviterName = inviter
       ? `${inviter.firstName} ${inviter.lastName}`
       : 'Administrador';
 
-    // Send invite email
     await this.emailService.sendEmployeeInvite({
       to: user.email,
       employeeName: `${user.firstName} ${user.lastName}`,
@@ -246,7 +246,7 @@ export class InviteEmployeeService {
     }
   }
 
-  private getMaxLimitForRole(role: UserRole, plan: any): number {
+  private getMaxLimitForRole(role: UserRole, plan: PlanLimits): number {
     switch (role) {
       case UserRole.MANAGER:
         return plan.maxManagers;
