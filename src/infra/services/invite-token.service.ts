@@ -25,17 +25,17 @@ export class JwtInviteTokenService implements InviteTokenService {
         expiresIn: '7d',
         secret: process.env.JWT_INVITE_SECRET ?? process.env.JWT_SECRET,
       },
-    )
+    );
   }
 
   verifyInviteToken(token: string): InviteTokenPayload {
     try {
       const payload = this.jwtService.verify(token, {
         secret: process.env.JWT_INVITE_SECRET ?? process.env.JWT_SECRET,
-      })
+      });
 
       if (payload.type !== 'employee_invite') {
-        throw new UnauthorizedException(ErrorMessages.AUTH.INVALID_TOKEN)
+        throw new UnauthorizedException(ErrorMessages.AUTH.INVALID_TOKEN);
       }
 
       if (!payload.document) {

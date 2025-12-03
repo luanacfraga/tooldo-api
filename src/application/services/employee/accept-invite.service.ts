@@ -60,15 +60,15 @@ export class AcceptInviteService {
   ) {}
 
   async execute(input: AcceptInviteInput): Promise<AcceptInviteOutput> {
-    let companyUserId = input.companyUserId
-    let tokenDocument: string | undefined
+    let companyUserId = input.companyUserId;
+    let tokenDocument: string | undefined;
 
     if (input.token) {
       const tokenPayload = this.inviteTokenService.verifyInviteToken(
         input.token,
-      )
-      companyUserId = tokenPayload.companyUserId
-      tokenDocument = tokenPayload.document
+      );
+      companyUserId = tokenPayload.companyUserId;
+      tokenDocument = tokenPayload.document;
 
       if (tokenDocument && !this.isTemporaryDocument(tokenDocument)) {
         if (input.document !== tokenDocument) {
@@ -136,7 +136,7 @@ export class AcceptInviteService {
 
     const user = await this.userRepository.findById(companyUser.userId);
     if (!user) {
-      throw new EntityNotFoundException('Usuário', companyUser.userId)
+      throw new EntityNotFoundException('Usuário', companyUser.userId);
     }
 
     this.validateDocumentMatchesInvite(
@@ -161,7 +161,7 @@ export class AcceptInviteService {
         status: CompanyUserStatus.ACTIVE,
         acceptedAt: new Date(),
       } as Partial<CompanyUser>,
-    )
+    );
 
     this.eventEmitter.emit(
       'employee.invite.accepted',
@@ -207,7 +207,7 @@ export class AcceptInviteService {
       ) {
         throw new DomainValidationException(
           ErrorMessages.COMPANY_USER.DOCUMENT_MISMATCH,
-        )
+        );
       }
     } else {
       if (
@@ -216,7 +216,7 @@ export class AcceptInviteService {
       ) {
         throw new DomainValidationException(
           ErrorMessages.COMPANY_USER.DOCUMENT_MISMATCH,
-        )
+        );
       }
     }
   }

@@ -92,8 +92,8 @@ export class EmployeeResponseDto {
     dto.position = companyUser.position;
     dto.notes = companyUser.notes;
     dto.invitedAt = companyUser.invitedAt;
-    dto.invitedBy = companyUser.invitedBy
-    dto.acceptedAt = companyUser.acceptedAt
+    dto.invitedBy = companyUser.invitedBy;
+    dto.acceptedAt = companyUser.acceptedAt;
 
     if (companyUser.user) {
       dto.user = {

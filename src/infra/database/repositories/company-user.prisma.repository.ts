@@ -181,13 +181,13 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
   private mapToDomainWithUser(
     prismaCompanyUser: PrismaCompanyUser & { user?: PrismaUser | null },
   ): any {
-    const companyUser = this.mapToDomain(prismaCompanyUser)
-    const result: any = Object.assign({}, companyUser)
+    const companyUser = this.mapToDomain(prismaCompanyUser);
+    const result: any = Object.assign({}, companyUser);
 
     if (prismaCompanyUser.user) {
-      result.user = prismaCompanyUser.user
+      result.user = prismaCompanyUser.user;
     }
 
-    return result
+    return result;
   }
 }

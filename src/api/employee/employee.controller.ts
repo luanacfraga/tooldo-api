@@ -67,7 +67,7 @@ export class EmployeeController {
     @Body() inviteEmployeeDto: InviteEmployeeDto,
     @Req() req: any,
   ): Promise<EmployeeResponseDto> {
-    const invitedById = req.user?.id ?? 'temp-admin-id'
+    const invitedById = req.user?.id ?? 'temp-admin-id';
 
     const result = await this.inviteEmployeeService.execute({
       ...inviteEmployeeDto,
@@ -100,7 +100,7 @@ export class EmployeeController {
     const result = await this.acceptInviteService.execute({
       companyUserId: '',
       ...acceptInviteByTokenDto,
-    })
+    });
 
     return EmployeeResponseDto.fromDomain(result.companyUser);
   }
@@ -135,8 +135,8 @@ export class EmployeeController {
     });
 
     return result.employees.map((employee: any) => {
-      return EmployeeResponseDto.fromDomain(employee)
-    })
+      return EmployeeResponseDto.fromDomain(employee);
+    });
   }
 
   @Put(':id/suspend')
