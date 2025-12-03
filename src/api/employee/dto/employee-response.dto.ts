@@ -1,5 +1,17 @@
-import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
+import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
+import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
+
+export interface CompanyUserWithUser extends CompanyUser {
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    role: string;
+  };
+}
 
 export class EmployeeResponseDto {
   @ApiProperty({
@@ -82,7 +94,7 @@ export class EmployeeResponseDto {
     role: string;
   };
 
-  static fromDomain(companyUser: any): EmployeeResponseDto {
+  static fromDomain(companyUser: CompanyUser | CompanyUserWithUser): EmployeeResponseDto {
     const dto = new EmployeeResponseDto();
     dto.id = companyUser.id;
     dto.companyId = companyUser.companyId;
@@ -95,7 +107,7 @@ export class EmployeeResponseDto {
     dto.invitedBy = companyUser.invitedBy;
     dto.acceptedAt = companyUser.acceptedAt;
 
-    if (companyUser.user) {
+    if ('user' in companyUser && companyUser.user) {
       dto.user = {
         id: companyUser.user.id,
         firstName: companyUser.user.firstName,

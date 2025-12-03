@@ -1,3 +1,13 @@
+import { Roles } from '@/api/auth/decorators/roles.decorator';
+import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
+import type { JwtPayload } from '@/application/services/auth/auth.service';
+import { AcceptInviteService } from '@/application/services/employee/accept-invite.service';
+import { ActivateEmployeeService } from '@/application/services/employee/activate-employee.service';
+import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
+import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
+import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
+import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
+import { UserRole } from '@/core/domain/shared/enums';
 import {
   Body,
   Controller,
@@ -20,22 +30,15 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-
-import { UserRole } from '@/core/domain/shared/enums';
-
-import { AcceptInviteService } from '@/application/services/employee/accept-invite.service';
-import { ActivateEmployeeService } from '@/application/services/employee/activate-employee.service';
-import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
-import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
-import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
-import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
-
-import { Roles } from '@/api/auth/decorators/roles.decorator';
-import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
+import type { Request } from 'express';
 import { AcceptInviteByTokenDto } from './dto/accept-invite-by-token.dto';
 import { EmployeeResponseDto } from './dto/employee-response.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
 import { ListEmployeesQueryDto } from './dto/list-employees.dto';
+
+interface AuthenticatedRequest extends Request {
+  user?: JwtPayload;
+}
 
 @ApiTags('Employees')
 @Controller('employees')
@@ -69,9 +72,9 @@ export class EmployeeController {
   })
   async invite(
     @Body() inviteEmployeeDto: InviteEmployeeDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ): Promise<EmployeeResponseDto> {
-    const invitedById = req.user?.id ?? 'temp-admin-id';
+    const invitedById = req.user?.sub ?? 'temp-admin-id';
 
     const result = await this.inviteEmployeeService.execute({
       ...inviteEmployeeDto,
@@ -143,7 +146,7 @@ export class EmployeeController {
     });
 
     return {
-      data: result.employees.map((employee: any) => {
+      data: result.employees.map((employee) => {
         return EmployeeResponseDto.fromDomain(employee);
       }),
       meta: {
