@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import type { StringValue } from 'ms';
 import { AdminApplicationModule } from '@/application/modules/admin.module';
 import { AuthApplicationModule } from '@/application/modules/auth.module';
 import { AuthController } from './auth.controller';
@@ -22,7 +23,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
             'your-secret-key-change-me',
           ),
           signOptions: {
-            expiresIn: expiresIn as string | number,
+            expiresIn: expiresIn as StringValue | number,
           },
         };
       },

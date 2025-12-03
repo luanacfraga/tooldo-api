@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import type { StringValue } from 'ms';
 import { AuthService } from '@/application/services/auth/auth.service';
 import { DatabaseModule } from '@/infra/database/database.module';
 import { SharedServicesModule } from '@/infra/services/shared-services.module';
@@ -19,7 +20,7 @@ import { SharedServicesModule } from '@/infra/services/shared-services.module';
             'your-secret-key-change-me',
           ),
           signOptions: {
-            expiresIn: expiresIn as string | number,
+            expiresIn: expiresIn as StringValue | number,
           },
         };
       },
