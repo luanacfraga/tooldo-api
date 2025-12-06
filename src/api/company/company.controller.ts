@@ -5,7 +5,11 @@ import { CreateCompanyService } from '@/application/services/company/create-comp
 import { DeleteCompanyService } from '@/application/services/company/delete-company.service';
 import { ListCompaniesService } from '@/application/services/company/list-companies.service';
 import { UpdateCompanyService } from '@/application/services/company/update-company.service';
-import { UserRole } from '@/core/domain/shared/enums';
+import { Company } from '@/core/domain/company/company.entity';
+import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
+import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
+import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
+import { Inject } from '@nestjs/common';
 import {
   Body,
   Controller,
@@ -38,6 +42,10 @@ export class CompanyController {
     private readonly listCompaniesService: ListCompaniesService,
     private readonly updateCompanyService: UpdateCompanyService,
     private readonly deleteCompanyService: DeleteCompanyService,
+    @Inject('CompanyUserRepository')
+    private readonly companyUserRepository: CompanyUserRepository,
+    @Inject('CompanyRepository')
+    private readonly companyRepository: CompanyRepository,
   ) {}
 
   @Post()
@@ -73,29 +81,50 @@ export class CompanyController {
   }
 
   @Get('me')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR, UserRole.CONSULTANT)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'List companies of authenticated admin',
+    summary: 'List companies of authenticated user',
     description:
-      'Lista todas as empresas do administrador autenticado. Apenas admins podem acessar.',
+      'Lista empresas do usuário autenticado. Admins veem todas suas empresas. Managers, executores e consultores veem apenas a empresa onde estão ativos.',
   })
   @ApiOkResponse({
     description: 'Companies successfully retrieved',
     type: [CompanyResponseDto],
   })
   @ApiNotFoundResponse({
-    description: 'Not Found - Admin not found',
+    description: 'Not Found - User not found',
   })
   async listMyCompanies(
     @CurrentUser() user: JwtPayload,
   ): Promise<CompanyResponseDto[]> {
-    const adminId = user.sub;
-    const result = await this.listCompaniesService.execute({ adminId });
+    if (user.role === UserRole.ADMIN) {
+      const adminId = user.sub;
+      const result = await this.listCompaniesService.execute({ adminId });
 
-    return result.companies.map((company) =>
-      CompanyResponseDto.fromDomain(company),
+      return result.companies.map((company) =>
+        CompanyResponseDto.fromDomain(company),
+      );
+    }
+
+    const userId = user.sub;
+    const companyUsers = await this.companyUserRepository.findByUserId(
+      userId,
+      CompanyUserStatus.ACTIVE,
     );
+
+    if (companyUsers.length === 0) {
+      return [];
+    }
+
+    const companyIds = companyUsers.map((cu) => cu.companyId);
+    const companies = await Promise.all(
+      companyIds.map((id) => this.companyRepository.findById(id)),
+    );
+
+    return companies
+      .filter((company): company is Company => company !== null)
+      .map((company) => CompanyResponseDto.fromDomain(company));
   }
 
   @Get('admin/:adminId')

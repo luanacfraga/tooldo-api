@@ -10,6 +10,11 @@ export interface CompanyUserRepository {
     tx?: unknown,
   ): Promise<CompanyUser | null>;
   findByCompanyId(companyId: string, tx?: unknown): Promise<CompanyUser[]>;
+  findByUserId(
+    userId: string,
+    status?: CompanyUserStatus,
+    tx?: unknown,
+  ): Promise<CompanyUser[]>;
   findByCompanyIdAndStatus(
     companyId: string,
     status: CompanyUserStatus,
