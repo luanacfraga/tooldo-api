@@ -2,6 +2,7 @@ import { AddTeamMemberService } from '@/application/services/team/add-team-membe
 import { CreateTeamService } from '@/application/services/team/create-team.service';
 import { DeleteTeamService } from '@/application/services/team/delete-team.service';
 import { ListTeamMembersService } from '@/application/services/team/list-team-members.service';
+import { ListTeamsByManagerService } from '@/application/services/team/list-teams-by-manager.service';
 import { ListTeamsService } from '@/application/services/team/list-teams.service';
 import { RemoveTeamMemberService } from '@/application/services/team/remove-team-member.service';
 import { UpdateTeamService } from '@/application/services/team/update-team.service';
@@ -16,6 +17,7 @@ import { Module } from '@nestjs/common';
     UpdateTeamService,
     DeleteTeamService,
     ListTeamsService,
+    ListTeamsByManagerService,
     AddTeamMemberService,
     RemoveTeamMemberService,
     ListTeamMembersService,
@@ -25,6 +27,7 @@ import { Module } from '@nestjs/common';
     UpdateTeamService,
     DeleteTeamService,
     ListTeamsService,
+    ListTeamsByManagerService,
     AddTeamMemberService,
     RemoveTeamMemberService,
     ListTeamMembersService,

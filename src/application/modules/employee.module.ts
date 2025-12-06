@@ -4,6 +4,7 @@ import { ActivateEmployeeService } from '@/application/services/employee/activat
 import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
 import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
+import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
 import { ValidatePlanLimitsService } from '@/application/services/employee/validate-plan-limits.service';
 import { DatabaseModule } from '@/infra/database/database.module';
@@ -21,6 +22,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     SuspendEmployeeService,
     ActivateEmployeeService,
     RemoveEmployeeService,
+    ResendInviteService,
     EmployeeInviteAcceptedListener,
   ],
   exports: [
@@ -31,6 +33,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     SuspendEmployeeService,
     ActivateEmployeeService,
     RemoveEmployeeService,
+    ResendInviteService,
   ],
 })
 export class EmployeeApplicationModule {}

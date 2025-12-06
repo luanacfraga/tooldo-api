@@ -42,6 +42,15 @@ export class TeamPrismaRepository implements TeamRepository {
     return teams.map((team) => this.mapToDomain(team));
   }
 
+  async findByManagerId(managerId: string, tx?: unknown): Promise<Team[]> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const teams = await client.team.findMany({
+      where: { managerId },
+    });
+
+    return teams.map((team) => this.mapToDomain(team));
+  }
+
   async update(
     id: string,
     data: Partial<UpdateTeamData>,

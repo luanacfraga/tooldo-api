@@ -1,11 +1,15 @@
+import { CurrentUser } from '@/api/auth/decorators/current-user.decorator';
 import { Roles } from '@/api/auth/decorators/roles.decorator';
+import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { AddTeamMemberService } from '@/application/services/team/add-team-member.service';
 import { CreateTeamService } from '@/application/services/team/create-team.service';
 import { DeleteTeamService } from '@/application/services/team/delete-team.service';
 import { ListTeamMembersService } from '@/application/services/team/list-team-members.service';
+import { ListTeamsByManagerService } from '@/application/services/team/list-teams-by-manager.service';
 import { ListTeamsService } from '@/application/services/team/list-teams.service';
 import { RemoveTeamMemberService } from '@/application/services/team/remove-team-member.service';
 import { UpdateTeamService } from '@/application/services/team/update-team.service';
+import { DomainValidationException } from '@/core/domain/shared/exceptions/domain.exception';
 import { UserRole } from '@/core/domain/shared/enums';
 import {
   Body,
@@ -41,6 +45,7 @@ export class TeamController {
     private readonly updateTeamService: UpdateTeamService,
     private readonly deleteTeamService: DeleteTeamService,
     private readonly listTeamsService: ListTeamsService,
+    private readonly listTeamsByManagerService: ListTeamsByManagerService,
     private readonly addTeamMemberService: AddTeamMemberService,
     private readonly removeTeamMemberService: RemoveTeamMemberService,
     private readonly listTeamMembersService: ListTeamMembersService,
@@ -52,7 +57,7 @@ export class TeamController {
   @ApiOperation({
     summary: 'Create a new team',
     description:
-      'Cria uma nova equipe. Valida que o gestor está cadastrado na empresa como manager. Apenas admins e managers podem criar equipes.',
+      'Cria uma nova equipe. Valida que o gestor está cadastrado na empresa como manager. Managers só podem criar equipes onde eles são o gestor. Apenas admins e managers podem criar equipes.',
   })
   @ApiCreatedResponse({
     description: 'Team successfully created',
@@ -64,7 +69,17 @@ export class TeamController {
   @ApiNotFoundResponse({
     description: 'Not Found - Company not found',
   })
-  async create(@Body() createTeamDto: CreateTeamDto): Promise<TeamResponseDto> {
+  async create(
+    @Body() createTeamDto: CreateTeamDto,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<TeamResponseDto> {
+    // Se for MANAGER, só pode criar equipes onde ele é o gestor
+    if (user.role === UserRole.MANAGER && createTeamDto.managerId !== user.sub) {
+      throw new DomainValidationException(
+        'Managers só podem criar equipes onde eles são o gestor',
+      );
+    }
+
     const result = await this.createTeamService.execute(createTeamDto);
 
     return TeamResponseDto.fromDomain(result.team);
@@ -133,7 +148,7 @@ export class TeamController {
   @ApiOperation({
     summary: 'List teams of a company',
     description:
-      'Lista todas as equipes de uma empresa. Apenas admins e managers podem listar.',
+      'Lista todas as equipes de uma empresa. Admins veem todas as equipes. Managers veem apenas suas próprias equipes.',
   })
   @ApiParam({
     name: 'companyId',
@@ -149,9 +164,19 @@ export class TeamController {
   })
   async listByCompany(
     @Param('companyId') companyId: string,
+    @CurrentUser() user: JwtPayload,
   ): Promise<TeamResponseDto[]> {
-    const result = await this.listTeamsService.execute({ companyId });
+    // Se for MANAGER, retorna apenas suas equipes
+    if (user.role === UserRole.MANAGER) {
+      const result = await this.listTeamsByManagerService.execute({
+        managerId: user.sub,
+        companyId,
+      });
+      return result.teams.map((team) => TeamResponseDto.fromDomain(team));
+    }
 
+    // Se for ADMIN, retorna todas as equipes da empresa
+    const result = await this.listTeamsService.execute({ companyId });
     return result.teams.map((team) => TeamResponseDto.fromDomain(team));
   }
 

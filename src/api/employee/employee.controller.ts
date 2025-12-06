@@ -6,6 +6,7 @@ import { ActivateEmployeeService } from '@/application/services/employee/activat
 import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
 import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
+import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
 import { UserRole } from '@/core/domain/shared/enums';
 import {
@@ -50,6 +51,7 @@ export class EmployeeController {
     private readonly suspendEmployeeService: SuspendEmployeeService,
     private readonly activateEmployeeService: ActivateEmployeeService,
     private readonly removeEmployeeService: RemoveEmployeeService,
+    private readonly resendInviteService: ResendInviteService,
   ) {}
 
   @Post('invite')
@@ -244,6 +246,43 @@ export class EmployeeController {
   async remove(@Param('id') id: string): Promise<EmployeeResponseDto> {
     const result = await this.removeEmployeeService.execute({
       companyUserId: id,
+    });
+
+    return EmployeeResponseDto.fromDomain(result.companyUser);
+  }
+
+  @Post(':id/resend-invite')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Resend employee invitation email',
+    description:
+      'Reenvia o email de convite para um funcionário com status INVITED. Apenas admins e managers.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do vínculo do funcionário (CompanyUser ID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Invite email successfully resent',
+    type: EmployeeResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Employee is not in INVITED status',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Employee not found',
+  })
+  async resendInvite(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<EmployeeResponseDto> {
+    const invitedById = req.user?.sub ?? 'temp-admin-id';
+
+    const result = await this.resendInviteService.execute({
+      companyUserId: id,
+      invitedById,
     });
 
     return EmployeeResponseDto.fromDomain(result.companyUser);
