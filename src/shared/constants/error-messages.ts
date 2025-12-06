@@ -89,6 +89,7 @@ export const ErrorMessages = {
     USER_ID_REQUIRED: 'O userId do membro da equipe é obrigatório',
     NOT_FOUND: 'Membro da equipe não encontrado',
     ALREADY_EXISTS: 'Este executor já faz parte desta equipe',
+    ALREADY_IN_ANOTHER_TEAM: 'Este executor já faz parte de outra equipe',
   },
 
   AUTH: {

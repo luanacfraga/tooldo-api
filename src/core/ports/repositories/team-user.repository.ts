@@ -4,6 +4,7 @@ export interface TeamUserRepository {
   create(teamUser: TeamUser, tx?: unknown): Promise<TeamUser>;
   findById(id: string, tx?: unknown): Promise<TeamUser | null>;
   findByTeamId(teamId: string, tx?: unknown): Promise<TeamUser[]>;
+  findByUserId(userId: string, tx?: unknown): Promise<TeamUser | null>;
   findByTeamAndUser(
     teamId: string,
     userId: string,

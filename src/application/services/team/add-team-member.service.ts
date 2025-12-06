@@ -54,6 +54,16 @@ export class AddTeamMemberService {
       );
     }
 
+    const executorInAnotherTeam = await this.teamUserRepository.findByUserId(
+      input.userId,
+    );
+
+    if (executorInAnotherTeam) {
+      throw new DomainValidationException(
+        ErrorMessages.TEAM_USER.ALREADY_IN_ANOTHER_TEAM,
+      );
+    }
+
     const teamUserId = this.idGenerator.generate();
 
     const teamUser = new TeamUser(teamUserId, input.teamId, input.userId);

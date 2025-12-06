@@ -39,6 +39,15 @@ export class TeamUserPrismaRepository implements TeamUserRepository {
     return teamUsers.map((teamUser) => this.mapToDomain(teamUser));
   }
 
+  async findByUserId(userId: string, tx?: unknown): Promise<TeamUser | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const teamUser = await client.teamUser.findFirst({
+      where: { userId },
+    });
+
+    return teamUser ? this.mapToDomain(teamUser) : null;
+  }
+
   async findByTeamAndUser(
     teamId: string,
     userId: string,
