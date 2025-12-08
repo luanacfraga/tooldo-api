@@ -103,15 +103,31 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     tx?: unknown,
   ): Promise<CompanyUser[]> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
-    const companyUsers = await client.companyUser.findMany({
+    const companyUsersWithoutUser = await client.companyUser.findMany({
       where: { companyId },
-      include: { user: true },
       orderBy: { createdAt: 'desc' },
     });
 
-    return companyUsers.map((cu) =>
-      this.mapToDomainWithUser(cu),
-    ) as CompanyUser[];
+    const userIds = companyUsersWithoutUser
+      .map((cu) => cu.userId)
+      .filter((id): id is string => id != null);
+
+    const users: PrismaUser[] =
+      userIds.length > 0
+        ? (
+            await Promise.all(
+              userIds.map((id) => client.user.findUnique({ where: { id } })),
+            )
+          ).filter((user): user is PrismaUser => user != null)
+        : [];
+
+    const userMap = new Map(users.map((u) => [u.id, u]));
+    const companyUsers = companyUsersWithoutUser.map((cu) => ({
+      ...cu,
+      user: userMap.get(cu.userId) ?? null,
+    }));
+
+    return companyUsers.map((cu) => this.mapToDomainWithUser(cu));
   }
 
   async findByUserId(
@@ -139,14 +155,32 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     tx?: unknown,
   ): Promise<CompanyUser[]> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
-    const companyUsers = await client.companyUser.findMany({
+    const companyUsersWithoutUser = await client.companyUser.findMany({
       where: {
         companyId,
         status,
       },
-      include: { user: true },
       orderBy: { createdAt: 'desc' },
     });
+
+    const userIds = companyUsersWithoutUser
+      .map((cu) => cu.userId)
+      .filter((id): id is string => id != null);
+
+    const users: PrismaUser[] =
+      userIds.length > 0
+        ? (
+            await Promise.all(
+              userIds.map((id) => client.user.findUnique({ where: { id } })),
+            )
+          ).filter((user): user is PrismaUser => user != null)
+        : [];
+
+    const userMap = new Map(users.map((u) => [u.id, u]));
+    const companyUsers = companyUsersWithoutUser.map((cu) => ({
+      ...cu,
+      user: userMap.get(cu.userId) ?? null,
+    }));
 
     return companyUsers.map((cu) => this.mapToDomainWithUser(cu));
   }
@@ -179,8 +213,6 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     const validSortFields = ['createdAt', 'updatedAt', 'role', 'status'];
     const userSortFields = ['firstName', 'lastName', 'email'];
 
-    // Quando ordenar por campos do relacionamento user, precisamos buscar todos
-    // e ordenar em memória para evitar problemas com queries SQL do Prisma
     const shouldSortInMemory = userSortFields.includes(sortBy);
 
     let orderBy: CompanyUserOrderByInput = {};
@@ -188,7 +220,6 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       const field = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
       orderBy[field] = sortOrder;
     } else {
-      // Ordenação padrão quando vamos ordenar em memória
       orderBy.createdAt = 'desc';
     }
 
@@ -197,13 +228,11 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     let companyUsers: (PrismaCompanyUser & { user?: PrismaUser | null })[];
 
     if (shouldSortInMemory) {
-      // Buscar todos os registros para ordenar em memória (sem include para evitar bug do Prisma)
       const allCompanyUsers = await client.companyUser.findMany({
         where,
         orderBy,
       });
 
-      // Buscar users separadamente usando findUnique para evitar bug do Prisma
       const userIds = allCompanyUsers
         .map((cu) => cu.userId)
         .filter((id): id is string => id != null);
@@ -217,33 +246,27 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
             ).filter((user): user is PrismaUser => user != null)
           : [];
 
-      // Mapear users aos company_users
       const userMap = new Map(users.map((u) => [u.id, u]));
       const allCompanyUsersWithUser = allCompanyUsers.map((cu) => ({
         ...cu,
         user: userMap.get(cu.userId) ?? null,
       }));
 
-      // Ordenar em memória por campo do user
       allCompanyUsersWithUser.sort((a, b) => {
         const aValue = a.user?.[sortBy as keyof PrismaUser];
         const bValue = b.user?.[sortBy as keyof PrismaUser];
 
-        // Tratar valores nulos/undefined
         if (aValue == null && bValue == null) return 0;
         if (aValue == null) return sortOrder === 'asc' ? 1 : -1;
         if (bValue == null) return sortOrder === 'asc' ? -1 : 1;
 
-        // Comparação de valores
         const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
         return sortOrder === 'asc' ? comparison : -comparison;
       });
 
-      // Aplicar paginação após ordenação
       const skip = (page - 1) * limit;
       companyUsers = allCompanyUsersWithUser.slice(skip, skip + limit);
     } else {
-      // Buscar company_users com paginação (sem include para evitar bug do Prisma)
       const companyUsersWithoutUser = await client.companyUser.findMany({
         where,
         orderBy,
@@ -251,7 +274,6 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         take: limit,
       });
 
-      // Buscar users separadamente usando findUnique para evitar bug do Prisma
       const userIds = companyUsersWithoutUser
         .map((cu) => cu.userId)
         .filter((id): id is string => id != null);
@@ -265,7 +287,6 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
             ).filter((user): user is PrismaUser => user != null)
           : [];
 
-      // Mapear users aos company_users
       const userMap = new Map(users.map((u) => [u.id, u]));
       companyUsers = companyUsersWithoutUser.map((cu) => ({
         ...cu,
