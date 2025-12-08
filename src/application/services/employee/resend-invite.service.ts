@@ -67,7 +67,6 @@ export class ResendInviteService {
       ? `${inviter.firstName} ${inviter.lastName}`
       : 'Administrador';
 
-    // Gerar novo token de convite
     const inviteToken = this.inviteTokenService.generateInviteToken({
       companyUserId: companyUser.id,
       companyId: companyUser.companyId,
@@ -77,7 +76,6 @@ export class ResendInviteService {
       document: user.document,
     });
 
-    // Atualizar data do convite
     const updatedCompanyUser = await this.companyUserRepository.update(
       companyUser.id,
       {
@@ -86,7 +84,6 @@ export class ResendInviteService {
       } as Partial<CompanyUser>,
     );
 
-    // Enviar email de convite
     await this.emailService.sendEmployeeInvite({
       to: user.email,
       employeeName: `${user.firstName} ${user.lastName}`,

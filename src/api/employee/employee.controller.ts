@@ -5,6 +5,7 @@ import { AcceptInviteService } from '@/application/services/employee/accept-invi
 import { ActivateEmployeeService } from '@/application/services/employee/activate-employee.service';
 import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
+import { ListExecutorsService } from '@/application/services/employee/list-executors.service';
 import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
 import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
@@ -29,6 +30,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
@@ -48,6 +50,7 @@ export class EmployeeController {
     private readonly inviteEmployeeService: InviteEmployeeService,
     private readonly acceptInviteService: AcceptInviteService,
     private readonly listEmployeesService: ListEmployeesService,
+    private readonly listExecutorsService: ListExecutorsService,
     private readonly suspendEmployeeService: SuspendEmployeeService,
     private readonly activateEmployeeService: ActivateEmployeeService,
     private readonly removeEmployeeService: RemoveEmployeeService,
@@ -158,6 +161,46 @@ export class EmployeeController {
         totalPages: result.totalPages,
       },
     };
+  }
+
+  @Get('company/:companyId/executors')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List available executors for team selection',
+    description:
+      'Lista executores disponíveis de uma empresa para adicionar em equipes. Retorna apenas executores ativos que ainda não estão em nenhuma equipe. Se excludeTeamId for fornecido, também exclui os membros dessa equipe. Apenas admins e managers podem listar.',
+  })
+  @ApiParam({
+    name: 'companyId',
+    description: 'ID da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiQuery({
+    name: 'excludeTeamId',
+    description: 'ID da equipe para excluir seus membros da lista (opcional)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
+  })
+  @ApiOkResponse({
+    description: 'Available executors successfully retrieved',
+    type: [EmployeeResponseDto],
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Company not found',
+  })
+  async listExecutors(
+    @Param('companyId') companyId: string,
+    @Query('excludeTeamId') excludeTeamId?: string,
+  ): Promise<EmployeeResponseDto[]> {
+    const result = await this.listExecutorsService.execute({
+      companyId,
+      excludeTeamId,
+    });
+
+    return result.executors.map((executor) =>
+      EmployeeResponseDto.fromDomain(executor),
+    );
   }
 
   @Put(':id/suspend')
