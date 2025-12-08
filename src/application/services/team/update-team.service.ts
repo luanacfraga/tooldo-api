@@ -38,6 +38,20 @@ export class UpdateTeamService {
 
     if (input.managerId && input.managerId !== team.managerId) {
       await this.validateManager(team.companyId, input.managerId);
+
+      const existingTeams = await this.teamRepository.findByManagerId(
+        input.managerId,
+      );
+
+      const teamsManagedByNewManager = existingTeams.filter(
+        (t) => t.id !== team.id,
+      );
+
+      if (teamsManagedByNewManager.length > 0) {
+        throw new DomainValidationException(
+          ErrorMessages.TEAM.MANAGER_ALREADY_IN_TEAM,
+        );
+      }
     }
 
     const updateData: Partial<UpdateTeamData> = {};

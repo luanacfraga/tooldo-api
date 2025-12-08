@@ -77,6 +77,7 @@ export const ErrorMessages = {
     NOT_FOUND: 'Equipe não encontrada',
     MANAGER_NOT_FOUND: 'Gestor não encontrado na empresa',
     MANAGER_NOT_MANAGER_ROLE: 'O gestor deve ter o papel de manager na empresa',
+    MANAGER_ALREADY_IN_TEAM: 'Este gestor já está gerenciando outra equipe',
     EXECUTOR_NOT_FOUND: 'Executor não encontrado na empresa',
     EXECUTOR_NOT_EXECUTOR_ROLE:
       'O executor deve ter o papel de executor na empresa',

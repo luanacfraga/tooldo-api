@@ -44,6 +44,16 @@ export class CreateTeamService {
 
     await this.validateManager(input.companyId, input.managerId);
 
+    const existingTeams = await this.teamRepository.findByManagerId(
+      input.managerId,
+    );
+
+    if (existingTeams.length > 0) {
+      throw new DomainValidationException(
+        ErrorMessages.TEAM.MANAGER_ALREADY_IN_TEAM,
+      );
+    }
+
     const teamId = this.idGenerator.generate();
 
     const team = new Team(
