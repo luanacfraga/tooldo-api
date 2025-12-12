@@ -32,6 +32,14 @@ enum UserStatus {
   PENDING @map("pending")
 }
 
+enum CompanyUserStatus {
+  INVITED   @map("invited")
+  ACTIVE    @map("active")
+  REJECTED  @map("rejected")
+  SUSPENDED @map("suspended")
+  REMOVED   @map("removed")
+}
+
 model User {
   id              String       @id @default(uuid())
   firstName       String       @map("first_name")
@@ -106,10 +114,20 @@ model Company {
 }
 
 model CompanyUser {
-  id        String   @id @default(uuid())
-  companyId String   @map("company_id")
-  userId    String   @map("user_id")
+  id        String            @id @default(uuid())
+  companyId String            @map("company_id")
+  userId    String            @map("user_id")
   role      UserRole
+  status    CompanyUserStatus @default(INVITED)
+
+  position   String?
+  notes      String?
+  metadata   Json?
+
+  invitedAt  DateTime? @map("invited_at")
+  invitedBy  String?   @map("invited_by")
+  acceptedAt DateTime? @map("accepted_at")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

@@ -12,6 +12,10 @@ export interface CreatePlanInput {
   iaCallsLimit: number;
 }
 
+export interface CreatePlanOutput {
+  plan: Plan;
+}
+
 @Injectable()
 export class CreatePlanService {
   constructor(
@@ -21,16 +25,17 @@ export class CreatePlanService {
     private readonly idGenerator: IdGenerator,
   ) {}
 
-  async execute(input: CreatePlanInput): Promise<Plan> {
-    const plan = new Plan(
-      this.idGenerator.generate(),
-      input.name,
-      input.maxCompanies,
-      input.maxManagers,
-      input.maxExecutors,
-      input.maxConsultants,
-      input.iaCallsLimit,
-    );
-    return this.planRepository.create(plan);
+  async execute(input: CreatePlanInput): Promise<CreatePlanOutput> {
+    const plan = Plan.create({
+      id: this.idGenerator.generate(),
+      name: input.name,
+      maxCompanies: input.maxCompanies,
+      maxManagers: input.maxManagers,
+      maxExecutors: input.maxExecutors,
+      maxConsultants: input.maxConsultants,
+      iaCallsLimit: input.iaCallsLimit,
+    });
+    const created = await this.planRepository.create(plan);
+    return { plan: created };
   }
 }

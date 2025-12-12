@@ -19,22 +19,15 @@ export class DomainValidator {
     }
   }
 
-  static validateNonNegativeNumber(
-    value: number,
-    errorMessage: string,
-  ): void {
+  static validateNonNegativeNumber(value: number, errorMessage: string): void {
     if (value < 0) {
       throw new DomainValidationException(errorMessage);
     }
   }
 
-  static validateDate(
-    date: Date,
-    errorMessage: string,
-  ): void {
+  static validateDate(date: Date, errorMessage: string): void {
     if (!(date instanceof Date) || isNaN(date.getTime())) {
       throw new DomainValidationException(errorMessage);
     }
   }
 }
-

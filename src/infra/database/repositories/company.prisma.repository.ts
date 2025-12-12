@@ -1,4 +1,7 @@
-import { Company } from '@/core/domain/company/company.entity';
+import {
+  Company,
+  UpdateCompanyData,
+} from '@/core/domain/company/company.entity';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
@@ -22,6 +25,24 @@ export class CompanyPrismaRepository implements CompanyRepository {
     return this.mapToDomain(created);
   }
 
+  async findById(id: string, tx?: unknown): Promise<Company | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const company = await client.company.findUnique({
+      where: { id },
+    });
+
+    return company ? this.mapToDomain(company) : null;
+  }
+
+  async findByAdminId(adminId: string, tx?: unknown): Promise<Company[]> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const companies = await client.company.findMany({
+      where: { adminId },
+    });
+
+    return companies.map((company) => this.mapToDomain(company));
+  }
+
   async countByAdminId(adminId: string): Promise<number> {
     return this.prisma.company.count({
       where: {
@@ -30,12 +51,36 @@ export class CompanyPrismaRepository implements CompanyRepository {
     });
   }
 
+  async update(
+    id: string,
+    data: Partial<UpdateCompanyData>,
+    tx?: unknown,
+  ): Promise<Company> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const updated = await client.company.update({
+      where: { id },
+      data: {
+        name: data.name,
+        description: data.description,
+      },
+    });
+
+    return this.mapToDomain(updated);
+  }
+
+  async delete(id: string, tx?: unknown): Promise<void> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    await client.company.delete({
+      where: { id },
+    });
+  }
+
   private mapToDomain(prismaCompany: PrismaCompany): Company {
-    return new Company(
-      prismaCompany.id,
-      prismaCompany.name,
-      prismaCompany.description,
-      prismaCompany.adminId,
-    );
+    return Company.create({
+      id: prismaCompany.id,
+      name: prismaCompany.name,
+      description: prismaCompany.description,
+      adminId: prismaCompany.adminId,
+    });
   }
 }

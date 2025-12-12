@@ -12,7 +12,7 @@ export class CreateCompanyDto {
 
   @ApiProperty({
     description: 'Nome da empresa',
-    example: 'Weedu Tecnologia',
+    example: 'Tooldo Tecnologia',
   })
   @IsString({ message: 'O nome da empresa deve ser uma string' })
   @IsNotEmpty({ message: 'O nome da empresa é obrigatório' })

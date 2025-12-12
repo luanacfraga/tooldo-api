@@ -60,14 +60,14 @@ describe('CreatePlanService', () => {
 
       const result = await service.execute(mockPlanInput);
 
-      expect(result).toBeInstanceOf(Plan);
-      expect(result.id).toBe(mockPlanId);
-      expect(result.name).toBe(mockPlanInput.name);
-      expect(result.maxCompanies).toBe(mockPlanInput.maxCompanies);
-      expect(result.maxManagers).toBe(mockPlanInput.maxManagers);
-      expect(result.maxExecutors).toBe(mockPlanInput.maxExecutors);
-      expect(result.maxConsultants).toBe(mockPlanInput.maxConsultants);
-      expect(result.iaCallsLimit).toBe(mockPlanInput.iaCallsLimit);
+      expect(result.plan).toBeInstanceOf(Plan);
+      expect(result.plan.id).toBe(mockPlanId);
+      expect(result.plan.name).toBe(mockPlanInput.name);
+      expect(result.plan.maxCompanies).toBe(mockPlanInput.maxCompanies);
+      expect(result.plan.maxManagers).toBe(mockPlanInput.maxManagers);
+      expect(result.plan.maxExecutors).toBe(mockPlanInput.maxExecutors);
+      expect(result.plan.maxConsultants).toBe(mockPlanInput.maxConsultants);
+      expect(result.plan.iaCallsLimit).toBe(mockPlanInput.iaCallsLimit);
       expect(idGenerator.generate).toHaveBeenCalledTimes(1);
       expect(planRepository.create).toHaveBeenCalledTimes(1);
       const createCall = planRepository.create.mock.calls[0][0];
@@ -96,8 +96,8 @@ describe('CreatePlanService', () => {
         name: 'Plano Premium',
       });
 
-      expect(result1.id).toBe(firstPlanId);
-      expect(result2.id).toBe(secondPlanId);
+      expect(result1.plan.id).toBe(firstPlanId);
+      expect(result2.plan.id).toBe(secondPlanId);
       expect(idGenerator.generate).toHaveBeenCalledTimes(2);
       expect(planRepository.create).toHaveBeenCalledTimes(2);
     });
@@ -117,14 +117,14 @@ describe('CreatePlanService', () => {
 
       const result = await service.execute(customInput);
 
-      expect(result).toBeInstanceOf(Plan);
-      expect(result.id).toBe(mockPlanId);
-      expect(result.name).toBe(customInput.name);
-      expect(result.maxCompanies).toBe(customInput.maxCompanies);
-      expect(result.maxManagers).toBe(customInput.maxManagers);
-      expect(result.maxExecutors).toBe(customInput.maxExecutors);
-      expect(result.maxConsultants).toBe(customInput.maxConsultants);
-      expect(result.iaCallsLimit).toBe(customInput.iaCallsLimit);
+      expect(result.plan).toBeInstanceOf(Plan);
+      expect(result.plan.id).toBe(mockPlanId);
+      expect(result.plan.name).toBe(customInput.name);
+      expect(result.plan.maxCompanies).toBe(customInput.maxCompanies);
+      expect(result.plan.maxManagers).toBe(customInput.maxManagers);
+      expect(result.plan.maxExecutors).toBe(customInput.maxExecutors);
+      expect(result.plan.maxConsultants).toBe(customInput.maxConsultants);
+      expect(result.plan.iaCallsLimit).toBe(customInput.iaCallsLimit);
       const createCall = planRepository.create.mock.calls[0][0];
       expect(createCall).toBeInstanceOf(Plan);
       expect(createCall.id).toBe(mockPlanId);
@@ -151,13 +151,13 @@ describe('CreatePlanService', () => {
 
       const result = await service.execute(zeroLimitsInput);
 
-      expect(result).toBeInstanceOf(Plan);
-      expect(result.name).toBe(zeroLimitsInput.name);
-      expect(result.maxCompanies).toBe(0);
-      expect(result.maxManagers).toBe(0);
-      expect(result.maxExecutors).toBe(0);
-      expect(result.maxConsultants).toBe(0);
-      expect(result.iaCallsLimit).toBe(0);
+      expect(result.plan).toBeInstanceOf(Plan);
+      expect(result.plan.name).toBe(zeroLimitsInput.name);
+      expect(result.plan.maxCompanies).toBe(0);
+      expect(result.plan.maxManagers).toBe(0);
+      expect(result.plan.maxExecutors).toBe(0);
+      expect(result.plan.maxConsultants).toBe(0);
+      expect(result.plan.iaCallsLimit).toBe(0);
       const createCall = planRepository.create.mock.calls[0][0];
       expect(createCall).toBeInstanceOf(Plan);
       expect(createCall.name).toBe(zeroLimitsInput.name);

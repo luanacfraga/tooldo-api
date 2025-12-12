@@ -3,7 +3,7 @@ import { Entity } from '../shared/entity.base';
 import { DomainValidator } from '../shared/validators/domain.validator';
 
 export class Plan extends Entity {
-  constructor(
+  private constructor(
     public readonly id: string,
     public readonly name: string,
     public readonly maxCompanies: number,
@@ -14,6 +14,26 @@ export class Plan extends Entity {
   ) {
     super(id);
     this.validate();
+  }
+
+  static create(params: {
+    id: string;
+    name: string;
+    maxCompanies: number;
+    maxManagers: number;
+    maxExecutors: number;
+    maxConsultants: number;
+    iaCallsLimit: number;
+  }): Plan {
+    return new Plan(
+      params.id,
+      params.name,
+      params.maxCompanies,
+      params.maxManagers,
+      params.maxExecutors,
+      params.maxConsultants,
+      params.iaCallsLimit,
+    );
   }
 
   protected getIdErrorMessage(): string {

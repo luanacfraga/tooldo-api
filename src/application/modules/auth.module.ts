@@ -1,9 +1,12 @@
-import { AuthService } from '@/application/services/auth/auth.service';
-import { DatabaseModule } from '@/infra/database/database.module';
-import { SharedServicesModule } from '@/infra/services/shared-services.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import type { StringValue } from 'ms';
+import { AuthService } from '@/application/services/auth/auth.service';
+import { ForgotPasswordService } from '@/application/services/auth/forgot-password.service';
+import { ResetPasswordService } from '@/application/services/auth/reset-password.service';
+import { DatabaseModule } from '@/infra/database/database.module';
+import { SharedServicesModule } from '@/infra/services/shared-services.module';
 
 @Module({
   imports: [
@@ -11,20 +14,22 @@ import { JwtModule } from '@nestjs/jwt';
     SharedServicesModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>(
-          'JWT_SECRET',
-          'your-secret-key-change-me',
-        ),
-        signOptions: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d') as any,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const expiresIn = configService.get<string>('JWT_EXPIRES_IN', '7d');
+        return {
+          secret: configService.get<string>(
+            'JWT_SECRET',
+            'your-secret-key-change-me',
+          ),
+          signOptions: {
+            expiresIn: expiresIn as StringValue | number,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, ForgotPasswordService, ResetPasswordService],
+  exports: [AuthService, ForgotPasswordService, ResetPasswordService],
 })
 export class AuthApplicationModule {}

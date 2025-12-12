@@ -55,15 +55,15 @@ describe('RegisterAdminService', () => {
     },
   };
 
-  const mockDefaultPlan = new Plan(
-    mockPlanId,
-    'default',
-    10,
-    50,
-    100,
-    30,
-    1000,
-  );
+  const mockDefaultPlan = Plan.create({
+    id: mockPlanId,
+    name: 'default',
+    maxCompanies: 10,
+    maxManagers: 50,
+    maxExecutors: 100,
+    maxConsultants: 30,
+    iaCallsLimit: 1000,
+  });
 
   beforeEach(async () => {
     const mockUserRepository = {
@@ -166,12 +166,12 @@ describe('RegisterAdminService', () => {
         UserStatus.ACTIVE,
         null,
       );
-      const mockCompany = new Company(
-        mockCompanyId,
-        mockInput.company.name,
-        mockInput.company.description ?? null,
-        mockUserId,
-      );
+      const mockCompany = Company.create({
+        id: mockCompanyId,
+        name: mockInput.company.name,
+        description: mockInput.company.description,
+        adminId: mockUserId,
+      });
       const mockSubscription = new Subscription(
         mockSubscriptionId,
         mockUserId,
@@ -241,12 +241,12 @@ describe('RegisterAdminService', () => {
         UserStatus.ACTIVE,
         null,
       );
-      const mockCompany = new Company(
-        mockCompanyId,
-        mockInput.company.name,
-        mockInput.company.description ?? null,
-        mockUserId,
-      );
+      const mockCompany = Company.create({
+        id: mockCompanyId,
+        name: mockInput.company.name,
+        description: mockInput.company.description,
+        adminId: mockUserId,
+      });
       const mockSubscription = new Subscription(
         mockSubscriptionId,
         mockUserId,
@@ -303,12 +303,12 @@ describe('RegisterAdminService', () => {
         UserStatus.ACTIVE,
         null,
       );
-      const mockCompany = new Company(
-        mockCompanyId,
-        mockInput.company.name,
-        mockInput.company.description ?? null,
-        mockUserId,
-      );
+      const mockCompany = Company.create({
+        id: mockCompanyId,
+        name: mockInput.company.name,
+        description: mockInput.company.description,
+        adminId: mockUserId,
+      });
       const mockSubscription = new Subscription(
         mockSubscriptionId,
         mockUserId,
@@ -364,12 +364,12 @@ describe('RegisterAdminService', () => {
         UserStatus.ACTIVE,
         null,
       );
-      const mockCompany = new Company(
-        mockCompanyId,
-        inputWithoutDescription.company.name,
-        null,
-        mockUserId,
-      );
+      const mockCompany = Company.create({
+        id: mockCompanyId,
+        name: inputWithoutDescription.company.name,
+        description: null,
+        adminId: mockUserId,
+      });
       const mockSubscription = new Subscription(
         mockSubscriptionId,
         mockUserId,
@@ -415,12 +415,12 @@ describe('RegisterAdminService', () => {
         UserStatus.ACTIVE,
         null,
       );
-      const mockCompany = new Company(
-        mockCompanyId,
-        mockInput.company.name,
-        mockInput.company.description ?? null,
-        mockUserId,
-      );
+      const mockCompany = Company.create({
+        id: mockCompanyId,
+        name: mockInput.company.name,
+        description: mockInput.company.description,
+        adminId: mockUserId,
+      });
       const mockSubscription = new Subscription(
         mockSubscriptionId,
         mockUserId,
@@ -568,12 +568,12 @@ describe('RegisterAdminService', () => {
         UserStatus.ACTIVE,
         null,
       );
-      const mockCompany = new Company(
-        mockCompanyId,
-        mockInput.company.name,
-        mockInput.company.description ?? null,
-        mockUserId,
-      );
+      const mockCompany = Company.create({
+        id: mockCompanyId,
+        name: mockInput.company.name,
+        description: mockInput.company.description,
+        adminId: mockUserId,
+      });
       const mockSubscription = new Subscription(
         mockSubscriptionId,
         mockUserId,
@@ -621,12 +621,12 @@ describe('RegisterAdminService', () => {
         UserStatus.ACTIVE,
         null,
       );
-      const mockCompany = new Company(
-        mockCompanyId,
-        mockInput.company.name,
-        mockInput.company.description ?? null,
-        mockUserId,
-      );
+      const mockCompany = Company.create({
+        id: mockCompanyId,
+        name: mockInput.company.name,
+        description: mockInput.company.description,
+        adminId: mockUserId,
+      });
       const mockSubscription = new Subscription(
         mockSubscriptionId,
         mockUserId,

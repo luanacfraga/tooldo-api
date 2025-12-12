@@ -1,6 +1,28 @@
 # Sistema de Tratamento de Erros
 
-Este documento descreve a arquitetura de tratamento de erros do projeto, que segue princípios de Clean Architecture e Domain-Driven Design.
+> **Arquitetura completa de tratamento de erros seguindo Clean Architecture e Domain-Driven Design**
+
+Este documento descreve como o sistema trata erros, desde a camada de domínio até as respostas HTTP, garantindo consistência e separação de responsabilidades.
+
+## 📋 Índice
+
+1. [Estrutura](#estrutura)
+2. [Mensagens Centralizadas](#1-mensagens-centralizadas)
+3. [Exceções de Domínio](#2-exceções-de-domínio)
+4. [Exceções HTTP Personalizadas](#3-exceções-http-personalizadas)
+5. [Filtro Global de Exceções](#4-filtro-global-de-exceções)
+6. [Fluxo de Tratamento](#5-fluxo-de-tratamento-de-erros)
+7. [Exemplos de Uso](#6-exemplos-de-uso)
+8. [Vantagens da Abordagem](#7-vantagens-da-abordagem)
+9. [Boas Práticas](#8-boas-práticas)
+10. [Adicionando Novas Mensagens](#9-adicionando-novas-mensagens)
+11. [Adicionando Novas Exceções](#10-adicionando-novas-exceções)
+
+## 🔗 Documentos Relacionados
+
+- **[MEMORY_BANK_PADROES.md](../MEMORY_BANK_PADROES.md)**: Padrões de código
+- **[API_FLOWS.md](./API_FLOWS.md)**: Fluxos da API
+- **[BUSINESS_RULES.md](../BUSINESS_RULES.md)**: Regras de negócio
 
 ## Estrutura
 
@@ -21,6 +43,7 @@ src/
 **Arquivo:** `src/shared/constants/error-messages.ts`
 
 Todas as mensagens de erro estão centralizadas em um único arquivo para facilitar:
+
 - Manutenção e atualização
 - Tradução/internacionalização
 - Reutilização
@@ -48,9 +71,11 @@ export const ErrorMessages = {
 Exceções que representam violações de regras de negócio no domínio:
 
 ### `DomainException` (Base)
+
 Classe base para todas as exceções de domínio.
 
 ### `DomainValidationException`
+
 Usada quando há violação de regras de validação de entidades.
 
 ```typescript
@@ -61,6 +86,7 @@ if (!this.email?.trim()) {
 ```
 
 ### `EntityNotFoundException`
+
 Usada quando uma entidade não é encontrada.
 
 ```typescript
@@ -70,6 +96,7 @@ throw new EntityNotFoundException('Plano', 'default');
 ```
 
 ### `UniqueConstraintException`
+
 Usada quando há violação de restrição de unicidade (duplicatas).
 
 ```typescript
@@ -94,12 +121,12 @@ Exceções HTTP customizadas que herdam do NestJS para uso direto em controllers
 
 Intercepta exceções de domínio e as converte automaticamente para respostas HTTP apropriadas:
 
-| Exceção de Domínio | Status HTTP | Código |
-|-------------------|-------------|--------|
-| `DomainValidationException` | Bad Request | 400 |
-| `EntityNotFoundException` | Not Found | 404 |
-| `UniqueConstraintException` | Conflict | 409 |
-| Outras `DomainException` | Internal Server Error | 500 |
+| Exceção de Domínio          | Status HTTP           | Código |
+| --------------------------- | --------------------- | ------ |
+| `DomainValidationException` | Bad Request           | 400    |
+| `EntityNotFoundException`   | Not Found             | 404    |
+| `UniqueConstraintException` | Conflict              | 409    |
+| Outras `DomainException`    | Internal Server Error | 500    |
 
 ### Formato de Resposta
 
@@ -161,7 +188,10 @@ export class User {
 ### Em Serviços (Application Layer)
 
 ```typescript
-import { UniqueConstraintException, EntityNotFoundException } from '@/core/domain/exceptions/domain.exception';
+import {
+  UniqueConstraintException,
+  EntityNotFoundException,
+} from '@/core/domain/exceptions/domain.exception';
 
 export class RegisterAdminService {
   async execute(input: RegisterAdminInput) {
@@ -229,3 +259,25 @@ if (exception instanceof BusinessRuleViolationException) {
   status = HttpStatus.UNPROCESSABLE_ENTITY; // 422
 }
 ```
+
+---
+
+## 📝 Notas Finais
+
+Este sistema de tratamento de erros garante:
+
+- ✅ **Separação de responsabilidades**: Domínio não conhece detalhes HTTP
+- ✅ **Consistência**: Todas as respostas seguem o mesmo formato
+- ✅ **Manutenibilidade**: Mensagens centralizadas facilitam atualizações
+- ✅ **Testabilidade**: Exceções podem ser testadas isoladamente
+
+## 🔗 Links Úteis
+
+- [MEMORY_BANK_PADROES.md](../MEMORY_BANK_PADROES.md) - Padrões de código
+- [API_FLOWS.md](./API_FLOWS.md) - Fluxos da API
+- [Error Messages](../src/shared/constants/error-messages.ts) - Arquivo de mensagens
+
+---
+
+**Documento criado em**: 2025-11-09  
+**Última atualização**: 2025-12-11

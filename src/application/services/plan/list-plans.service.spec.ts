@@ -8,35 +8,35 @@ describe('ListPlansService', () => {
   let service: ListPlansService;
   let planRepository: jest.Mocked<PlanRepository>;
 
-  const mockPlan1 = new Plan(
-    '123e4567-e89b-12d3-a456-426614174000',
-    'Plano Básico',
-    5,
-    10,
-    20,
-    15,
-    1000,
-  );
+  const mockPlan1 = Plan.create({
+    id: '123e4567-e89b-12d3-a456-426614174000',
+    name: 'Plano Básico',
+    maxCompanies: 5,
+    maxManagers: 10,
+    maxExecutors: 20,
+    maxConsultants: 15,
+    iaCallsLimit: 1000,
+  });
 
-  const mockPlan2 = new Plan(
-    '223e4567-e89b-12d3-a456-426614174001',
-    'Plano Premium',
-    50,
-    100,
-    200,
-    150,
-    10000,
-  );
+  const mockPlan2 = Plan.create({
+    id: '223e4567-e89b-12d3-a456-426614174001',
+    name: 'Plano Premium',
+    maxCompanies: 50,
+    maxManagers: 100,
+    maxExecutors: 200,
+    maxConsultants: 150,
+    iaCallsLimit: 10000,
+  });
 
-  const mockPlan3 = new Plan(
-    '323e4567-e89b-12d3-a456-426614174002',
-    'Plano Enterprise',
-    100,
-    500,
-    1000,
-    200,
-    50000,
-  );
+  const mockPlan3 = Plan.create({
+    id: '323e4567-e89b-12d3-a456-426614174002',
+    name: 'Plano Enterprise',
+    maxCompanies: 100,
+    maxManagers: 500,
+    maxExecutors: 1000,
+    maxConsultants: 200,
+    iaCallsLimit: 50000,
+  });
 
   beforeEach(async () => {
     const mockPlanRepository = {

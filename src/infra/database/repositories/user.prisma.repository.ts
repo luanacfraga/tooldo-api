@@ -66,6 +66,26 @@ export class UserPrismaRepository implements UserRepository {
     return this.mapToDomain(created);
   }
 
+  async update(id: string, data: Partial<User>, tx?: unknown): Promise<User> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const updated = await client.user.update({
+      where: { id },
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        document: data.document,
+        documentType: data.documentType,
+        password: data.password,
+        role: data.role,
+        status: data.status,
+        profileImageUrl: data.profileImageUrl,
+      },
+    });
+
+    return this.mapToDomain(updated);
+  }
+
   private mapToDomain(prismaUser: PrismaUser): User {
     return new User(
       prismaUser.id,

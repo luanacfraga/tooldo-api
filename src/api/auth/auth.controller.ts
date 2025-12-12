@@ -4,15 +4,19 @@ import { UserMapper } from '@/application/mappers/user.mapper';
 import { RegisterAdminService } from '@/application/services/admin/register-admin.service';
 import { RegisterMasterService } from '@/application/services/admin/register-master.service';
 import { AuthService } from '@/application/services/auth/auth.service';
+import { ForgotPasswordService } from '@/application/services/auth/forgot-password.service';
+import { ResetPasswordService } from '@/application/services/auth/reset-password.service';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from './decorators/public.decorator';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterAdminResponseDto } from './dto/register-admin-response.dto';
 import { RegisterAdminDto } from './dto/register-admin.dto';
 import { RegisterMasterResponseDto } from './dto/register-master-response.dto';
 import { RegisterMasterDto } from './dto/register-master.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -21,6 +25,8 @@ export class AuthController {
     private readonly registerAdminService: RegisterAdminService,
     private readonly registerMasterService: RegisterMasterService,
     private readonly authService: AuthService,
+    private readonly forgotPasswordService: ForgotPasswordService,
+    private readonly resetPasswordService: ResetPasswordService,
   ) {}
 
   @Public()
@@ -98,5 +104,54 @@ export class AuthController {
     return {
       user: UserMapper.toResponseDto(result.user),
     };
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Request password reset',
+    description:
+      'Solicita a recuperação de senha. Envia um email com link para redefinir a senha.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent if user exists',
+  })
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
+    return await this.forgotPasswordService.execute({
+      email: forgotPasswordDto.email,
+    });
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset password with token',
+    description:
+      'Redefine a senha usando o token recebido por email. O token expira em 1 hora.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password successfully reset',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or expired token',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Not Found - User not found',
+  })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    return await this.resetPasswordService.execute({
+      token: resetPasswordDto.token,
+      newPassword: resetPasswordDto.newPassword,
+    });
   }
 }

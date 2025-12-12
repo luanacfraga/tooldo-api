@@ -76,7 +76,7 @@ export class CompanyResponseDto {
 
   @ApiProperty({
     description: 'Nome da empresa',
-    example: 'Weedu Tecnologia',
+    example: 'Tooldo Tecnologia',
   })
   name!: string;
 

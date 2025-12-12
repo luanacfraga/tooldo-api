@@ -26,15 +26,15 @@ export class UpdatePlanService {
       throw new EntityNotFoundException('Plano', input.id);
     }
 
-    const updatedPlan = new Plan(
-      input.id,
-      input.name,
-      input.maxCompanies,
-      input.maxManagers,
-      input.maxExecutors,
-      input.maxConsultants,
-      input.iaCallsLimit,
-    );
+    const updatedPlan = Plan.create({
+      id: input.id,
+      name: input.name,
+      maxCompanies: input.maxCompanies,
+      maxManagers: input.maxManagers,
+      maxExecutors: input.maxExecutors,
+      maxConsultants: input.maxConsultants,
+      iaCallsLimit: input.iaCallsLimit,
+    });
 
     return this.planRepository.update(updatedPlan);
   }

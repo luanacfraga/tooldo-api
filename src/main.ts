@@ -12,43 +12,56 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  // Security - Helmet (instalar: npm install helmet)
-  // app.use(helmet());
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+  const allowedOriginsEnv = configService.get<string>('ALLOWED_ORIGINS');
 
-  // CORS
-  const allowedOrigins = configService
-    .get<string>('ALLOWED_ORIGINS')
-    ?.split(',') ?? ['http://localhost:3000'];
+  let allowedOrigins: string[] | boolean;
+
+  if (nodeEnv === 'production') {
+    allowedOrigins = allowedOriginsEnv
+      ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
+      : [];
+  } else {
+    allowedOrigins = allowedOriginsEnv
+      ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
+      : true;
+  }
+
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
+    exposedHeaders: ['Authorization'],
   });
 
-  // Global validation
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Remove propriedades não definidas no DTO
-      forbidNonWhitelisted: true, // Rejeita requisições com propriedades extras
-      transform: true, // Transforma automaticamente tipos
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
       transformOptions: {
         enableImplicitConversion: true,
       },
     }),
   );
 
-  // API Versioning
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
 
-  // Swagger (apenas em desenvolvimento)
-  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
   if (nodeEnv !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('Weedu API')
-      .setDescription('API documentation for Weedu')
+      .setTitle('Tooldo API')
+      .setDescription('API documentation for Tooldo')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

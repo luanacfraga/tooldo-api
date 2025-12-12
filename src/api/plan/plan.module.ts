@@ -1,4 +1,4 @@
-import { PlanApplicationModule } from '@/application/modules';
+import { PlanApplicationModule } from '@/application/modules/plan.module';
 import { Module } from '@nestjs/common';
 import { PlanController } from './plan.controller';
 

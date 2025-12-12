@@ -6,4 +6,5 @@ export interface UserRepository {
   findByDocument(document: string, tx?: unknown): Promise<User | null>;
   findById(id: string, tx?: unknown): Promise<User | null>;
   create(user: User, tx?: unknown): Promise<User>;
+  update(id: string, data: Partial<User>, tx?: unknown): Promise<User>;
 }

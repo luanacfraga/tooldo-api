@@ -4,12 +4,23 @@ import { AuthModule } from './api/auth/auth.module';
 import { JwtAuthGuard } from './api/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './api/auth/guards/roles.guard';
 import { CompanyModule } from './api/company/company.module';
+import { EmployeeModule } from './api/employee/employee.module';
+import { HealthModule } from './api/health/health.module';
 import { PlanModule } from './api/plan/plan.module';
 import { DomainExceptionFilter } from './api/shared/filters/domain-exception.filter';
+import { TeamModule } from './api/team/team.module';
 import { ConfigModule } from './infra/config/config.module';
 
 @Module({
-  imports: [ConfigModule, PlanModule, AuthModule, CompanyModule],
+  imports: [
+    ConfigModule,
+    PlanModule,
+    AuthModule,
+    CompanyModule,
+    EmployeeModule,
+    TeamModule,
+    HealthModule,
+  ],
   controllers: [],
   providers: [
     {
