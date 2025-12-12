@@ -1,6 +1,6 @@
-# Guia de Deploy na AWS - Weedu API
+# Guia de Deploy na AWS - Tooldo API
 
-Este documento descreve o processo completo de deploy da API Weedu na AWS usando VPC, RDS PostgreSQL, ECR, ECS Fargate e ALB.
+Este documento descreve o processo completo de deploy da API Tooldo na AWS usando VPC, RDS PostgreSQL, ECR, ECS Fargate e ALB.
 
 ## 📋 Pré-requisitos
 
@@ -31,7 +31,7 @@ As seguintes variáveis devem ser configuradas no **AWS Secrets Manager** (chave
 
 - `DATABASE_URL` - String de conexão PostgreSQL
   - Formato: `postgresql://USER:PASSWORD@HOST:5432/DATABASE?schema=public`
-  - Exemplo: `postgresql://weedu:senha123@tooldo-db.xxxxx.us-east-1.rds.amazonaws.com:5432/weedu_db`
+  - Exemplo: `postgresql://tooldo:senha123@tooldo-db.xxxxx.us-east-1.rds.amazonaws.com:5432/tooldo_db`
 
 #### Autenticação JWT
 
@@ -47,6 +47,66 @@ As seguintes variáveis devem ser configuradas no **AWS Secrets Manager** (chave
 - `JWT_RESET_SECRET` - Chave para tokens de reset de senha (usa `JWT_SECRET` se não definido)
 - `JWT_INVITE_SECRET` - Chave para tokens de convite (usa `JWT_SECRET` se não definido)
 - `FRONTEND_URL` - URL do frontend para links de email (padrão: `http://localhost:3001`)
+
+#### Configuração de Email (Opcional)
+
+Para habilitar o envio real de emails, configure as seguintes variáveis. **Se não configuradas, os emails serão apenas logados no console.**
+
+**Variáveis obrigatórias para envio de email:**
+
+- `SMTP_USER` - Usuário do servidor SMTP
+- `SMTP_PASSWORD` - Senha do servidor SMTP
+
+**Variáveis opcionais de configuração SMTP:**
+
+- `EMAIL_PROVIDER` - Provedor de email (`smtp` ou `aws-ses`, padrão: `smtp`)
+- `SMTP_HOST` - Host do servidor SMTP
+  - Para AWS SES: `email-smtp.us-east-1.amazonaws.com` (ajuste a região)
+  - Para Gmail: `smtp.gmail.com`
+  - Para outros: consulte a documentação do seu provedor
+- `SMTP_PORT` - Porta do servidor SMTP (padrão: `587`)
+  - `587` - TLS/STARTTLS (recomendado)
+  - `465` - SSL (requer `SMTP_SECURE=true`)
+  - `25` - Não recomendado (muitos provedores bloqueiam)
+- `SMTP_SECURE` - Usar SSL (`true` ou `false`, padrão: `false`)
+  - `true` para porta 465
+  - `false` para porta 587 com STARTTLS
+- `SMTP_REQUIRE_TLS` - Exigir TLS (`true` ou `false`, padrão: `false`)
+- `EMAIL_FROM` - Email remetente (padrão: usa `SMTP_USER` ou `noreply@tooldo.com`)
+- `EMAIL_FROM_NAME` - Nome do remetente (padrão: `Tooldo`)
+
+**Exemplo de configuração para AWS SES:**
+
+```bash
+EMAIL_PROVIDER=aws-ses
+SMTP_HOST=email-smtp.us-east-1.amazonaws.com
+SMTP_PORT=587
+SMTP_USER=AKIAIOSFODNN7EXAMPLE
+SMTP_PASSWORD=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+SMTP_SECURE=false
+EMAIL_FROM=noreply@tooldo.com
+EMAIL_FROM_NAME=Tooldo
+```
+
+**Exemplo de configuração para Gmail:**
+
+```bash
+EMAIL_PROVIDER=smtp
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=seu-email@gmail.com
+SMTP_PASSWORD=sua-senha-de-app  # Use "Senha de app" do Google
+SMTP_SECURE=false
+SMTP_REQUIRE_TLS=true
+EMAIL_FROM=seu-email@gmail.com
+EMAIL_FROM_NAME=Tooldo
+```
+
+**Nota:** Para AWS SES, você precisará:
+
+1. Verificar seu domínio ou email no AWS SES
+2. Criar credenciais SMTP no console AWS SES
+3. Usar as credenciais SMTP (não as credenciais IAM) nas variáveis acima
 
 #### Configuração da Aplicação
 
@@ -94,12 +154,12 @@ Criar segredo no AWS Secrets Manager:
 
 ```json
 {
-  "username": "weedu",
+  "username": "tooldo",
   "password": "sua-senha-segura",
   "engine": "postgres",
   "host": "tooldo-db.xxxxx.us-east-1.rds.amazonaws.com",
   "port": 5432,
-  "dbname": "weedu_db"
+  "dbname": "tooldo_db"
 }
 ```
 
@@ -157,7 +217,7 @@ No console ECS:
 2. Tipo: Fargate
 3. CPU/Memória: 0.5 vCPU / 1 GB (ajustar conforme necessário)
 4. Container:
-   - Nome: `weedu-api`
+   - Nome: `tooldo-api`
    - Imagem: `114700956661.dkr.ecr.us-east-1.amazonaws.com/tooldo-api:latest`
    - Porta: `3000`
    - Protocolo: `tcp`
@@ -269,7 +329,7 @@ aws ecs run-task \
   --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx,subnet-yyy],securityGroups=[sg-xxx],assignPublicIp=DISABLED}" \
   --overrides '{
     "containerOverrides": [{
-      "name": "weedu-api",
+      "name": "tooldo-api",
       "command": ["sh", "-c", "npm run prisma:migrate:deploy && exit"]
     }]
   }'
@@ -313,7 +373,7 @@ Use o script `deploy.sh` para fazer build, push e atualizar o serviço:
    curl https://api.tooldo.com/api/health
    ```
 
-   Deve retornar: `{"status":"ok","timestamp":"...","service":"weedu-api"}`
+   Deve retornar: `{"status":"ok","timestamp":"...","service":"tooldo-api"}`
 
 2. **Logs CloudWatch**:
    - Verificar logs do container no CloudWatch Logs

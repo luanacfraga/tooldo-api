@@ -35,12 +35,12 @@ O script irá:
 
 ```json
 {
-  "username": "weedu",
+  "username": "tooldo",
   "password": "SUA_SENHA_AQUI",
   "engine": "postgres",
   "host": "SEU_RDS_ENDPOINT.us-east-1.rds.amazonaws.com",
   "port": 5432,
-  "dbname": "weedu_db"
+  "dbname": "tooldo_db"
 }
 ```
 
@@ -48,12 +48,12 @@ O script irá:
 
 ```json
 {
-  "username": "weedu",
+  "username": "tooldo",
   "password": "MinhaSenhaSegura123!",
   "engine": "postgres",
   "host": "tooldo-db.abc123xyz.us-east-1.rds.amazonaws.com",
   "port": 5432,
-  "dbname": "weedu_db"
+  "dbname": "tooldo_db"
 }
 ```
 
@@ -69,13 +69,13 @@ O script irá:
 3. Em **"Plaintext"**, cole a string de conexão completa:
 
 ```
-postgresql://weedu:SUA_SENHA@SEU_RDS_ENDPOINT:5432/weedu_db?schema=public
+postgresql://tooldo:SUA_SENHA@SEU_RDS_ENDPOINT:5432/tooldo_db?schema=public
 ```
 
 **Exemplo real:**
 
 ```
-postgresql://weedu:MinhaSenhaSegura123!@tooldo-db.abc123xyz.us-east-1.rds.amazonaws.com:5432/weedu_db?schema=public
+postgresql://tooldo:MinhaSenhaSegura123!@tooldo-db.abc123xyz.us-east-1.rds.amazonaws.com:5432/tooldo_db?schema=public
 ```
 
 4. Clique em **"Next"**
@@ -115,12 +115,12 @@ aws secretsmanager create-secret \
   --name tooldo/db/prod \
   --description "Credenciais do banco de dados PostgreSQL para produção" \
   --secret-string '{
-    "username": "weedu",
+    "username": "tooldo",
     "password": "SUA_SENHA",
     "engine": "postgres",
     "host": "SEU_RDS_ENDPOINT.us-east-1.rds.amazonaws.com",
     "port": 5432,
-    "dbname": "weedu_db"
+    "dbname": "tooldo_db"
   }' \
   --region us-east-1
 ```
@@ -131,7 +131,7 @@ aws secretsmanager create-secret \
 aws secretsmanager create-secret \
   --name tooldo/db/url \
   --description "String de conexão completa do PostgreSQL" \
-  --secret-string "postgresql://weedu:SUA_SENHA@SEU_RDS_ENDPOINT:5432/weedu_db?schema=public" \
+  --secret-string "postgresql://tooldo:SUA_SENHA@SEU_RDS_ENDPOINT:5432/tooldo_db?schema=public" \
   --region us-east-1
 ```
 

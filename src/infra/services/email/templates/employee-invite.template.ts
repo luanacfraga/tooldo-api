@@ -101,7 +101,7 @@ export function getEmployeeInviteTemplate(
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">Weedu</div>
+      <div class="logo">Tooldo</div>
     </div>
 
     <h1>🎉 Você foi convidado!</h1>
@@ -111,7 +111,7 @@ export function getEmployeeInviteTemplate(
 
       <p>
         <strong>${params.inviterName}</strong> convidou você para fazer parte da equipe
-        <strong>${params.companyName}</strong> na plataforma Weedu.
+        <strong>${params.companyName}</strong> na plataforma Tooldo.
       </p>
 
       <div class="info-box">
@@ -144,7 +144,7 @@ export function getEmployeeInviteTemplate(
         Esta é uma mensagem automática, por favor não responda este email.
       </p>
       <p>
-        © ${new Date().getFullYear()} Weedu. Todos os direitos reservados.
+        © ${new Date().getFullYear()} Tooldo. Todos os direitos reservados.
       </p>
     </div>
   </div>

@@ -1,22 +1,21 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: weedu-postgres
+    container_name: tooldo-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: weedu
-      POSTGRES_PASSWORD: weedu123
-      POSTGRES_DB: weedu_db
+      POSTGRES_USER: tooldo
+      POSTGRES_PASSWORD: tooldo123
+      POSTGRES_DB: tooldo_db
     ports:
-      - "5433:5432"
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U weedu -d weedu_db"]
+      test: ['CMD-SHELL', 'pg_isready -U tooldo -d tooldo_db']
       interval: 10s
       timeout: 5s
       retries: 5
 
 volumes:
   postgres_data:
-

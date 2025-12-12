@@ -326,7 +326,7 @@ User (admin)
   "document": "12345678900",
   "documentType": "CPF",
   "company": {
-    "name": "Weedu Tecnologia",
+    "name": "Tooldo Tecnologia",
     "description": "Empresa de tecnologia focada em educação"
   }
 }
@@ -349,7 +349,7 @@ User (admin)
   },
   "company": {
     "id": "uuid",
-    "name": "Weedu Tecnologia",
+    "name": "Tooldo Tecnologia",
     "description": "Empresa de tecnologia focada em educação",
     "adminId": "uuid"
   },

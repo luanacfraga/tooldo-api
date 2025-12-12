@@ -4,7 +4,7 @@ import { IsOptional, IsString } from 'class-validator';
 export class UpdateCompanyDto {
   @ApiProperty({
     description: 'Nome da empresa',
-    example: 'Weedu Tecnologia Atualizada',
+    example: 'Tooldo Tecnologia Atualizada',
     required: false,
   })
   @IsString({ message: 'O nome da empresa deve ser uma string' })

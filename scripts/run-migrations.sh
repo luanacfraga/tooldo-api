@@ -41,7 +41,7 @@ TASK_ARN=$(aws ecs run-task \
     --network-configuration "awsvpcConfiguration={subnets=[${SUBNET_1},${SUBNET_2}],securityGroups=[${SECURITY_GROUP}],assignPublicIp=DISABLED}" \
     --overrides '{
         "containerOverrides": [{
-            "name": "weedu-api",
+            "name": "tooldo-api",
             "command": ["sh", "-c", "npm run prisma:migrate:deploy"]
         }]
     }' \

@@ -1,4 +1,7 @@
-import { Company, UpdateCompanyData } from '@/core/domain/company/company.entity';
+import {
+  Company,
+  UpdateCompanyData,
+} from '@/core/domain/company/company.entity';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import { Inject, Injectable } from '@nestjs/common';

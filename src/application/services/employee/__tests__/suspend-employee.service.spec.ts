@@ -59,10 +59,9 @@ describe('SuspendEmployeeService', () => {
 
       // Assert
       expect(result.companyUser.status).toBe(CompanyUserStatus.SUSPENDED);
-      expect(companyUserRepository.update).toHaveBeenCalledWith(
-        'cu-123',
-        { status: CompanyUserStatus.SUSPENDED },
-      );
+      expect(companyUserRepository.update).toHaveBeenCalledWith('cu-123', {
+        status: CompanyUserStatus.SUSPENDED,
+      });
     });
 
     it('should throw error when employee not found', async () => {
@@ -70,9 +69,9 @@ describe('SuspendEmployeeService', () => {
       companyUserRepository.findById.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.execute({ companyUserId: 'cu-123' })).rejects.toThrow(
-        new EntityNotFoundException('Funcionário', 'cu-123'),
-      );
+      await expect(
+        service.execute({ companyUserId: 'cu-123' }),
+      ).rejects.toThrow(new EntityNotFoundException('Funcionário', 'cu-123'));
     });
 
     it('should throw error when trying to suspend invited employee', async () => {
@@ -94,9 +93,9 @@ describe('SuspendEmployeeService', () => {
       companyUserRepository.findById.mockResolvedValue(invitedEmployee);
 
       // Act & Assert
-      await expect(service.execute({ companyUserId: 'cu-123' })).rejects.toThrow(
-        DomainValidationException,
-      );
+      await expect(
+        service.execute({ companyUserId: 'cu-123' }),
+      ).rejects.toThrow(DomainValidationException);
     });
 
     it('should throw error when trying to suspend already suspended employee', async () => {
@@ -118,9 +117,9 @@ describe('SuspendEmployeeService', () => {
       companyUserRepository.findById.mockResolvedValue(suspendedEmployee);
 
       // Act & Assert
-      await expect(service.execute({ companyUserId: 'cu-123' })).rejects.toThrow(
-        DomainValidationException,
-      );
+      await expect(
+        service.execute({ companyUserId: 'cu-123' }),
+      ).rejects.toThrow(DomainValidationException);
     });
   });
 });

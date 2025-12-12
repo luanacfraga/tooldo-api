@@ -94,7 +94,9 @@ export class EmployeeResponseDto {
     role: string;
   };
 
-  static fromDomain(companyUser: CompanyUser | CompanyUserWithUser): EmployeeResponseDto {
+  static fromDomain(
+    companyUser: CompanyUser | CompanyUserWithUser,
+  ): EmployeeResponseDto {
     const dto = new EmployeeResponseDto();
     dto.id = companyUser.id;
     dto.companyId = companyUser.companyId;

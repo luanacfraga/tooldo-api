@@ -35,12 +35,12 @@ No console AWS → Secrets Manager:
 
 ```json
 {
-  "username": "weedu",
+  "username": "tooldo",
   "password": "SUA_SENHA_DO_RDS",
   "engine": "postgres",
   "host": "SEU_RDS_ENDPOINT.us-east-1.rds.amazonaws.com",
   "port": 5432,
-  "dbname": "weedu_db"
+  "dbname": "tooldo_db"
 }
 ```
 
@@ -51,13 +51,13 @@ No console AWS → Secrets Manager:
 **Valor:**
 
 ```
-postgresql://weedu:SUA_SENHA@SEU_RDS_ENDPOINT:5432/weedu_db?schema=public
+postgresql://tooldo:SUA_SENHA@SEU_RDS_ENDPOINT:5432/tooldo_db?schema=public
 ```
 
 **Exemplo:**
 
 ```
-postgresql://weedu:MinhaSenha123@tooldo-db.abc123.us-east-1.rds.amazonaws.com:5432/weedu_db?schema=public
+postgresql://tooldo:MinhaSenha123@tooldo-db.abc123.us-east-1.rds.amazonaws.com:5432/tooldo_db?schema=public
 ```
 
 #### C) Criar segredo JWT: `tooldo/jwt/secret`
@@ -155,7 +155,7 @@ aws ec2 describe-security-groups \
 curl https://api.tooldo.com/api/health
 
 # Deve retornar:
-# {"status":"ok","timestamp":"...","service":"weedu-api"}
+# {"status":"ok","timestamp":"...","service":"tooldo-api"}
 ```
 
 ---

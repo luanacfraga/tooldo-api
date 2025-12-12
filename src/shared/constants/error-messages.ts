@@ -97,6 +97,7 @@ export const ErrorMessages = {
     INVALID_CREDENTIALS: 'Credenciais inválidas',
     INVALID_TOKEN: 'Token inválido',
     INVALID_OR_EXPIRED_INVITE_TOKEN: 'Token de convite inválido ou expirado',
+    INVALID_OR_EXPIRED_RESET_TOKEN: 'Token de recuperação inválido ou expirado',
     LEGACY_INVITE_TOKEN:
       'Token de convite inválido. Este token foi gerado antes da atualização do sistema. Por favor, solicite um novo convite.',
   },

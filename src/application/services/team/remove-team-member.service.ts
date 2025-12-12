@@ -22,4 +22,3 @@ export class RemoveTeamMemberService {
     await this.teamUserRepository.delete(input.id);
   }
 }
-

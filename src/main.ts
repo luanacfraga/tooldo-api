@@ -60,8 +60,8 @@ async function bootstrap() {
 
   if (nodeEnv !== 'production') {
     const config = new DocumentBuilder()
-      .setTitle('Weedu API')
-      .setDescription('API documentation for Weedu')
+      .setTitle('Tooldo API')
+      .setDescription('API documentation for Tooldo')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

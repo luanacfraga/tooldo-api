@@ -53,7 +53,9 @@ export class ListEmployeesQueryDto {
     example: 'desc',
     enum: ['asc', 'desc'],
   })
-  @IsEnum(['asc', 'desc'], { message: 'Direção de ordenação deve ser asc ou desc' })
+  @IsEnum(['asc', 'desc'], {
+    message: 'Direção de ordenação deve ser asc ou desc',
+  })
   @IsOptional()
   sortOrder?: 'asc' | 'desc' = 'desc';
 }

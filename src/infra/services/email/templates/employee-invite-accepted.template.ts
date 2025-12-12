@@ -75,7 +75,7 @@ export function getEmployeeInviteAcceptedTemplate(
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">Weedu</div>
+      <div class="logo">Tooldo</div>
     </div>
 
     <div style="text-align: center;">
@@ -105,7 +105,7 @@ export function getEmployeeInviteAcceptedTemplate(
 
     <div class="footer">
       <p>
-        © ${new Date().getFullYear()} Weedu. Todos os direitos reservados.
+        © ${new Date().getFullYear()} Tooldo. Todos os direitos reservados.
       </p>
     </div>
   </div>

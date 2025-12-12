@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import type { StringValue } from 'ms';
 import { AuthService } from '@/application/services/auth/auth.service';
+import { ForgotPasswordService } from '@/application/services/auth/forgot-password.service';
+import { ResetPasswordService } from '@/application/services/auth/reset-password.service';
 import { DatabaseModule } from '@/infra/database/database.module';
 import { SharedServicesModule } from '@/infra/services/shared-services.module';
 
@@ -27,7 +29,7 @@ import { SharedServicesModule } from '@/infra/services/shared-services.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, ForgotPasswordService, ResetPasswordService],
+  exports: [AuthService, ForgotPasswordService, ResetPasswordService],
 })
 export class AuthApplicationModule {}

@@ -45,12 +45,12 @@ aws ecr get-login-password --region us-east-1 | \
 
 ```json
 {
-  "username": "weedu",
+  "username": "tooldo",
   "password": "senha",
   "engine": "postgres",
   "host": "endpoint.rds.amazonaws.com",
   "port": 5432,
-  "dbname": "weedu_db"
+  "dbname": "tooldo_db"
 }
 ```
 
@@ -63,7 +63,7 @@ sua-chave-jwt-secreta
 ### Segredo DATABASE_URL (Alternativa): `tooldo/db/url`
 
 ```
-postgresql://weedu:senha@endpoint:5432/weedu_db?schema=public
+postgresql://tooldo:senha@endpoint:5432/tooldo_db?schema=public
 ```
 
 ## 🏷️ Imagem ECR
@@ -107,6 +107,19 @@ aws ecs describe-services \
 | `FRONTEND_URL`    | `https://www.tooldo.com`                    | Valor           |
 | `DATABASE_URL`    | (do Secrets Manager)                        | Secrets Manager |
 | `JWT_SECRET`      | (do Secrets Manager)                        | Secrets Manager |
+
+### Variáveis de Email (Opcional - para envio real de emails)
+
+| Variável          | Valor                                | Tipo            |
+| ----------------- | ------------------------------------ | --------------- |
+| `SMTP_USER`       | Usuário SMTP                         | Secrets Manager |
+| `SMTP_PASSWORD`   | Senha SMTP                           | Secrets Manager |
+| `SMTP_HOST`       | `email-smtp.us-east-1.amazonaws.com` | Valor           |
+| `SMTP_PORT`       | `587`                                | Valor           |
+| `EMAIL_FROM`      | `noreply@tooldo.com`                 | Valor           |
+| `EMAIL_FROM_NAME` | `Tooldo`                             | Valor           |
+
+**Nota:** Se `SMTP_USER` e `SMTP_PASSWORD` não estiverem configurados, os emails serão apenas logados no console (modo desenvolvimento).
 
 ## 🛠️ Troubleshooting Rápido
 

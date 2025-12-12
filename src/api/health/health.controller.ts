@@ -13,7 +13,7 @@ export class HealthController {
     return {
       status: 'ok',
       timestamp: new Date().toISOString(),
-      service: 'weedu-api',
+      service: 'tooldo-api',
     };
   }
 }

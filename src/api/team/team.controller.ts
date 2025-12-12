@@ -74,7 +74,10 @@ export class TeamController {
     @CurrentUser() user: JwtPayload,
   ): Promise<TeamResponseDto> {
     // Se for MANAGER, só pode criar equipes onde ele é o gestor
-    if (user.role === UserRole.MANAGER && createTeamDto.managerId !== user.sub) {
+    if (
+      user.role === UserRole.MANAGER &&
+      createTeamDto.managerId !== user.sub
+    ) {
       throw new DomainValidationException(
         'Managers só podem criar equipes onde eles são o gestor',
       );

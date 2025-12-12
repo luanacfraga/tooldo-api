@@ -81,7 +81,12 @@ export class CompanyController {
   }
 
   @Get('me')
-  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR, UserRole.CONSULTANT)
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.MANAGER,
+    UserRole.EXECUTOR,
+    UserRole.CONSULTANT,
+  )
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'List companies of authenticated user',

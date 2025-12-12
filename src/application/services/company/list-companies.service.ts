@@ -27,13 +27,10 @@ export class ListCompaniesService {
       throw new EntityNotFoundException('Administrador', input.adminId);
     }
 
-    const companies = await this.companyRepository.findByAdminId(
-      input.adminId,
-    );
+    const companies = await this.companyRepository.findByAdminId(input.adminId);
 
     return {
       companies,
     };
   }
 }
-

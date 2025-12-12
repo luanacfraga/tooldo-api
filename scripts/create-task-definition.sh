@@ -8,7 +8,7 @@ set -e
 AWS_REGION="${AWS_REGION:-us-east-1}"
 TASK_FAMILY="${TASK_FAMILY:-tooldo-api-task}"
 LOG_GROUP="/ecs/tooldo-api"
-EXECUTION_ROLE="ecs_tasks_execution_role-weedu-weedu-api-prod"
+EXECUTION_ROLE="ecs_tasks_execution_role-tooldo-tooldo-api-prod"
 
 echo "🚀 Criando Task Definition no ECS..."
 echo ""
@@ -54,7 +54,7 @@ cat > ${TASK_DEF_FILE} <<EOF
   "memory": "1024",
   "containerDefinitions": [
     {
-      "name": "weedu-api",
+      "name": "tooldo-api",
       "image": "114700956661.dkr.ecr.us-east-1.amazonaws.com/tooldo-api:latest",
       "essential": true,
       "portMappings": [
@@ -108,7 +108,7 @@ cat > ${TASK_DEF_FILE} <<EOF
         "options": {
           "awslogs-group": "${LOG_GROUP}",
           "awslogs-region": "${AWS_REGION}",
-          "awslogs-stream-prefix": "weedu-api"
+          "awslogs-stream-prefix": "tooldo-api"
         }
       },
       "healthCheck": {

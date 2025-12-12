@@ -1,6 +1,6 @@
 # Deploy Passo a Passo - ECR e ECS
 
-Guia prático para fazer deploy da API Weedu (NestJS) no ECR e ECS.
+Guia prático para fazer deploy da API Tooldo (NestJS) no ECR e ECS.
 
 ## ✅ Pré-requisitos Verificados
 
@@ -76,12 +76,12 @@ No console AWS → Secrets Manager → Criar segredo:
 
 ```json
 {
-  "username": "weedu",
+  "username": "tooldo",
   "password": "SUA_SENHA_AQUI",
   "engine": "postgres",
   "host": "SEU_RDS_ENDPOINT.us-east-1.rds.amazonaws.com",
   "port": 5432,
-  "dbname": "weedu_db"
+  "dbname": "tooldo_db"
 }
 ```
 
@@ -89,12 +89,12 @@ No console AWS → Secrets Manager → Criar segredo:
 
 ```json
 {
-  "username": "weedu",
+  "username": "tooldo",
   "password": "MinhaSenhaSegura123!",
   "engine": "postgres",
   "host": "tooldo-db.abc123xyz.us-east-1.rds.amazonaws.com",
   "port": 5432,
-  "dbname": "weedu_db"
+  "dbname": "tooldo_db"
 }
 ```
 
@@ -128,7 +128,7 @@ No console AWS → ECS → Task Definitions → Criar nova:
 
 ### 4.2 Container
 
-**Nome do container:** `weedu-api`
+**Nome do container:** `tooldo-api`
 
 **URI da imagem:**
 
@@ -161,7 +161,7 @@ Como o ECS não constrói automaticamente a `DATABASE_URL` a partir do segredo, 
 Criar um novo segredo `tooldo/db/url` com:
 
 ```
-postgresql://weedu:senha@host:5432/weedu_db?schema=public
+postgresql://tooldo:senha@host:5432/tooldo_db?schema=public
 ```
 
 E referenciar no ECS como variável de ambiente do tipo "Valor do Secrets Manager".
@@ -189,7 +189,7 @@ Adicionar como variável de ambiente do tipo "Valor do Secrets Manager":
 
 - **Grupo de logs do awslogs:** `/ecs/tooldo-api`
 - **Região do awslogs:** `us-east-1`
-- **Stream prefix do awslogs:** `weedu-api`
+- **Stream prefix do awslogs:** `tooldo-api`
 
 ### 4.4 Networking
 
@@ -344,7 +344,7 @@ No console AWS → ECS → Clusters → `tooldo-api` → Serviço `tooldo-api` �
 - ✅ Ativar balanceamento de carga
 - **Tipo de balanceador:** Application Load Balancer
 - **Balanceador de carga:** `tooldo-api-alb`
-- **Nome do container:** `weedu-api:3000`
+- **Nome do container:** `tooldo-api:3000`
 - **Target group:** `tooldo-api-tg`
 - **Listener:** `HTTPS:443`
 
@@ -410,7 +410,7 @@ curl https://api.tooldo.com/api/health
 {
   "status": "ok",
   "timestamp": "2024-01-01T00:00:00.000Z",
-  "service": "weedu-api"
+  "service": "tooldo-api"
 }
 ```
 

@@ -215,7 +215,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
 
     const shouldSortInMemory = userSortFields.includes(sortBy);
 
-    let orderBy: CompanyUserOrderByInput = {};
+    const orderBy: CompanyUserOrderByInput = {};
     if (!shouldSortInMemory) {
       const field = validSortFields.includes(sortBy) ? sortBy : 'createdAt';
       orderBy[field] = sortOrder;
@@ -256,9 +256,15 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         const aValue = a.user?.[sortBy as keyof PrismaUser];
         const bValue = b.user?.[sortBy as keyof PrismaUser];
 
-        if (aValue == null && bValue == null) return 0;
-        if (aValue == null) return sortOrder === 'asc' ? 1 : -1;
-        if (bValue == null) return sortOrder === 'asc' ? -1 : 1;
+        if (aValue == null && bValue == null) {
+          return 0;
+        }
+        if (aValue == null) {
+          return sortOrder === 'asc' ? 1 : -1;
+        }
+        if (bValue == null) {
+          return sortOrder === 'asc' ? -1 : 1;
+        }
 
         const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
         return sortOrder === 'asc' ? comparison : -comparison;

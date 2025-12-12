@@ -1,4 +1,4 @@
-# 📋 Regras de Negócio - Weedu API
+# 📋 Regras de Negócio - Tooldo API
 
 ## 📑 Índice
 
@@ -13,7 +13,7 @@
 
 ## 🎯 Visão Geral
 
-O sistema Weedu é uma plataforma de gestão que permite:
+O sistema Tooldo é uma plataforma de gestão que permite:
 
 - **Admins** contratarem **Planos** com limites específicos
 - **Admins** criarem **Empresas** (limitado pelo plano)

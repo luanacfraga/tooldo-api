@@ -1,6 +1,6 @@
-# Memory Bank - Padrões de Implementação Weedu API
+# Memory Bank - Padrões de Implementação Tooldo API
 
-Este documento define os padrões que devem ser seguidos em TODAS as implementações do projeto Weedu API para manter consistência e qualidade do código.
+Este documento define os padrões que devem ser seguidos em TODAS as implementações do projeto Tooldo API para manter consistência e qualidade do código.
 
 ## 🚫 REGRAS ABSOLUTAS
 

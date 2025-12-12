@@ -81,4 +81,3 @@ export class TeamUserPrismaRepository implements TeamUserRepository {
     );
   }
 }
-

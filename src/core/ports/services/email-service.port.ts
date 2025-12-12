@@ -3,6 +3,7 @@ export interface EmailService {
   sendEmployeeInviteAccepted(
     params: SendEmployeeInviteAcceptedParams,
   ): Promise<void>;
+  sendPasswordReset(params: SendPasswordResetParams): Promise<void>;
 }
 
 export interface SendEmployeeInviteParams {
@@ -19,4 +20,10 @@ export interface SendEmployeeInviteAcceptedParams {
   employeeName: string;
   companyName: string;
   adminName: string;
+}
+
+export interface SendPasswordResetParams {
+  to: string;
+  userName: string;
+  resetToken: string;
 }
