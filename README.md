@@ -1,100 +1,357 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Tooldo API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API REST desenvolvida com NestJS para a plataforma Tooldo - sistema de gestão empresarial com controle de planos, empresas, equipes e uso de IA.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 📋 Índice
 
-## Description
+- [Sobre o Projeto](#sobre-o-projeto)
+- [Tecnologias](#tecnologias)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação](#instalação)
+- [Configuração](#configuração)
+- [Executando o Projeto](#executando-o-projeto)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Documentação](#documentação)
+- [Scripts Disponíveis](#scripts-disponíveis)
+- [Contribuindo](#contribuindo)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🎯 Sobre o Projeto
 
-## Project setup
+Tooldo é uma plataforma de gestão que permite:
 
-```bash
-$ npm install
-```
+- **Admins** contratarem **Planos** com limites específicos
+- **Admins** criarem **Empresas** (limitado pelo plano)
+- **Empresas** terem **Membros** (gestores, executores, consultores)
+- **Empresas** organizarem membros em **Equipes**
+- **Equipes** terem um **Gestor** e vários **Executores**
+- Controle de uso de **Chamadas IA** por subscription
 
-## Compile and run the project
+### Princípio Fundamental
 
-```bash
-# development
-$ npm run start
+> **O plano é vinculado ao ADMIN, não à empresa.**
+>
+> Todas as empresas de um admin compartilham os limites definidos pelo plano contratado.
 
-# watch mode
-$ npm run start:dev
+## 🛠️ Tecnologias
 
-# production mode
-$ npm run start:prod
-```
+- **Framework**: NestJS 11
+- **Linguagem**: TypeScript 5.7
+- **Banco de Dados**: PostgreSQL com Prisma ORM
+- **Autenticação**: JWT (JSON Web Tokens)
+- **Validação**: class-validator + class-transformer
+- **Documentação**: Swagger/OpenAPI
+- **Testes**: Jest
+- **Arquitetura**: Hexagonal (Clean Architecture)
 
-## Run tests
+## 📦 Pré-requisitos
 
-```bash
-# unit tests
-$ npm run test
+- Node.js 18+ e npm
+- PostgreSQL 14+
+- Docker (opcional, para desenvolvimento com docker-compose)
 
-# e2e tests
-$ npm run test:e2e
+## 🚀 Instalação
 
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 1. Clone o repositório
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+git clone <repository-url>
+cd weedu-api
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 2. Instale as dependências
 
-## Resources
+```bash
+npm install
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 3. Configure as variáveis de ambiente
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Copie o arquivo `.env.example` para `.env` e configure as variáveis:
 
-## Support
+```bash
+cp .env.example .env
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Edite o arquivo `.env` com suas configurações:
 
-## Stay in touch
+```env
+# Banco de Dados
+DATABASE_URL="postgresql://user:password@localhost:5432/tooldo_db?schema=public"
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# JWT
+JWT_SECRET="your-secret-key-change-me"
+JWT_EXPIRES_IN="7d"
 
-## License
+# Aplicação
+NODE_ENV="development"
+PORT=3000
+FRONTEND_URL="http://localhost:3001"
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+# Email (Opcional - se não configurado, emails serão logados no console)
+SMTP_USER=""
+SMTP_PASSWORD=""
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+EMAIL_FROM="noreply@tooldo.com"
+EMAIL_FROM_NAME="Tooldo"
+```
 
-# tooldo-api
+### 4. Configure o banco de dados
+
+```bash
+# Gerar cliente Prisma
+npm run prisma:generate
+
+# Executar migrações
+npm run prisma:migrate
+```
+
+## ⚙️ Configuração
+
+### Variáveis de Ambiente
+
+#### Obrigatórias
+
+- `DATABASE_URL`: String de conexão PostgreSQL
+- `JWT_SECRET`: Chave secreta para assinatura de tokens JWT (mínimo 32 caracteres)
+
+#### Opcionais
+
+- `JWT_EXPIRES_IN`: Tempo de expiração do token (padrão: `7d`)
+- `NODE_ENV`: Ambiente de execução (padrão: `development`)
+- `PORT`: Porta da aplicação (padrão: `3000`)
+- `FRONTEND_URL`: URL do frontend para links de email
+- `ALLOWED_ORIGINS`: Origens permitidas para CORS (separadas por vírgula)
+
+#### Configuração de Email
+
+Para habilitar o envio real de emails, configure:
+
+- `SMTP_USER`: Usuário do servidor SMTP
+- `SMTP_PASSWORD`: Senha do servidor SMTP
+- `SMTP_HOST`: Host do servidor SMTP (padrão: `smtp.gmail.com`)
+- `SMTP_PORT`: Porta do servidor SMTP (padrão: `587`)
+- `EMAIL_FROM`: Email remetente
+- `EMAIL_FROM_NAME`: Nome do remetente
+
+**Nota**: Se `SMTP_USER` e `SMTP_PASSWORD` não estiverem configurados, os emails serão apenas logados no console (modo desenvolvimento).
+
+## 🏃 Executando o Projeto
+
+### Desenvolvimento
+
+```bash
+# Modo watch (recompila automaticamente)
+npm run start:dev
+
+# Modo debug
+npm run start:debug
+```
+
+### Produção
+
+```bash
+# Build
+npm run build
+
+# Executar
+npm run start:prod
+```
+
+### Docker Compose (Desenvolvimento)
+
+```bash
+# Iniciar banco de dados
+docker-compose up -d
+
+# Executar migrações
+npm run prisma:migrate
+```
+
+## 📁 Estrutura do Projeto
+
+```
+src/
+├── api/                    # Camada de Apresentação (Controllers)
+│   ├── auth/              # Autenticação
+│   ├── company/           # Empresas
+│   ├── employee/          # Funcionários
+│   └── shared/            # Recursos compartilhados
+│
+├── application/            # Camada de Aplicação
+│   ├── services/          # Use cases / Services
+│   ├── modules/          # Application modules
+│   ├── mappers/           # Domain to DTO mappers
+│   └── events/            # Event listeners
+│
+├── core/                   # Camada de Domínio
+│   ├── domain/            # Entidades de domínio
+│   └── ports/             # Interfaces/Contratos
+│       ├── repositories/  # Repository interfaces
+│       └── services/      # Service interfaces
+│
+├── infra/                  # Camada de Infraestrutura
+│   ├── database/          # Prisma e repositórios
+│   ├── services/          # Implementações de serviços
+│   └── config/            # Configurações
+│
+└── shared/                 # Código compartilhado
+    └── constants/         # Constantes e mensagens
+```
+
+Para mais detalhes sobre a arquitetura, consulte [MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md).
+
+## 📚 Documentação
+
+### Documentação Principal
+
+- **[COMECE_AQUI.md](./COMECE_AQUI.md)**: Guia rápido para começar com o deploy AWS
+- **[BUSINESS_RULES.md](./BUSINESS_RULES.md)**: Regras de negócio e estrutura de dados
+- **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**: Padrões de código e arquitetura
+
+### Documentação Técnica
+
+- **[docs/API_FLOWS.md](./docs/API_FLOWS.md)**: Fluxos da API e endpoints disponíveis
+- **[docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)**: Sistema de tratamento de erros
+- **[docs/QUICK_REFERENCE.md](./docs/QUICK_REFERENCE.md)**: Referência rápida para deploy
+
+### Documentação de Deploy
+
+- **[docs/AWS_DEPLOY.md](./docs/AWS_DEPLOY.md)**: Guia completo de deploy na AWS
+- **[docs/DEPLOY_STEP_BY_STEP.md](./docs/DEPLOY_STEP_BY_STEP.md)**: Passo a passo detalhado
+- **[docs/SECRETS_MANAGER_GUIDE.md](./docs/SECRETS_MANAGER_GUIDE.md)**: Configuração do Secrets Manager
+- **[scripts/README.md](./scripts/README.md)**: Documentação dos scripts de deploy
+
+### Swagger/OpenAPI
+
+Após iniciar o servidor, acesse a documentação interativa:
+
+```
+http://localhost:3000/api/docs
+```
+
+## 🛠️ Scripts Disponíveis
+
+### Desenvolvimento
+
+```bash
+npm run start:dev      # Inicia em modo watch
+npm run start:debug   # Inicia em modo debug
+npm run build         # Compila o projeto
+```
+
+### Banco de Dados
+
+```bash
+npm run prisma:generate    # Gera cliente Prisma
+npm run prisma:migrate     # Executa migrações
+npm run prisma:studio      # Abre Prisma Studio
+npm run prisma:reset       # Reseta o banco (CUIDADO!)
+```
+
+### Qualidade de Código
+
+```bash
+npm run lint          # Executa ESLint e corrige
+npm run lint:check    # Verifica sem corrigir
+npm run format        # Formata código com Prettier
+npm run format:check  # Verifica formatação
+npm run typecheck     # Verifica tipos TypeScript
+npm run validate      # Executa todas as validações
+```
+
+### Testes
+
+```bash
+npm run test          # Executa testes unitários
+npm run test:watch    # Executa testes em modo watch
+npm run test:cov      # Executa testes com cobertura
+npm run test:e2e      # Executa testes end-to-end
+```
+
+### Deploy
+
+```bash
+# Build e push para ECR
+./scripts/build-and-push-ecr.sh latest
+
+# Deploy completo
+./scripts/deploy.sh latest tooldo-api tooldo-api
+
+# Executar migrações
+./scripts/run-migrations.sh <cluster> <task-def> <subnet1> <subnet2> <sg>
+```
+
+## 🧪 Testes
+
+### Executar Testes
+
+```bash
+# Todos os testes
+npm run test
+
+# Testes específicos
+npm run test -- employee.service.spec.ts
+
+# Com cobertura
+npm run test:cov
+```
+
+### Estrutura de Testes
+
+- Testes unitários: `src/**/*.spec.ts`
+- Testes E2E: `test/**/*.e2e-spec.ts`
+
+## 📝 Padrões de Código
+
+Este projeto segue padrões rigorosos de código. Consulte:
+
+- **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**: Padrões completos de implementação
+
+### Regras Principais
+
+- ❌ **NUNCA** usar arquivos `index.ts`
+- ❌ **NUNCA** adicionar comentários no código
+- ❌ **NUNCA** usar `console.log` em produção
+- ❌ **NUNCA** usar tipos `any` sem justificativa
+- ❌ **NUNCA** desabilitar regras do ESLint no código
+
+## 🚀 Deploy
+
+### Deploy Local
+
+```bash
+npm run build
+npm run start:prod
+```
+
+### Deploy AWS
+
+Consulte a documentação completa:
+
+- **[COMECE_AQUI.md](./COMECE_AQUI.md)**: Guia rápido
+- **[docs/DEPLOY_STEP_BY_STEP.md](./docs/DEPLOY_STEP_BY_STEP.md)**: Passo a passo detalhado
+- **[docs/AWS_DEPLOY.md](./docs/AWS_DEPLOY.md)**: Guia completo
+
+## 🤝 Contribuindo
+
+1. Leia os padrões de código em [MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)
+2. Execute `npm run validate` antes de commitar
+3. Siga os padrões de commit do projeto
+4. Crie testes para novas funcionalidades
+
+## 📄 Licença
+
+Este projeto é privado e proprietário.
+
+## 🆘 Suporte
+
+Para dúvidas ou problemas:
+
+1. Consulte a documentação em `docs/`
+2. Verifique os logs da aplicação
+3. Consulte a seção de Troubleshooting nos guias de deploy
+
+---
+
+**Desenvolvido com ❤️ para Tooldo**

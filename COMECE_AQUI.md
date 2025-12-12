@@ -1,5 +1,19 @@
 # 🚀 Comece Aqui - Deploy AWS
 
+> **Guia rápido para fazer deploy da API Tooldo na AWS**
+
+Este guia fornece um checklist rápido dos passos essenciais para fazer deploy. Para instruções detalhadas, consulte a [documentação completa](./docs/README.md).
+
+## 📋 Índice
+
+1. [O que já está pronto](#-o-que-já-está-pronto)
+2. [Próximos Passos](#-próximos-passos-ordem-de-execução)
+3. [Documentação Completa](#-documentação-completa)
+4. [Comandos Rápidos](#-comandos-rápidos)
+5. [Precisa de Ajuda?](#-precisa-de-ajuda)
+
+---
+
 ## ✅ O que já está pronto
 
 - ✅ Dockerfile otimizado para NestJS
@@ -162,18 +176,47 @@ curl https://api.tooldo.com/api/health
 
 ## 📚 Documentação Completa
 
-- **Guia Passo a Passo Detalhado:** [docs/DEPLOY_STEP_BY_STEP.md](docs/DEPLOY_STEP_BY_STEP.md)
-- **Guia Rápido de Referência:** [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)
-- **Documentação AWS Completa:** [docs/AWS_DEPLOY.md](docs/AWS_DEPLOY.md)
-- **Template Task Definition:** [docs/ECS_TASK_DEFINITION_TEMPLATE.json](docs/ECS_TASK_DEFINITION_TEMPLATE.json)
+### Guias de Deploy
+
+- **[Guia Passo a Passo Detalhado](./docs/DEPLOY_STEP_BY_STEP.md)**: Instruções detalhadas para cada etapa
+- **[Guia Rápido de Referência](./docs/QUICK_REFERENCE.md)**: Comandos e URLs importantes
+- **[Documentação AWS Completa](./docs/AWS_DEPLOY.md)**: Arquitetura e configuração completa
+- **[Guia Secrets Manager](./docs/SECRETS_MANAGER_GUIDE.md)**: Configuração de segredos
+
+### Outros Documentos
+
+- **[README.md](./README.md)**: Visão geral do projeto
+- **[Índice de Documentação](./docs/README.md)**: Navegação completa da documentação
+- **[Regras de Negócio](./BUSINESS_RULES.md)**: Entenda as regras do sistema
+- **[Padrões de Código](./MEMORY_BANK_PADROES.md)**: Padrões de desenvolvimento
 
 ---
 
 ## 🆘 Precisa de Ajuda?
 
-1. Verifique os logs no CloudWatch: `/ecs/tooldo-api`
-2. Consulte a seção de Troubleshooting nos guias
-3. Verifique Security Groups e VPC configuration
+### Troubleshooting
+
+1. **Verifique os logs no CloudWatch**
+
+   ```bash
+   aws logs tail /ecs/tooldo-api --follow --region us-east-1
+   ```
+
+2. **Consulte a seção de Troubleshooting**
+   - [DEPLOY_STEP_BY_STEP.md](./docs/DEPLOY_STEP_BY_STEP.md#-troubleshooting)
+   - [AWS_DEPLOY.md](./docs/AWS_DEPLOY.md#-troubleshooting)
+   - [QUICK_REFERENCE.md](./docs/QUICK_REFERENCE.md#-troubleshooting-rápido)
+
+3. **Verifique configurações**
+   - Security Groups e VPC
+   - Secrets Manager
+   - Task Definition e variáveis de ambiente
+
+### Recursos Adicionais
+
+- [Documentação NestJS](https://docs.nestjs.com)
+- [Documentação AWS ECS](https://docs.aws.amazon.com/ecs/)
+- [Documentação Prisma](https://www.prisma.io/docs)
 
 ---
 

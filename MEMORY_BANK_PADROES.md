@@ -1,6 +1,27 @@
 # Memory Bank - Padrões de Implementação Tooldo API
 
-Este documento define os padrões que devem ser seguidos em TODAS as implementações do projeto Tooldo API para manter consistência e qualidade do código.
+> **Guia completo de padrões de código, arquitetura e boas práticas**
+
+Este documento define os padrões que devem ser seguidos em **TODAS** as implementações do projeto Tooldo API para manter consistência e qualidade do código.
+
+## 📋 Índice Rápido
+
+- [Regras Absolutas](#-regras-absolutas)
+- [Estrutura de Pastas](#-estrutura-de-pastas)
+- [Nomenclatura](#-nomenclatura)
+- [Padrões de Código](#-padrões-de-código)
+- [Imports](#-imports)
+- [Tipagem e Type Safety](#-tipagem-e-type-safety)
+- [ESLint e Qualidade](#-eslint-e-qualidade-de-código)
+- [Tratamento de Erros](#-tratamento-de-erros)
+- [Checklist Antes de Commit](#-checklist-antes-de-commit)
+
+## 🔗 Documentos Relacionados
+
+- **[README.md](./README.md)**: Visão geral do projeto
+- **[BUSINESS_RULES.md](./BUSINESS_RULES.md)**: Regras de negócio
+- **[API_FLOWS.md](./docs/API_FLOWS.md)**: Fluxos da API
+- **[ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)**: Tratamento de erros
 
 ## 🚫 REGRAS ABSOLUTAS
 
@@ -852,11 +873,33 @@ export class RolesGuard implements CanActivate {
 - [ ] Sem erros de tipo (TypeScript)
 - [ ] `npm run validate` passa sem erros
 
-## 📚 REFERÊNCIAS
+## 📚 Referências
 
-- Framework: NestJS 11
-- Arquitetura: Hexagonal (Clean Architecture)
-- Database: Prisma + PostgreSQL
-- Validação: class-validator + class-transformer
-- Documentação: Swagger/OpenAPI
-- Testes: Jest
+### Tecnologias
+
+- **Framework**: NestJS 11
+- **Arquitetura**: Hexagonal (Clean Architecture)
+- **Database**: Prisma + PostgreSQL
+- **Validação**: class-validator + class-transformer
+- **Documentação**: Swagger/OpenAPI
+- **Testes**: Jest
+
+### Documentação Externa
+
+- [NestJS Documentation](https://docs.nestjs.com)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+
+## 🔗 Links Úteis
+
+- [README.md](./README.md) - Visão geral do projeto
+- [BUSINESS_RULES.md](./BUSINESS_RULES.md) - Regras de negócio
+- [API_FLOWS.md](./docs/API_FLOWS.md) - Fluxos da API
+- [ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) - Tratamento de erros
+
+---
+
+**Documento criado em**: 2025-11-09  
+**Última atualização**: 2025-12-11  
+**Versão**: 1.0.0

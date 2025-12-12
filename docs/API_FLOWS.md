@@ -1,11 +1,23 @@
 # 📚 Documentação de Fluxos e Estado do Banco de Dados
 
+> **Documentação completa dos fluxos da API, endpoints disponíveis e estrutura de dados**
+
+Este documento descreve todos os fluxos implementados, endpoints da API, estrutura do banco de dados e exemplos de uso.
+
 ## 📋 Índice
 
-1. [Estado Atual do Banco de Dados](#estado-atual-do-banco-de-dados)
-2. [Fluxos Implementados](#fluxos-implementados)
-3. [Endpoints Disponíveis](#endpoints-disponíveis)
-4. [Estrutura de Dados](#estrutura-de-dados)
+1. [Estado Atual do Banco de Dados](#-estado-atual-do-banco-de-dados)
+2. [Fluxos Implementados](#-fluxos-implementados)
+3. [Endpoints Disponíveis](#-endpoints-disponíveis)
+4. [Estrutura de Dados](#-estrutura-de-dados)
+5. [Autenticação e Autorização](#-autenticação-e-autorização)
+6. [Próximos Passos](#-próximos-passos-não-implementados)
+
+## 🔗 Documentos Relacionados
+
+- **[BUSINESS_RULES.md](../BUSINESS_RULES.md)**: Regras de negócio e relacionamentos
+- **[ERROR_HANDLING.md](./ERROR_HANDLING.md)**: Sistema de tratamento de erros
+- **[README.md](../README.md)**: Visão geral do projeto
 
 ---
 
@@ -707,6 +719,22 @@ Todas as outras rotas requerem autenticação JWT válida.
 
 ---
 
+## 📝 Notas Finais
+
+- **Base URL**: `/api/v1`
+- **Autenticação**: JWT Bearer Token
+- **Formato de Resposta**: JSON
+- **Documentação Interativa**: Disponível em `/api/docs` (Swagger)
+
+## 🔗 Links Úteis
+
+- [Swagger UI](http://localhost:3000/api/docs) - Documentação interativa (após iniciar o servidor)
+- [Regras de Negócio](../BUSINESS_RULES.md) - Entenda as regras do sistema
+- [Padrões de Código](../MEMORY_BANK_PADROES.md) - Padrões de desenvolvimento
+- [Tratamento de Erros](./ERROR_HANDLING.md) - Como erros são tratados
+
+---
+
 **Documento criado em:** 2025-11-14  
-**Versão da API:** 1.0  
-**Base URL:** `/api/v1`
+**Última atualização:** 2025-12-11  
+**Versão da API:** 1.0

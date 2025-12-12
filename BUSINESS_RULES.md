@@ -1,13 +1,25 @@
 # 📋 Regras de Negócio - Tooldo API
 
+> **Documentação completa das regras de negócio, estrutura de entidades e relacionamentos do sistema**
+
+Este documento define todas as regras de negócio, estrutura de entidades, relacionamentos, validações e fluxos de operação do sistema Tooldo.
+
 ## 📑 Índice
 
-1. [Visão Geral](#visão-geral)
-2. [Estrutura de Entidades](#estrutura-de-entidades)
-3. [Hierarquia e Relacionamentos](#hierarquia-e-relacionamentos)
-4. [Regras de Validação](#regras-de-validação)
-5. [Limites e Controles](#limites-e-controles)
-6. [Fluxos de Operação](#fluxos-de-operação)
+1. [Visão Geral](#-visão-geral)
+2. [Estrutura de Entidades](#-estrutura-de-entidades)
+3. [Hierarquia e Relacionamentos](#-hierarquia-e-relacionamentos)
+4. [Regras de Validação](#-regras-de-validação)
+5. [Limites e Controles](#-limites-e-controles)
+6. [Fluxos de Operação](#-fluxos-de-operação)
+7. [Constraints e Integridade](#-constraints-e-integridade)
+8. [Contexto de IA para Equipes](#-contexto-de-ia-para-equipes)
+
+## 🔗 Documentos Relacionados
+
+- **[API_FLOWS.md](./docs/API_FLOWS.md)**: Fluxos implementados e endpoints
+- **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**: Padrões de código e arquitetura
+- **[README.md](./README.md)**: Visão geral do projeto
 
 ---
 
@@ -562,5 +574,23 @@ O sistema combina o contexto da equipe com a instrução do usuário para criar 
 
 ---
 
-**Documento criado em**: 2025-11-09
+## 📝 Notas Finais
+
+Este documento deve ser atualizado sempre que:
+
+- Novas regras de negócio forem adicionadas
+- Estrutura de entidades for modificada
+- Novos relacionamentos forem criados
+- Limites ou validações forem alterados
+
+## 🔗 Links Úteis
+
+- [API_FLOWS.md](./docs/API_FLOWS.md) - Ver implementação dos fluxos
+- [ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) - Tratamento de erros
+- [Schema Prisma](./src/infra/database/prisma/schema.prisma) - Schema do banco de dados
+
+---
+
+**Documento criado em**: 2025-11-09  
+**Última atualização**: 2025-12-11  
 **Versão do Schema**: 1.0.0
