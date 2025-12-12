@@ -281,7 +281,3 @@ Este sistema de tratamento de erros garante:
 
 **Documento criado em**: 2025-11-09  
 **Última atualização**: 2025-12-11
-
-```
-
-```
