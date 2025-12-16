@@ -32,8 +32,6 @@ describe('RegisterAdminService', () => {
   let passwordHasher: jest.Mocked<PasswordHasher>;
   let idGenerator: jest.Mocked<IdGenerator>;
   let transactionManager: jest.Mocked<TransactionManager>;
-  let userFactory: UserFactory;
-  let subscriptionFactory: SubscriptionFactory;
 
   const mockUserId = 'user-id-123';
   const mockCompanyId = 'company-id-123';
@@ -143,8 +141,6 @@ describe('RegisterAdminService', () => {
     passwordHasher = module.get('PasswordHasher');
     idGenerator = module.get('IdGenerator');
     transactionManager = module.get('TransactionManager');
-    userFactory = module.get<UserFactory>(UserFactory);
-    subscriptionFactory = module.get<SubscriptionFactory>(SubscriptionFactory);
   });
 
   it('should be defined', () => {
