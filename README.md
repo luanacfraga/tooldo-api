@@ -208,6 +208,8 @@ Para mais detalhes sobre a arquitetura, consulte [MEMORY_BANK_PADROES.md](./MEMO
 - **[COMECE_AQUI.md](./COMECE_AQUI.md)**: Guia rápido para começar com o deploy AWS
 - **[BUSINESS_RULES.md](./BUSINESS_RULES.md)**: Regras de negócio e estrutura de dados
 - **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**: Padrões de código e arquitetura
+- **[STATUS_AWS.md](./STATUS_AWS.md)**: Status atual dos recursos AWS e informações de acesso
+- **[ENDPOINTS_COMPLETOS.md](./ENDPOINTS_COMPLETOS.md)**: Lista completa de endpoints da API
 
 ### Documentação Técnica
 
@@ -217,6 +219,8 @@ Para mais detalhes sobre a arquitetura, consulte [MEMORY_BANK_PADROES.md](./MEMO
 
 ### Documentação de Deploy
 
+- **[.github/README.md](./.github/README.md)**: Configuração da pipeline CI/CD (GitHub Actions)
+- **[STATUS_AWS.md](./STATUS_AWS.md)**: Status atual dos recursos AWS
 - **[docs/AWS_DEPLOY.md](./docs/AWS_DEPLOY.md)**: Guia completo de deploy na AWS
 - **[docs/DEPLOY_STEP_BY_STEP.md](./docs/DEPLOY_STEP_BY_STEP.md)**: Passo a passo detalhado
 - **[docs/SECRETS_MANAGER_GUIDE.md](./docs/SECRETS_MANAGER_GUIDE.md)**: Configuração do Secrets Manager
@@ -270,6 +274,12 @@ npm run test:e2e      # Executa testes end-to-end
 ```
 
 ### Deploy
+
+#### Deploy Automático (GitHub Actions) ⭐ Recomendado
+
+A pipeline de CI/CD está configurada para fazer deploy automaticamente quando você faz push para `main` ou `master`. Veja [.github/README.md](./.github/README.md) para configuração.
+
+#### Deploy Manual
 
 ```bash
 # Build e push para ECR
