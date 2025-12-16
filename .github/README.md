@@ -186,52 +186,12 @@ Este erro indica que as credenciais AWS não estão configuradas corretamente no
    - Clique em `Add secret`
    - Repita para `AWS_SECRET_ACCESS_KEY`
 
-3. **Verificar as credenciais AWS:**
-
-   **Passo a passo detalhado:**
-
-   a. **Acessar o AWS Console:**
-   - Acesse: https://console.aws.amazon.com
-   - Faça login com sua conta AWS
-
-   b. **Navegar para IAM:**
-   - No menu superior, procure por "IAM" ou acesse diretamente: https://console.aws.amazon.com/iam
-   - No menu lateral esquerdo, clique em `Users`
-
-   c. **Selecionar o usuário:**
-   - Encontre o usuário que você usa para o GitHub Actions
-   - Se não tiver um usuário específico, você pode usar um existente ou criar um novo
-   - Clique no nome do usuário para abrir os detalhes
-
-   d. **Acessar Security credentials:**
-   - Na página do usuário, clique na aba `Security credentials`
-   - Role a página até a seção `Access keys`
-
-   e. **Verificar credenciais existentes:**
-   - Se já existir uma Access Key, verifique se está `Active`
-   - Se estiver `Inactive`, você pode ativá-la ou criar uma nova
-   - **IMPORTANTE**: Se você não tem a Secret Access Key salva, não conseguirá recuperá-la. Nesse caso, você precisará criar uma nova
-
-   f. **Criar novas credenciais (se necessário):**
-   - Clique em `Create access key`
-   - Selecione o caso de uso: `Application running outside AWS` ou `Command Line Interface (CLI)`
-   - Marque a caixa de confirmação
-   - Clique em `Next`
-   - (Opcional) Adicione uma descrição como "GitHub Actions CI/CD"
-   - Clique em `Create access key`
-   - **CRÍTICO**: Copie imediatamente:
-     - `Access key ID` (ex: `AKIAIOSFODNN7EXAMPLE`)
-     - `Secret access key` (ex: `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
-   - **ATENÇÃO**: A Secret Access Key só é mostrada UMA VEZ. Se você fechar a janela sem copiar, precisará criar uma nova
-   - Clique em `Done`
-
-   g. **Atualizar os secrets no GitHub:**
-   - Volte ao GitHub: `Settings` → `Secrets and variables` → `Actions`
-   - Se já existir `AWS_ACCESS_KEY_ID`, clique nele e depois em `Update`
-   - Se não existir, clique em `New repository secret`
-   - Cole o `Access key ID` no campo `Value`
-   - Clique em `Update secret` ou `Add secret`
-   - Repita o processo para `AWS_SECRET_ACCESS_KEY` com o `Secret access key`
+3. **Verificar/criar credenciais AWS:**
+   - AWS Console → IAM → Users → Seu usuário → Security credentials
+   - Seção `Access keys` → Verifique se está `Active`
+   - Se necessário, `Create access key` → `Application running outside AWS`
+   - **CRÍTICO**: Copie imediatamente Access Key ID e Secret Access Key (só aparece uma vez)
+   - Atualize os secrets no GitHub: `Settings` → `Secrets and variables` → `Actions`
 
 4. **Verificar permissões do usuário IAM:**
    - O usuário precisa ter as permissões listadas na seção "Permissões Necessárias na AWS" acima
@@ -242,96 +202,40 @@ Este erro indica que as credenciais AWS não estão configuradas corretamente no
    - E: `${{ secrets.AWS_SECRET_ACCESS_KEY }}`
    - Não use variáveis de ambiente ou valores hardcoded
 
-6. **Testar as credenciais localmente (opcional):**
-
-   Você pode testar se as credenciais estão funcionando usando a AWS CLI:
-
+6. **Testar credenciais localmente (opcional):**
    ```bash
-   # Configurar as credenciais temporariamente
-   export AWS_ACCESS_KEY_ID="sua-access-key-id"
-   export AWS_SECRET_ACCESS_KEY="sua-secret-access-key"
-   export AWS_DEFAULT_REGION="us-east-1"
-
-   # Testar acesso ao ECR
+   aws sts get-caller-identity
    aws ecr describe-repositories --repository-names tooldo-api
-
-   # Testar acesso ao ECS
    aws ecs describe-services --cluster tooldo-api --services tooldo-api
    ```
 
-   Se esses comandos funcionarem, suas credenciais estão corretas e têm as permissões necessárias.
-
 ### Erro: "The security token included in the request is invalid"
 
-Este erro indica que as credenciais AWS configuradas no GitHub são inválidas, expiradas ou diferentes das que funcionam localmente.
+Este erro indica que as credenciais AWS no GitHub são inválidas, expiradas ou diferentes das locais.
 
-**⚠️ Diagnóstico Rápido:**
+**Soluções rápidas:**
 
-- Você tem 2 Access Keys ativas no AWS
-- O GitHub pode estar usando uma diferente da que funciona localmente
-- Ou a Secret Access Key no GitHub está incorreta/expirada
-
-**Soluções:**
-
-1. **Verificar se as credenciais no GitHub são as mesmas que funcionam localmente:**
-
+1. **Verificar credenciais locais:**
    ```bash
-   # Ver suas credenciais locais
-   aws configure list
-   # ou
+   aws configure get aws_access_key_id
    cat ~/.aws/credentials
    ```
 
-   - Compare o `AWS_ACCESS_KEY_ID` local com o secret no GitHub
-   - Se forem diferentes, atualize o secret no GitHub
+2. **Atualizar secrets no GitHub:**
+   - Use a mesma `AWS_ACCESS_KEY_ID` que funciona localmente
+   - Verifique se não há espaços extras ao copiar/colar
+   - `AWS_ACCESS_KEY_ID` deve começar com `AKIA`
+   - `AWS_SECRET_ACCESS_KEY` deve ter 40 caracteres
 
-2. **Verificar se há espaços em branco ou caracteres extras:**
-   - Ao copiar/colar as credenciais, podem ter sido adicionados espaços
-   - Edite os secrets no GitHub e remova espaços no início/fim
-   - Certifique-se de que não há quebras de linha
-
-3. **Criar novas credenciais AWS:**
-
-   Se as credenciais expiraram ou você não tem certeza:
-
-   a. Acesse AWS Console → IAM → Users → `luana-fraga` (ou seu usuário)
-   b. Aba `Security credentials`
-   c. Seção `Access keys`
-   d. Se já existir uma key ativa, você pode:
-   - Deletar a antiga (se não souber a secret key)
-   - Criar uma nova
-     e. Clique em `Create access key`
-     f. Copie o `Access key ID` e `Secret access key`
-     g. **IMPORTANTE**: Atualize os secrets no GitHub imediatamente
-
-4. **Atualizar os secrets no GitHub:**
-   - Acesse: `Settings` → `Secrets and variables` → `Actions`
-   - Clique em `AWS_ACCESS_KEY_ID` → `Update`
-   - Cole o novo `Access key ID` (sem espaços)
-   - Clique em `Update secret`
-   - Repita para `AWS_SECRET_ACCESS_KEY`
-
-5. **Verificar o formato das credenciais:**
-   - `AWS_ACCESS_KEY_ID` deve começar com `AKIA` (ex: `AKIAIOSFODNN7EXAMPLE`)
-   - `AWS_SECRET_ACCESS_KEY` deve ter 40 caracteres (ex: `wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`)
-   - Não deve conter espaços, quebras de linha ou caracteres especiais além do necessário
-
-6. **Testar as novas credenciais localmente antes de usar no GitHub:**
-
-   ```bash
-   export AWS_ACCESS_KEY_ID="nova-access-key-id"
-   export AWS_SECRET_ACCESS_KEY="nova-secret-access-key"
-   export AWS_DEFAULT_REGION="us-east-1"
-
-   aws sts get-caller-identity
-   aws ecr describe-repositories --repository-names tooldo-api
-   ```
+3. **Se necessário, criar novas credenciais:**
+   - AWS Console → IAM → Users → Security credentials → Create access key
+   - Copie imediatamente (Secret Key só aparece uma vez)
+   - Atualize ambos os secrets no GitHub
 
 ### Erro: "AWS credentials not configured"
 
-- Verifique se os secrets `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` estão configurados
-- Verifique se as credenciais estão corretas
-- Verifique se os nomes dos secrets estão exatamente como no workflow (case-sensitive)
+- Verifique se os secrets `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` existem no GitHub
+- Verifique se os nomes estão exatamente como acima (case-sensitive)
 
 ### Erro: "Repository not found"
 
