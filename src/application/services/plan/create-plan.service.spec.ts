@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/require-await */
 import { Plan } from '@/core/domain/plan/plan.entity';
 import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import type { IdGenerator } from '@/core/ports/services/id-generator.port';

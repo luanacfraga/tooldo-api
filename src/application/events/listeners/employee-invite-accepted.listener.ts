@@ -55,7 +55,9 @@ export class EmployeeInviteAcceptedListener {
       );
     } catch (error) {
       this.logger.error(
-        `Failed to process employee invite accepted event: ${error}`,
+        `Failed to process employee invite accepted event: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
       );
     }
   }

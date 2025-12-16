@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import {

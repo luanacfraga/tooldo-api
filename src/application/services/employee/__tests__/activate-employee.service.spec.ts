@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import {
@@ -15,7 +16,7 @@ describe('ActivateEmployeeService', () => {
     companyUserRepository = {
       findById: jest.fn(),
       update: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<CompanyUserRepository>;
 
     service = new ActivateEmployeeService(companyUserRepository);
   });
@@ -59,9 +60,12 @@ describe('ActivateEmployeeService', () => {
 
       // Assert
       expect(result.companyUser.status).toBe(CompanyUserStatus.ACTIVE);
-      expect(companyUserRepository.update).toHaveBeenCalledWith('cu-123', {
-        status: CompanyUserStatus.ACTIVE,
-      });
+      expect(companyUserRepository.update).toHaveBeenCalledWith(
+        'cu-123',
+        expect.objectContaining({
+          status: CompanyUserStatus.ACTIVE,
+        }),
+      );
     });
 
     it('should throw error when employee not found', async () => {

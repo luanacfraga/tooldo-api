@@ -216,6 +216,7 @@ Para mais detalhes sobre a arquitetura, consulte [MEMORY_BANK_PADROES.md](./MEMO
 - **[docs/API_FLOWS.md](./docs/API_FLOWS.md)**: Fluxos da API e endpoints disponíveis
 - **[docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)**: Sistema de tratamento de erros
 - **[docs/QUICK_REFERENCE.md](./docs/QUICK_REFERENCE.md)**: Referência rápida para deploy
+- **[docs/PRE_DEPLOY_CHECKLIST.md](./docs/PRE_DEPLOY_CHECKLIST.md)**: Checklist de validação pré-deploy
 
 ### Documentação de Deploy
 
@@ -261,7 +262,8 @@ npm run lint:check    # Verifica sem corrigir
 npm run format        # Formata código com Prettier
 npm run format:check  # Verifica formatação
 npm run typecheck     # Verifica tipos TypeScript
-npm run validate      # Executa todas as validações
+npm run validate      # Executa todas as validações (typecheck + lint + format)
+npm run pre-deploy    # Validação completa pré-deploy (recomendado antes de publicar)
 ```
 
 ### Testes
@@ -346,9 +348,10 @@ Consulte a documentação completa:
 ## 🤝 Contribuindo
 
 1. Leia os padrões de código em [MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)
-2. Execute `npm run validate` antes de commitar
-3. Siga os padrões de commit do projeto
-4. Crie testes para novas funcionalidades
+2. Execute `npm run pre-deploy` antes de fazer deploy ou push para produção
+3. Execute `npm run validate` antes de commitar
+4. Siga os padrões de commit do projeto
+5. Crie testes para novas funcionalidades
 
 ## 📄 Licença
 

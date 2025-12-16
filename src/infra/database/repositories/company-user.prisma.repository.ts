@@ -110,7 +110,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
 
     const userIds = companyUsersWithoutUser
       .map((cu) => cu.userId)
-      .filter((id): id is string => id != null);
+      .filter((id): id is string => id !== null);
 
     const users: PrismaUser[] =
       userIds.length > 0
@@ -118,7 +118,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
             await Promise.all(
               userIds.map((id) => client.user.findUnique({ where: { id } })),
             )
-          ).filter((user): user is PrismaUser => user != null)
+          ).filter((user): user is PrismaUser => user !== null)
         : [];
 
     const userMap = new Map(users.map((u) => [u.id, u]));
@@ -165,7 +165,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
 
     const userIds = companyUsersWithoutUser
       .map((cu) => cu.userId)
-      .filter((id): id is string => id != null);
+      .filter((id): id is string => id !== null);
 
     const users: PrismaUser[] =
       userIds.length > 0
@@ -173,7 +173,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
             await Promise.all(
               userIds.map((id) => client.user.findUnique({ where: { id } })),
             )
-          ).filter((user): user is PrismaUser => user != null)
+          ).filter((user): user is PrismaUser => user !== null)
         : [];
 
     const userMap = new Map(users.map((u) => [u.id, u]));
@@ -235,7 +235,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
 
       const userIds = allCompanyUsers
         .map((cu) => cu.userId)
-        .filter((id): id is string => id != null);
+        .filter((id): id is string => id !== null);
 
       const users: PrismaUser[] =
         userIds.length > 0
@@ -243,7 +243,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
               await Promise.all(
                 userIds.map((id) => client.user.findUnique({ where: { id } })),
               )
-            ).filter((user): user is PrismaUser => user != null)
+            ).filter((user): user is PrismaUser => user !== null)
           : [];
 
       const userMap = new Map(users.map((u) => [u.id, u]));
@@ -256,13 +256,16 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         const aValue = a.user?.[sortBy as keyof PrismaUser];
         const bValue = b.user?.[sortBy as keyof PrismaUser];
 
-        if (aValue == null && bValue == null) {
+        if (
+          (aValue === null || aValue === undefined) &&
+          (bValue === null || bValue === undefined)
+        ) {
           return 0;
         }
-        if (aValue == null) {
+        if (aValue === null || aValue === undefined) {
           return sortOrder === 'asc' ? 1 : -1;
         }
-        if (bValue == null) {
+        if (bValue === null || bValue === undefined) {
           return sortOrder === 'asc' ? -1 : 1;
         }
 
@@ -282,7 +285,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
 
       const userIds = companyUsersWithoutUser
         .map((cu) => cu.userId)
-        .filter((id): id is string => id != null);
+        .filter((id): id is string => id !== null);
 
       const users: PrismaUser[] =
         userIds.length > 0
@@ -290,7 +293,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
               await Promise.all(
                 userIds.map((id) => client.user.findUnique({ where: { id } })),
               )
-            ).filter((user): user is PrismaUser => user != null)
+            ).filter((user): user is PrismaUser => user !== null)
           : [];
 
       const userMap = new Map(users.map((u) => [u.id, u]));

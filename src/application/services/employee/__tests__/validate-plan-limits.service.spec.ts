@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { DomainValidationException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';

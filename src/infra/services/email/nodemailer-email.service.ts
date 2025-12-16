@@ -28,17 +28,17 @@ export class NodemailerEmailService implements EmailService {
 
   constructor() {
     this.fromEmail =
-      process.env.EMAIL_FROM || process.env.SMTP_USER || 'noreply@tooldo.com';
-    this.fromName = process.env.EMAIL_FROM_NAME || 'Tooldo';
+      process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? 'noreply@tooldo.com';
+    this.fromName = process.env.EMAIL_FROM_NAME ?? 'Tooldo';
 
     // Configuração do transporter baseado nas variáveis de ambiente
-    const emailProvider = process.env.EMAIL_PROVIDER || 'smtp';
+    const emailProvider = process.env.EMAIL_PROVIDER ?? 'smtp';
 
     if (emailProvider === 'aws-ses') {
       // Configuração para AWS SES usando SMTP
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'email-smtp.us-east-1.amazonaws.com',
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        host: process.env.SMTP_HOST ?? 'email-smtp.us-east-1.amazonaws.com',
+        port: parseInt(process.env.SMTP_PORT ?? '587', 10),
         secure: process.env.SMTP_SECURE === 'true', // true para 465, false para outras portas
         auth: {
           user: process.env.SMTP_USER,
@@ -48,8 +48,8 @@ export class NodemailerEmailService implements EmailService {
     } else {
       // Configuração SMTP genérica
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
+        host: process.env.SMTP_HOST ?? 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT ?? '587', 10),
         secure: process.env.SMTP_SECURE === 'true', // true para 465, false para outras portas
         auth: {
           user: process.env.SMTP_USER,
@@ -62,7 +62,7 @@ export class NodemailerEmailService implements EmailService {
     }
 
     // Verificar configuração na inicialização
-    this.verifyConnection();
+    void this.verifyConnection();
   }
 
   private async verifyConnection(): Promise<void> {

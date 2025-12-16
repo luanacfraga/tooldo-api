@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import { Company } from '@/core/domain/company/company.entity';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
@@ -55,6 +57,7 @@ describe('ListEmployeesService', () => {
     companyUserRepository = {
       findByCompanyId: jest.fn(),
       findByCompanyIdAndStatus: jest.fn(),
+      findByCompanyIdPaginated: jest.fn(),
     } as any;
 
     service = new ListEmployeesService(
@@ -67,16 +70,29 @@ describe('ListEmployeesService', () => {
     it('should list all employees when no status filter', async () => {
       // Arrange
       companyRepository.findById.mockResolvedValue(mockCompany);
-      companyUserRepository.findByCompanyId.mockResolvedValue(mockEmployees);
+      companyUserRepository.findByCompanyIdPaginated.mockResolvedValue({
+        employees: mockEmployees,
+        total: mockEmployees.length,
+      });
 
       // Act
       const result = await service.execute({ companyId: 'company-123' });
 
       // Assert
       expect(result.employees).toEqual(mockEmployees);
-      expect(companyUserRepository.findByCompanyId).toHaveBeenCalledWith(
-        'company-123',
-      );
+      expect(result.total).toBe(mockEmployees.length);
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(10);
+      expect(result.totalPages).toBe(1);
+      expect(
+        companyUserRepository.findByCompanyIdPaginated,
+      ).toHaveBeenCalledWith('company-123', {
+        page: 1,
+        limit: 10,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+        status: undefined,
+      });
     });
 
     it('should list employees filtered by status', async () => {
@@ -85,9 +101,10 @@ describe('ListEmployeesService', () => {
         (e) => e.status === CompanyUserStatus.ACTIVE,
       );
       companyRepository.findById.mockResolvedValue(mockCompany);
-      companyUserRepository.findByCompanyIdAndStatus.mockResolvedValue(
-        activeEmployees,
-      );
+      companyUserRepository.findByCompanyIdPaginated.mockResolvedValue({
+        employees: activeEmployees,
+        total: activeEmployees.length,
+      });
 
       // Act
       const result = await service.execute({
@@ -97,9 +114,16 @@ describe('ListEmployeesService', () => {
 
       // Assert
       expect(result.employees).toEqual(activeEmployees);
+      expect(result.total).toBe(activeEmployees.length);
       expect(
-        companyUserRepository.findByCompanyIdAndStatus,
-      ).toHaveBeenCalledWith('company-123', CompanyUserStatus.ACTIVE);
+        companyUserRepository.findByCompanyIdPaginated,
+      ).toHaveBeenCalledWith('company-123', {
+        page: 1,
+        limit: 10,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+        status: CompanyUserStatus.ACTIVE,
+      });
     });
 
     it('should throw error when company not found', async () => {
@@ -115,13 +139,18 @@ describe('ListEmployeesService', () => {
     it('should return empty array when no employees', async () => {
       // Arrange
       companyRepository.findById.mockResolvedValue(mockCompany);
-      companyUserRepository.findByCompanyId.mockResolvedValue([]);
+      companyUserRepository.findByCompanyIdPaginated.mockResolvedValue({
+        employees: [],
+        total: 0,
+      });
 
       // Act
       const result = await service.execute({ companyId: 'company-123' });
 
       // Assert
       expect(result.employees).toEqual([]);
+      expect(result.total).toBe(0);
+      expect(result.totalPages).toBe(0);
     });
   });
 });

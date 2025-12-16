@@ -7,9 +7,8 @@ import { ListCompaniesService } from '@/application/services/company/list-compan
 import { UpdateCompanyService } from '@/application/services/company/update-company.service';
 import { Company } from '@/core/domain/company/company.entity';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
-import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
-import { Inject } from '@nestjs/common';
+import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import {
   Body,
   Controller,
@@ -17,6 +16,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   Post,
   Put,

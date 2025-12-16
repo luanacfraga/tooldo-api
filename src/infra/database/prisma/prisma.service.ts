@@ -38,8 +38,8 @@ export class PrismaService
     const dbUser = process.env.DB_USER;
     const dbPass = process.env.DB_PASS;
     const dbName = process.env.DB_NAME;
-    const dbPort = process.env.DB_PORT || '5432';
-    const dbSchema = process.env.DB_SCHEMA || 'public';
+    const dbPort = process.env.DB_PORT ?? '5432';
+    const dbSchema = process.env.DB_SCHEMA ?? 'public';
 
     if (dbHost && dbUser && dbPass && dbName) {
       // Fazer URL encoding da senha para tratar caracteres especiais
