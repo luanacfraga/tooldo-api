@@ -213,10 +213,29 @@ jobs:
                 --region ${{ env.AWS_REGION }} \
                 --query 'tasks[*].[taskArn,stoppedReason,containers[0].reason,containers[0].exitCode]' \
                 --output table || true
+
+              echo ""
+              echo "== describe-tasks (STOPPED, raw) =="
+              aws ecs describe-tasks \
+                --cluster ${{ env.ECS_CLUSTER }} \
+                --tasks $STOPPED_TASK_ARNS \
+                --region ${{ env.AWS_REGION }} \
+                --output json || true
             fi
 
             echo ""
             echo "Dica: a causa quase sempre aparece em STOPPED reason (ex.: health check falhou, falta de env/secrets, erro de conexão com DB)."
+
+            echo ""
+            echo "== CloudWatch logs (últimos 200 eventos, /ecs/tooldo-api) =="
+            LOG_GROUP="/ecs/tooldo-api"
+            # filter-log-events não depende de logStreamName (evita ResourceNotFoundException)
+            aws logs filter-log-events \
+              --log-group-name "$LOG_GROUP" \
+              --limit 200 \
+              --region ${{ env.AWS_REGION }} \
+              --query 'events[*].message' \
+              --output text || true
             exit $WAIT_EXIT_CODE
           fi
 
