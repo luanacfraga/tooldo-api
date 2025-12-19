@@ -283,10 +283,8 @@ Se qualquer validação falhar no CI/CD, o deploy não será executado.
 
 ## 🔗 Referências
 
-- [README.md](../README.md) - Documentação principal
-- [AWS_DEPLOY.md](./AWS_DEPLOY.md) - Guia de deploy AWS
-- [DEPLOY_STEP_BY_STEP.md](./DEPLOY_STEP_BY_STEP.md) - Passo a passo de deploy
-- [MEMORY_BANK_PADROES.md](../MEMORY_BANK_PADROES.md) - Padrões de código
+- `AWS_DEPLOY.md` (infra do zero)
+- `DEPLOY.md` (infra já pronta)
 
 ---
 
