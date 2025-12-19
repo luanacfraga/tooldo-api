@@ -72,6 +72,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Set image tag
         id: image-tag
         run: |
@@ -83,32 +89,36 @@ jobs:
             echo "tag=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build and push image to Amazon ECR (linux/amd64)
         id: build-image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.tag }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+      - name: Verify image platform in registry (should be linux/amd64)
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ steps.image-tag.outputs.tag }}
         run: |
-          docker build \
-            --platform linux/amd64 \
-            --provenance=false \
-            --sbom=false \
-            -t $ECR_REPOSITORY:$IMAGE_TAG \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
-            .
+          set -e
+          echo "== imagetools inspect =="
+          docker buildx imagetools inspect "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "ecr_registry=$ECR_REGISTRY" >> $GITHUB_OUTPUT
+          echo ""
+          echo "== platform check (expect linux/amd64) =="
+          docker buildx imagetools inspect "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" | grep -E "Platform:|linux/amd64" || true
 
     outputs:
-      image: ${{ steps.build-image.outputs.image }}
-      image_tag: ${{ steps.build-image.outputs.image_tag }}
-      ecr_registry: ${{ steps.build-image.outputs.ecr_registry }}
+      image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.tag }}
+      image_tag: ${{ steps.image-tag.outputs.tag }}
+      ecr_registry: ${{ steps.login-ecr.outputs.registry }}
 
   deploy:
     name: Deploy to ECS
@@ -162,15 +172,52 @@ jobs:
       - name: Wait for service to stabilize
         run: |
           echo "⏳ Aguardando estabilização do serviço..."
-          set +e
-          aws ecs wait services-stable \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --services ${{ env.ECS_SERVICE }} \
-            --region ${{ env.AWS_REGION }} \
-            --delay 30 \
-            --max-attempts 40
-          WAIT_EXIT_CODE=$?
-          set -e
+          echo "AWS CLI: $(aws --version || true)"
+
+          # Alguns ambientes não suportam --delay/--max-attempts no waiter.
+          # Então fazemos um wait manual (read-only) via describe-services.
+          MAX_ATTEMPTS=60
+          SLEEP_SECONDS=20
+          WAIT_EXIT_CODE=1
+
+          for i in $(seq 1 "$MAX_ATTEMPTS"); do
+            DESIRED=$(aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.ECS_SERVICE }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'services[0].desiredCount' \
+              --output text)
+
+            RUNNING=$(aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.ECS_SERVICE }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'services[0].runningCount' \
+              --output text)
+
+            PENDING=$(aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.ECS_SERVICE }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'services[0].pendingCount' \
+              --output text)
+
+            IN_PROGRESS=$(aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.ECS_SERVICE }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'length(services[0].deployments[?rolloutState==`IN_PROGRESS`])' \
+              --output text)
+
+            echo "tentativa $i/$MAX_ATTEMPTS: desired=$DESIRED running=$RUNNING pending=$PENDING deployments_in_progress=$IN_PROGRESS"
+
+            if [ "$DESIRED" = "$RUNNING" ] && [ "$PENDING" = "0" ] && [ "$IN_PROGRESS" = "0" ]; then
+              WAIT_EXIT_CODE=0
+              break
+            fi
+
+            sleep "$SLEEP_SECONDS"
+          done
 
           if [ "$WAIT_EXIT_CODE" -ne 0 ]; then
             echo "❌ Serviço não estabilizou (exit code: $WAIT_EXIT_CODE). Diagnóstico rápido:"
