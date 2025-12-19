@@ -123,6 +123,34 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Preflight (ECS service status before deploy)
+        run: |
+          echo "== describe-services (before) =="
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'services[0].[status,desiredCount,runningCount,pendingCount,taskDefinition]' \
+            --output table
+
+          echo ""
+          echo "== events (últimos 10) =="
+          aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --query 'services[0].events[0:10].[createdAt,message]' \
+            --output table
+
+          echo ""
+          echo "== tasks RUNNING =="
+          aws ecs list-tasks \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service-name ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }} \
+            --desired-status RUNNING \
+            --output table || true
+
       - name: Update ECS service
         run: |
           aws ecs update-service \
@@ -134,10 +162,64 @@ jobs:
       - name: Wait for service to stabilize
         run: |
           echo "⏳ Aguardando estabilização do serviço..."
+          set +e
           aws ecs wait services-stable \
             --cluster ${{ env.ECS_CLUSTER }} \
             --services ${{ env.ECS_SERVICE }} \
-            --region ${{ env.AWS_REGION }}
+            --region ${{ env.AWS_REGION }} \
+            --delay 30 \
+            --max-attempts 40
+          WAIT_EXIT_CODE=$?
+          set -e
+
+          if [ "$WAIT_EXIT_CODE" -ne 0 ]; then
+            echo "❌ Serviço não estabilizou (exit code: $WAIT_EXIT_CODE). Diagnóstico rápido:"
+            echo ""
+
+            echo "== describe-services (deployments) =="
+            aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.ECS_SERVICE }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'services[0].deployments[*].[id,status,rolloutState,rolloutStateReason,taskDefinition,desiredCount,runningCount,pendingCount,failedTasks]' \
+              --output table || true
+
+            echo ""
+            echo "== events (últimos 15) =="
+            aws ecs describe-services \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --services ${{ env.ECS_SERVICE }} \
+              --region ${{ env.AWS_REGION }} \
+              --query 'services[0].events[0:15].[createdAt,message]' \
+              --output table || true
+
+            echo ""
+            echo "== list-tasks (STOPPED, últimos 5) =="
+            STOPPED_TASK_ARNS=$(aws ecs list-tasks \
+              --cluster ${{ env.ECS_CLUSTER }} \
+              --service-name ${{ env.ECS_SERVICE }} \
+              --desired-status STOPPED \
+              --region ${{ env.AWS_REGION }} \
+              --query 'taskArns[0:5]' \
+              --output text)
+            echo "$STOPPED_TASK_ARNS"
+
+            if [ -n "$STOPPED_TASK_ARNS" ] && [ "$STOPPED_TASK_ARNS" != "None" ]; then
+              echo ""
+              echo "== describe-tasks (STOPPED reason) =="
+              aws ecs describe-tasks \
+                --cluster ${{ env.ECS_CLUSTER }} \
+                --tasks $STOPPED_TASK_ARNS \
+                --region ${{ env.AWS_REGION }} \
+                --query 'tasks[*].[taskArn,stoppedReason,containers[0].reason,containers[0].exitCode]' \
+                --output table || true
+            fi
+
+            echo ""
+            echo "Dica: a causa quase sempre aparece em STOPPED reason (ex.: health check falhou, falta de env/secrets, erro de conexão com DB)."
+            exit $WAIT_EXIT_CODE
+          fi
+
           echo "✅ Serviço estabilizado!"
 
       - name: Deployment summary
