@@ -113,7 +113,17 @@ jobs:
 
           echo ""
           echo "== platform check (expect linux/amd64) =="
-          docker buildx imagetools inspect "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" | grep -E "Platform:|linux/amd64" || true
+          # imagetools inspect pode não imprimir Platform em manifest single-arch.
+          # A verificação mais confiável é pull + docker image inspect.
+          docker pull "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+          OS_ARCH=$(docker image inspect "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" --format '{{.Os}}/{{.Architecture}}')
+          echo "Image OS/Arch: $OS_ARCH"
+
+          if [ "$OS_ARCH" != "linux/amd64" ]; then
+            echo "❌ Arquitetura incorreta. Esperado: linux/amd64. Obtido: $OS_ARCH"
+            exit 1
+          fi
 
     outputs:
       image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ steps.image-tag.outputs.tag }}
