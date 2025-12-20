@@ -17,9 +17,9 @@ Este documento define todas as regras de negócio, estrutura de entidades, relac
 
 ## 🔗 Documentos Relacionados
 
-- **[API_FLOWS.md](./docs/API_FLOWS.md)**: Fluxos implementados e endpoints
-- **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**: Padrões de código e arquitetura
 - **[README.md](./README.md)**: Visão geral do projeto
+- **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**: Padrões de código e arquitetura
+- **[docs/](./docs/)**: Documentação técnica completa
 
 ---
 
@@ -585,8 +585,8 @@ Este documento deve ser atualizado sempre que:
 
 ## 🔗 Links Úteis
 
-- [API_FLOWS.md](./docs/API_FLOWS.md) - Ver implementação dos fluxos
-- [ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) - Tratamento de erros
+- [README.md](./README.md) - Visão geral do projeto
+- [docs/](./docs/) - Documentação técnica completa
 - [Schema Prisma](./src/infra/database/prisma/schema.prisma) - Schema do banco de dados
 
 ---

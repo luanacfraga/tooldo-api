@@ -2,14 +2,14 @@
 
 API REST desenvolvida com NestJS para a plataforma Tooldo - sistema de gestão empresarial com controle de planos, empresas, equipes e uso de IA.
 
+## 🚀 Comece Aqui
+
+**Novo no projeto?** Siga o guia rápido: **[COMECE_AQUI.md](./COMECE_AQUI.md)**
+
 ## 📋 Índice
 
 - [Sobre o Projeto](#sobre-o-projeto)
 - [Tecnologias](#tecnologias)
-- [Pré-requisitos](#pré-requisitos)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
-- [Executando o Projeto](#executando-o-projeto)
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Documentação](#documentação)
 - [Scripts Disponíveis](#scripts-disponíveis)
@@ -43,130 +43,7 @@ Tooldo é uma plataforma de gestão que permite:
 - **Testes**: Jest
 - **Arquitetura**: Hexagonal (Clean Architecture)
 
-## 📦 Pré-requisitos
-
-- Node.js 18+ e npm
-- PostgreSQL 14+
-- Docker (opcional, para desenvolvimento com docker-compose)
-
-## 🚀 Instalação
-
-### 1. Clone o repositório
-
-```bash
-git clone <repository-url>
-cd weedu-api
-```
-
-### 2. Instale as dependências
-
-```bash
-npm install
-```
-
-### 3. Configure as variáveis de ambiente
-
-Copie o arquivo `.env.example` para `.env` e configure as variáveis:
-
-```bash
-cp .env.example .env
-```
-
-Edite o arquivo `.env` com suas configurações:
-
-```env
-# Banco de Dados
-DATABASE_URL="postgresql://user:password@localhost:5432/tooldo_db?schema=public"
-
-# JWT
-JWT_SECRET="your-secret-key-change-me"
-JWT_EXPIRES_IN="7d"
-
-# Aplicação
-NODE_ENV="development"
-PORT=3000
-FRONTEND_URL="http://localhost:3001"
-
-# Email (Opcional - se não configurado, emails serão logados no console)
-SMTP_USER=""
-SMTP_PASSWORD=""
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT="587"
-EMAIL_FROM="noreply@tooldo.com"
-EMAIL_FROM_NAME="Tooldo"
-```
-
-### 4. Configure o banco de dados
-
-```bash
-# Gerar cliente Prisma
-npm run prisma:generate
-
-# Executar migrações
-npm run prisma:migrate
-```
-
-## ⚙️ Configuração
-
-### Variáveis de Ambiente
-
-#### Obrigatórias
-
-- `DATABASE_URL`: String de conexão PostgreSQL
-- `JWT_SECRET`: Chave secreta para assinatura de tokens JWT (mínimo 32 caracteres)
-
-#### Opcionais
-
-- `JWT_EXPIRES_IN`: Tempo de expiração do token (padrão: `7d`)
-- `NODE_ENV`: Ambiente de execução (padrão: `development`)
-- `PORT`: Porta da aplicação (padrão: `3000`)
-- `FRONTEND_URL`: URL do frontend para links de email
-- `ALLOWED_ORIGINS`: Origens permitidas para CORS (separadas por vírgula)
-
-#### Configuração de Email
-
-Para habilitar o envio real de emails, configure:
-
-- `SMTP_USER`: Usuário do servidor SMTP
-- `SMTP_PASSWORD`: Senha do servidor SMTP
-- `SMTP_HOST`: Host do servidor SMTP (padrão: `smtp.gmail.com`)
-- `SMTP_PORT`: Porta do servidor SMTP (padrão: `587`)
-- `EMAIL_FROM`: Email remetente
-- `EMAIL_FROM_NAME`: Nome do remetente
-
-**Nota**: Se `SMTP_USER` e `SMTP_PASSWORD` não estiverem configurados, os emails serão apenas logados no console (modo desenvolvimento).
-
-## 🏃 Executando o Projeto
-
-### Desenvolvimento
-
-```bash
-# Modo watch (recompila automaticamente)
-npm run start:dev
-
-# Modo debug
-npm run start:debug
-```
-
-### Produção
-
-```bash
-# Build
-npm run build
-
-# Executar
-npm run start:prod
-```
-
-### Docker Compose (Desenvolvimento)
-
-```bash
-# Iniciar banco de dados
-docker-compose up -d
-
-# Executar migrações
-npm run prisma:migrate
-```
+Para detalhes completos, consulte: **[docs/TECNOLOGIAS.md](./docs/TECNOLOGIAS.md)**
 
 ## 📁 Estrutura do Projeto
 
@@ -199,35 +76,42 @@ src/
     └── constants/         # Constantes e mensagens
 ```
 
-Para mais detalhes sobre a arquitetura, consulte [MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md).
+Para mais detalhes sobre a arquitetura, consulte: **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**
 
 ## 📚 Documentação
 
-### Documentação Principal
+### 📖 Documentação Principal
 
-- **[COMECE_AQUI.md](./COMECE_AQUI.md)**: Guia rápido para começar com o deploy AWS
+- **[COMECE_AQUI.md](./COMECE_AQUI.md)**: Guia rápido para começar
 - **[BUSINESS_RULES.md](./BUSINESS_RULES.md)**: Regras de negócio e estrutura de dados
 - **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**: Padrões de código e arquitetura
-- **[STATUS_AWS.md](./STATUS_AWS.md)**: Status atual dos recursos AWS e informações de acesso
-- **[ENDPOINTS_COMPLETOS.md](./ENDPOINTS_COMPLETOS.md)**: Lista completa de endpoints da API
+- **[STATUS_AWS.md](./STATUS_AWS.md)**: Status atual dos recursos AWS
 
-### Documentação Técnica
+### 📂 Documentação Técnica Detalhada
 
-- **[docs/API_FLOWS.md](./docs/API_FLOWS.md)**: Fluxos da API e endpoints disponíveis
-- **[docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)**: Sistema de tratamento de erros
-- **[docs/QUICK_REFERENCE.md](./docs/QUICK_REFERENCE.md)**: Referência rápida para deploy
+Toda a documentação técnica está organizada na pasta **[docs/](./docs/)**:
+
+#### 🚀 Para Começar
+
+- **[docs/SETUP_LOCAL.md](./docs/SETUP_LOCAL.md)**: Setup completo para desenvolvimento local
+- **[docs/AWS_ACCESS.md](./docs/AWS_ACCESS.md)**: Configuração de acesso AWS (onboarding)
+- ⭐ **[docs/CICD.md](./docs/CICD.md)**: Deploy automático via Git (recomendado)
+- **[docs/DEPLOY.md](./docs/DEPLOY.md)**: Deploy manual quando infraestrutura já existe
+
+#### 🏗️ Infraestrutura
+
+- **[docs/AWS_DEPLOY.md](./docs/AWS_DEPLOY.md)**: Guia completo para criar infraestrutura AWS do zero
+
+#### 🔧 Operação
+
+- **[docs/SCRIPTS.md](./docs/SCRIPTS.md)**: Documentação completa dos scripts disponíveis
 - **[docs/PRE_DEPLOY_CHECKLIST.md](./docs/PRE_DEPLOY_CHECKLIST.md)**: Checklist de validação pré-deploy
 
-### Documentação de Deploy
+#### 📖 Referência Técnica
 
-- **[.github/README.md](./.github/README.md)**: Configuração da pipeline CI/CD (GitHub Actions)
-- **[STATUS_AWS.md](./STATUS_AWS.md)**: Status atual dos recursos AWS
-- **[docs/AWS_DEPLOY.md](./docs/AWS_DEPLOY.md)**: Guia completo de deploy na AWS
-- **[docs/DEPLOY_STEP_BY_STEP.md](./docs/DEPLOY_STEP_BY_STEP.md)**: Passo a passo detalhado
-- **[docs/SECRETS_MANAGER_GUIDE.md](./docs/SECRETS_MANAGER_GUIDE.md)**: Configuração do Secrets Manager
-- **[scripts/README.md](./scripts/README.md)**: Documentação dos scripts de deploy
+- **[docs/TECNOLOGIAS.md](./docs/TECNOLOGIAS.md)**: Detalhes técnicos das tecnologias usadas
 
-### Swagger/OpenAPI
+### 📄 Swagger/OpenAPI
 
 Após iniciar o servidor, acesse a documentação interativa:
 
@@ -241,8 +125,8 @@ http://localhost:3000/api/docs
 
 ```bash
 npm run start:dev      # Inicia em modo watch
-npm run start:debug   # Inicia em modo debug
-npm run build         # Compila o projeto
+npm run start:debug    # Inicia em modo debug
+npm run build          # Compila o projeto
 ```
 
 ### Banco de Dados
@@ -277,42 +161,23 @@ npm run test:e2e      # Executa testes end-to-end
 
 ### Deploy
 
-#### Deploy Automático (GitHub Actions) ⭐ Recomendado
+#### ⭐ Deploy Automático (Recomendado)
 
-A pipeline de CI/CD está configurada para fazer deploy automaticamente quando você faz push para `main` ou `master`. Veja [.github/README.md](./.github/README.md) para configuração.
+O projeto possui **pipeline CI/CD** configurada com GitHub Actions que faz deploy automaticamente:
+
+- **Push para `main` ou `master`**: Deploy automático completo
+- **Tags `v*`**: Deploy por versão
+- **Manual**: Via GitHub Actions UI
+
+Consulte: **[docs/CICD.md](./docs/CICD.md)** para detalhes da pipeline.
 
 #### Deploy Manual
 
-```bash
-# Build e push para ECR
-./scripts/build-and-push-ecr.sh latest
+Para deploy manual ou quando a infraestrutura precisa ser atualizada:
 
-# Deploy completo
-./scripts/deploy.sh latest tooldo-api tooldo-api
-
-# Executar migrações
-./scripts/run-migrations.sh <cluster> <task-def> <subnet1> <subnet2> <sg>
-```
-
-## 🧪 Testes
-
-### Executar Testes
-
-```bash
-# Todos os testes
-npm run test
-
-# Testes específicos
-npm run test -- employee.service.spec.ts
-
-# Com cobertura
-npm run test:cov
-```
-
-### Estrutura de Testes
-
-- Testes unitários: `src/**/*.spec.ts`
-- Testes E2E: `test/**/*.e2e-spec.ts`
+- **[COMECE_AQUI.md](./COMECE_AQUI.md)**: Guia rápido
+- **[docs/DEPLOY.md](./docs/DEPLOY.md)**: Deploy manual quando infra já existe
+- **[docs/AWS_DEPLOY.md](./docs/AWS_DEPLOY.md)**: Criar infraestrutura do zero
 
 ## 📝 Padrões de Código
 
@@ -328,26 +193,9 @@ Este projeto segue padrões rigorosos de código. Consulte:
 - ❌ **NUNCA** usar tipos `any` sem justificativa
 - ❌ **NUNCA** desabilitar regras do ESLint no código
 
-## 🚀 Deploy
-
-### Deploy Local
-
-```bash
-npm run build
-npm run start:prod
-```
-
-### Deploy AWS
-
-Consulte a documentação completa:
-
-- **[COMECE_AQUI.md](./COMECE_AQUI.md)**: Guia rápido
-- **[docs/DEPLOY_STEP_BY_STEP.md](./docs/DEPLOY_STEP_BY_STEP.md)**: Passo a passo detalhado
-- **[docs/AWS_DEPLOY.md](./docs/AWS_DEPLOY.md)**: Guia completo
-
 ## 🤝 Contribuindo
 
-1. Leia os padrões de código em [MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)
+1. Leia os padrões de código em **[MEMORY_BANK_PADROES.md](./MEMORY_BANK_PADROES.md)**
 2. Execute `npm run pre-deploy` antes de fazer deploy ou push para produção
 3. Execute `npm run validate` antes de commitar
 4. Siga os padrões de commit do projeto
@@ -361,7 +209,7 @@ Este projeto é privado e proprietário.
 
 Para dúvidas ou problemas:
 
-1. Consulte a documentação em `docs/`
+1. Consulte a documentação em **[docs/](./docs/)**
 2. Verifique os logs da aplicação
 3. Consulte a seção de Troubleshooting nos guias de deploy
 

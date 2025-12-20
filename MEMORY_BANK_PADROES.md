@@ -20,8 +20,7 @@ Este documento define os padrões que devem ser seguidos em **TODAS** as impleme
 
 - **[README.md](./README.md)**: Visão geral do projeto
 - **[BUSINESS_RULES.md](./BUSINESS_RULES.md)**: Regras de negócio
-- **[API_FLOWS.md](./docs/API_FLOWS.md)**: Fluxos da API
-- **[ERROR_HANDLING.md](./docs/ERROR_HANDLING.md)**: Tratamento de erros
+- **[docs/](./docs/)**: Documentação técnica completa
 
 ## 🚫 REGRAS ABSOLUTAS
 
@@ -895,8 +894,7 @@ export class RolesGuard implements CanActivate {
 
 - [README.md](./README.md) - Visão geral do projeto
 - [BUSINESS_RULES.md](./BUSINESS_RULES.md) - Regras de negócio
-- [API_FLOWS.md](./docs/API_FLOWS.md) - Fluxos da API
-- [ERROR_HANDLING.md](./docs/ERROR_HANDLING.md) - Tratamento de erros
+- [docs/](./docs/) - Documentação técnica completa
 
 ---
 

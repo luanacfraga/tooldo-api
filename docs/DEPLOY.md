@@ -1,73 +1,48 @@
-# Deploy (infra já pronta)
+# Deploy Manual (Infraestrutura já Pronta)
 
-Este guia é para publicar uma nova versão na AWS quando a infraestrutura já existe.
+> **💡 Prefira usar o deploy automático via Git!**  
+> Este guia é para deploy manual. Se você tem acesso ao repositório, use a **[pipeline CI/CD](./CICD.md)** que faz deploy automaticamente ao fazer push para `main` ou `master`.
 
-## Pré-requisitos
+Este guia é para **atualizar a aplicação manualmente** em uma infraestrutura AWS que já existe (ECR/ECS/ALB/RDS já criados).
 
-- AWS CLI configurado
-- Docker instalado
-- Secrets configurados (ver [AWS_ACCESS.md](AWS_ACCESS.md))
-
-## 1) Build + Push para ECR
-
-```bash
-./scripts/build-and-push-ecr.sh latest
-```
-
-## 2) Atualizar serviço ECS
-
-```bash
-./scripts/deploy.sh latest tooldo-api tooldo-api
-```
-
-## 3) Migrações (quando necessário)
-
-```bash
-./scripts/run-migrations.sh \
-  tooldo-api \
-  tooldo-api-task \
-  subnet-xxxxx \
-  subnet-yyyyy \
-  sg-zzzzz
-```
-
-## 4) Verificar health
-
-```bash
-curl https://api.tooldo.net/api/v1/health
-```
-
-## 5) Ver logs
-
-```bash
-aws logs tail /ecs/tooldo-api --follow --region us-east-1
-```
-
-# Deploy (infra já pronta)
-
-Este guia é para **atualizar a aplicação** em uma infraestrutura AWS que já existe (ECR/ECS/ALB/RDS já criados).
-
-## Pré-requisitos
+## 📋 Pré-requisitos
 
 - AWS CLI configurado e com acesso
 - Docker instalado e rodando
-- Secrets já configurados (ver [AWS_ACCESS.md](AWS_ACCESS.md))
+- Secrets já configurados (ver **[AWS_ACCESS.md](./AWS_ACCESS.md)**)
+- Acesso ao cluster ECS `tooldo-api`
 
-## 1) Build + Push para ECR
+## 🚀 Passo a Passo
+
+### 1) Build + Push para ECR
 
 ```bash
 ./scripts/build-and-push-ecr.sh latest
 ```
 
-## 2) Atualizar serviço ECS (forçar novo deployment)
+Este script:
+- Faz login no ECR automaticamente
+- Faz build da imagem Docker
+- Faz push para o repositório `tooldo-api` com tag `latest`
+
+**Verificar:** Acesse o console ECR e confirme que a imagem está disponível.
+
+### 2) Atualizar serviço ECS
 
 ```bash
 ./scripts/deploy.sh latest tooldo-api tooldo-api
 ```
 
-## 3) Migrações (quando necessário)
+Parâmetros:
+- `latest`: Tag da imagem
+- `tooldo-api`: Nome do cluster ECS
+- `tooldo-api`: Nome do serviço ECS
 
-Quando houver migrações novas, rode via task one-off:
+Este script força um novo deployment do serviço ECS.
+
+### 3) Migrações (quando necessário)
+
+Quando houver migrações novas do Prisma, execute via task one-off:
 
 ```bash
 ./scripts/run-migrations.sh \
@@ -78,34 +53,131 @@ Quando houver migrações novas, rode via task one-off:
   sg-zzzzz
 ```
 
-## 4) Verificar saúde
+**Como encontrar os IDs necessários:**
+
+```bash
+# Encontrar subnets privadas
+aws ec2 describe-subnets \
+  --filters "Name=vpc-id,Values=vpc-xxxxx" "Name=tag:Name,Values=*private*" \
+  --query 'Subnets[*].[SubnetId,Tags[?Key==`Name`].Value|[0]]' \
+  --output table
+
+# Encontrar security group
+aws ec2 describe-security-groups \
+  --filters "Name=group-name,Values=SG-App" \
+  --query 'SecurityGroups[*].[GroupId,GroupName]' \
+  --output table
+```
+
+### 4) Verificar saúde
 
 ```bash
 curl https://api.tooldo.net/api/v1/health
 ```
 
-## 5) Ver logs
+Deve retornar:
+
+```json
+{
+  "status": "ok",
+  "timestamp": "...",
+  "service": "tooldo-api"
+}
+```
+
+### 5) Ver logs
 
 ```bash
 aws logs tail /ecs/tooldo-api --follow --region us-east-1
 ```
 
-## Se o deploy “não estabilizar” (services-stable timeout)
+## 🔍 Verificação do Deploy
 
-Quando o GitHub Actions mostra:
+### Console AWS
 
-- `Waiter ServicesStable failed: Max attempts exceeded`
+1. **ECS Console** → Cluster `tooldo-api` → Service `tooldo-api`
+   - Verificar se as tasks estão rodando e healthy
+   - Verificar eventos do serviço
 
-isso significa que o ECS **não conseguiu deixar o serviço saudável** dentro do tempo (em geral: tasks reiniciando, health check falhando, ou erro de configuração).
+2. **Target Group** → Health checks
+   - Verificar se os targets estão healthy
 
-Checklist rápido:
+3. **CloudWatch Logs** → `/ecs/tooldo-api`
+   - Verificar logs da aplicação
 
-- Ver `docs/STATUS_AWS.md` e confirme **health check**: `/api/v1/health`
-- Verifique logs no CloudWatch: `aws logs tail /ecs/tooldo-api --follow --region us-east-1`
-- Verifique eventos do serviço (Console ECS → Service → Events)
+### Comandos CLI
 
-## Infra (primeira vez / criar do zero)
+```bash
+# Status do serviço
+aws ecs describe-services \
+  --cluster tooldo-api \
+  --services tooldo-api \
+  --region us-east-1
 
-Se você precisa criar a infraestrutura (VPC/RDS/ALB/ACM etc.), use:
+# Tasks rodando
+aws ecs list-tasks \
+  --cluster tooldo-api \
+  --service-name tooldo-api \
+  --region us-east-1
+```
 
-- [AWS_DEPLOY.md](AWS_DEPLOY.md)
+## 🆘 Troubleshooting
+
+### Deploy não estabiliza (services-stable timeout)
+
+Quando o GitHub Actions ou o deploy mostra:
+
+```
+Waiter ServicesStable failed: Max attempts exceeded
+```
+
+Isso significa que o ECS **não conseguiu deixar o serviço saudável** dentro do tempo.
+
+**Checklist:**
+
+1. Verifique **[STATUS_AWS.md](../STATUS_AWS.md)** e confirme o **health check**: `/api/v1/health`
+2. Verifique logs no CloudWatch:
+   ```bash
+   aws logs tail /ecs/tooldo-api --follow --region us-east-1
+   ```
+3. Verifique eventos do serviço (Console ECS → Service → Events)
+4. Verifique se as tasks estão reiniciando (pode indicar erro na aplicação)
+5. Verifique configuração do Target Group e health check
+
+### Tasks não iniciam
+
+- Verifique logs do CloudWatch
+- Verifique configuração da Task Definition
+- Verifique variáveis de ambiente e secrets
+- Verifique permissões IAM da task
+
+### Health check falha
+
+- Verifique se o endpoint `/api/v1/health` está respondendo
+- Verifique configuração do Target Group
+- Verifique security groups (porta 3000 deve estar acessível)
+- Verifique se a aplicação está rodando na porta correta
+
+### Migrações falham
+
+- Verifique `DATABASE_URL` nos secrets
+- Verifique conectividade da task com o RDS
+- Verifique security groups do RDS
+- Verifique logs da task de migração
+
+## 🔗 Próximos Passos
+
+- **⭐ Deploy automático**: Consulte **[CICD.md](./CICD.md)** - Use a pipeline CI/CD para deploy automático via Git
+- **Criar infra do zero**: Consulte **[AWS_DEPLOY.md](./AWS_DEPLOY.md)**
+- **Scripts disponíveis**: Consulte **[SCRIPTS.md](./SCRIPTS.md)**
+- **Status AWS**: Consulte **[STATUS_AWS.md](../STATUS_AWS.md)**
+
+## 📚 Documentação Relacionada
+
+- **[AWS_ACCESS.md](./AWS_ACCESS.md)**: Configuração de acesso AWS
+- **[PRE_DEPLOY_CHECKLIST.md](./PRE_DEPLOY_CHECKLIST.md)**: Checklist pré-deploy
+- **[SCRIPTS.md](./SCRIPTS.md)**: Documentação dos scripts
+
+---
+
+**Deploy realizado com sucesso! 🎉**
