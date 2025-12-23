@@ -24,6 +24,11 @@ async function bootstrap() {
           .map((origin) => origin.trim())
           .filter(Boolean)
       : [];
+    if (Array.isArray(allowedOrigins) && allowedOrigins.length === 0) {
+      logger.warn(
+        '⚠️  WARNING: ALLOWED_ORIGINS not configured in production! CORS will block all requests.',
+      );
+    }
   } else {
     // Em desenvolvimento, se não houver ALLOWED_ORIGINS definido, permite todas as origens
     allowedOrigins = allowedOriginsEnv

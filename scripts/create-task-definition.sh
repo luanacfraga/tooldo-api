@@ -74,11 +74,11 @@ cat > ${TASK_DEF_FILE} <<EOF
         },
         {
           "name": "ALLOWED_ORIGINS",
-          "value": "https://www.tooldo.com,https://tooldo.com"
+          "value": "https://www.tooldo.app,https://www.tooldo.com,https://tooldo.com"
         },
         {
           "name": "FRONTEND_URL",
-          "value": "https://www.tooldo.com"
+          "value": "https://www.tooldo.app"
         }
       ],
       "secrets": [
