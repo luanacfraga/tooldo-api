@@ -19,27 +19,49 @@ async function bootstrap() {
 
   if (nodeEnv === 'production') {
     allowedOrigins = allowedOriginsEnv
-      ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
+      ? allowedOriginsEnv
+          .split(',')
+          .map((origin) => origin.trim())
+          .filter(Boolean)
       : [];
   } else {
+    // Em desenvolvimento, se não houver ALLOWED_ORIGINS definido, permite todas as origens
     allowedOrigins = allowedOriginsEnv
-      ? allowedOriginsEnv.split(',').map((origin) => origin.trim())
+      ? allowedOriginsEnv
+          .split(',')
+          .map((origin) => origin.trim())
+          .filter(Boolean)
       : true;
   }
 
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
     allowedHeaders: [
       'Content-Type',
       'Authorization',
       'Accept',
       'Origin',
       'X-Requested-With',
+      'Access-Control-Allow-Origin',
+      'Access-Control-Allow-Headers',
+      'Access-Control-Allow-Methods',
     ],
     exposedHeaders: ['Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
+
+  logger.log(
+    `CORS configured - Allowed origins: ${
+      typeof allowedOrigins === 'boolean'
+        ? allowedOrigins
+          ? 'All origins (development)'
+          : 'None'
+        : allowedOrigins.join(', ') || 'None'
+    }`,
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
