@@ -8,7 +8,7 @@ set -e
 AWS_REGION="${AWS_REGION:-us-east-1}"
 TASK_FAMILY="${TASK_FAMILY:-tooldo-api-task}"
 LOG_GROUP="/ecs/tooldo-api"
-EXECUTION_ROLE="ecs_tasks_execution_role-tooldo-tooldo-api-prod"
+EXECUTION_ROLE="ecs_tasks_execution_role-weedu-weedu-api-prod"
 
 echo "🚀 Criando Task Definition no ECS..."
 echo ""
@@ -74,7 +74,7 @@ cat > ${TASK_DEF_FILE} <<EOF
         },
         {
           "name": "ALLOWED_ORIGINS",
-          "value": "https://www.tooldo.app,https://www.tooldo.com,https://tooldo.com"
+          "value": "https://www.tooldo.app,https://tooldo.app,https://www.tooldo.net,https://tooldo.net"
         },
         {
           "name": "FRONTEND_URL",
