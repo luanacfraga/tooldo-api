@@ -34,11 +34,11 @@ echo ""
 
 # 2. Obter ARNs dos segredos
 echo -e "${YELLOW}🔐 Obtendo ARNs dos segredos...${NC}"
-DB_PROD_ARN=$(aws secretsmanager describe-secret --secret-id tooldo/db/prod --region ${AWS_REGION} --query 'ARN' --output text)
+RDS_SECRET_ARN=$(aws secretsmanager describe-secret --secret-id "rds!db-88e2c3ab-7e5b-4a52-835b-83d97a389c6b" --region ${AWS_REGION} --query 'ARN' --output text)
 JWT_SECRET_ARN=$(aws secretsmanager describe-secret --secret-id tooldo/jwt/secret --region ${AWS_REGION} --query 'ARN' --output text)
 EXECUTION_ROLE_ARN=$(aws iam get-role --role-name ${EXECUTION_ROLE} --query 'Role.Arn' --output text)
 
-echo "  DB_PROD (JSON): ${DB_PROD_ARN}"
+echo "  RDS Secret (auto-rotated): ${RDS_SECRET_ARN}"
 echo "  JWT_SECRET: ${JWT_SECRET_ARN}"
 echo "  Execution Role: ${EXECUTION_ROLE_ARN}"
 echo ""
@@ -79,24 +79,28 @@ cat > ${TASK_DEF_FILE} <<EOF
         {
           "name": "FRONTEND_URL",
           "value": "https://www.tooldo.app"
+        },
+        {
+          "name": "DB_HOST",
+          "value": "tooldo-db.cmvj2jytztco.us-east-1.rds.amazonaws.com"
+        },
+        {
+          "name": "DB_PORT",
+          "value": "5432"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "tooldo-db"
         }
       ],
       "secrets": [
         {
-          "name": "DB_HOST",
-          "valueFrom": "${DB_PROD_ARN}:host::"
-        },
-        {
           "name": "DB_USER",
-          "valueFrom": "${DB_PROD_ARN}:username::"
+          "valueFrom": "${RDS_SECRET_ARN}:username::"
         },
         {
           "name": "DB_PASS",
-          "valueFrom": "${DB_PROD_ARN}:password::"
-        },
-        {
-          "name": "DB_NAME",
-          "valueFrom": "${DB_PROD_ARN}:dbname::"
+          "valueFrom": "${RDS_SECRET_ARN}:password::"
         },
         {
           "name": "JWT_SECRET",
@@ -114,7 +118,7 @@ cat > ${TASK_DEF_FILE} <<EOF
       "healthCheck": {
         "command": [
           "CMD-SHELL",
-          "node -e \"require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""
+          "node -e \"require('http').get('http://localhost:3000/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""
         ],
         "interval": 30,
         "timeout": 5,
