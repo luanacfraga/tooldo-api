@@ -30,7 +30,6 @@ async function bootstrap() {
       );
     }
   } else {
-    // Em desenvolvimento, se não houver ALLOWED_ORIGINS definido, permite todas as origens
     allowedOrigins = allowedOriginsEnv
       ? allowedOriginsEnv
           .split(',')

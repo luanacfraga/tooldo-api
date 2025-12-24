@@ -17,7 +17,6 @@ const idGeneratorProvider: ClassProvider = {
   useClass: CryptoIdGenerator,
 };
 
-// Usa NodemailerEmailService se SMTP estiver configurado, caso contrário usa ConsoleEmailService
 const emailServiceProvider: ClassProvider = {
   provide: 'EmailService',
   useClass:
