@@ -30,4 +30,14 @@ export class DomainValidator {
       throw new DomainValidationException(errorMessage);
     }
   }
+
+  static validateDateAfter(
+    dateToValidate: Date,
+    dateToCompare: Date,
+    errorMessage: string,
+  ): void {
+    if (dateToValidate <= dateToCompare) {
+      throw new DomainValidationException(errorMessage);
+    }
+  }
 }

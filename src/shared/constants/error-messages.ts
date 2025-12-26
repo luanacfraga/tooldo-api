@@ -101,6 +101,42 @@ export const ErrorMessages = {
     LEGACY_INVITE_TOKEN:
       'Token de convite inválido. Este token foi gerado antes da atualização do sistema. Por favor, solicite um novo convite.',
   },
+
+  ACTION: {
+    ID_REQUIRED: 'O id da ação é obrigatório',
+    TITLE_REQUIRED: 'O título da ação é obrigatório',
+    DESCRIPTION_REQUIRED: 'A descrição da ação é obrigatória',
+    COMPANY_ID_REQUIRED: 'O companyId da ação é obrigatório',
+    CREATOR_ID_REQUIRED: 'O creatorId da ação é obrigatório',
+    RESPONSIBLE_ID_REQUIRED: 'O responsibleId da ação é obrigatório',
+    ESTIMATED_START_DATE_REQUIRED: 'A data estimada de início é obrigatória',
+    ESTIMATED_END_DATE_REQUIRED: 'A data estimada de término é obrigatória',
+    ESTIMATED_START_DATE_INVALID:
+      'A data estimada de início deve ser uma data válida',
+    ESTIMATED_END_DATE_INVALID:
+      'A data estimada de término deve ser uma data válida',
+    ESTIMATED_END_DATE_BEFORE_START:
+      'A data estimada de término deve ser após a data de início',
+    ACTUAL_START_DATE_INVALID: 'A data real de início deve ser uma data válida',
+    ACTUAL_END_DATE_INVALID: 'A data real de término deve ser uma data válida',
+    BLOCKED_REASON_REQUIRED:
+      'O motivo do bloqueio é obrigatório quando a ação está bloqueada',
+    NOT_FOUND: 'Ação não encontrada',
+  },
+
+  CHECKLIST_ITEM: {
+    ID_REQUIRED: 'O id do item da checklist é obrigatório',
+    ACTION_ID_REQUIRED: 'O actionId do item da checklist é obrigatório',
+    DESCRIPTION_REQUIRED: 'A descrição do item da checklist é obrigatória',
+    ORDER_INVALID: 'A ordem do item da checklist deve ser maior ou igual a 0',
+  },
+
+  ACTION_MOVEMENT: {
+    ID_REQUIRED: 'O id do movimento é obrigatório',
+    ACTION_ID_REQUIRED: 'O actionId do movimento é obrigatório',
+    MOVED_BY_ID_REQUIRED: 'O movedById do movimento é obrigatório',
+    MOVED_AT_INVALID: 'A data do movimento deve ser uma data válida',
+  },
   VALIDATION: {
     STRING_REQUIRED: 'Este campo deve ser uma string',
     NOT_EMPTY: 'Este campo é obrigatório',
