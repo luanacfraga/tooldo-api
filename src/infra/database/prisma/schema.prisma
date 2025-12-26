@@ -63,6 +63,10 @@ model User {
   teamsManaged    Team[]     @relation("TeamManager")
   teamMemberships TeamUser[]
 
+  actionsCreated     Action[]         @relation("ActionCreator")
+  actionsResponsible Action[]         @relation("ActionResponsible")
+  actionMovements    ActionMovement[]
+
   @@map("users")
 }
 
@@ -109,6 +113,7 @@ model Company {
   admin   User          @relation("CompanyAdmin", fields: [adminId], references: [id])
   members CompanyUser[]
   teams   Team[]
+  actions Action[]
 
   @@map("companies")
 }
@@ -164,6 +169,7 @@ model Team {
   company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   manager User       @relation("TeamManager", fields: [managerId], references: [id])
   members TeamUser[]
+  actions Action[]
 
   @@map("teams")
 }
@@ -180,5 +186,139 @@ model TeamUser {
 
   @@unique([teamId, userId])
   @@map("team_users")
+}
+
+// ============================================
+// ACTION PLANS MODULE
+// ============================================
+
+enum ActionStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum ActionPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Action {
+  id                 String           @id @default(uuid())
+  title              String
+  description        String           @db.Text
+  status             ActionStatus     @default(TODO)
+  priority           ActionPriority   @default(MEDIUM)
+
+  estimatedStartDate DateTime         @map("estimated_start_date")
+  estimatedEndDate   DateTime         @map("estimated_end_date")
+  actualStartDate    DateTime?        @map("actual_start_date")
+  actualEndDate      DateTime?        @map("actual_end_date")
+
+  isLate             Boolean          @default(false) @map("is_late")
+  isBlocked          Boolean          @default(false) @map("is_blocked")
+  blockedReason      String?          @db.Text @map("blocked_reason")
+
+  companyId          String           @map("company_id")
+  teamId             String?          @map("team_id")
+  creatorId          String           @map("creator_id")
+  responsibleId      String           @map("responsible_id")
+
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  deletedAt          DateTime?        @map("deleted_at")
+
+  company            Company          @relation(fields: [companyId], references: [id])
+  team               Team?            @relation(fields: [teamId], references: [id])
+  creator            User             @relation("ActionCreator", fields: [creatorId], references: [id])
+  responsible        User             @relation("ActionResponsible", fields: [responsibleId], references: [id])
+
+  checklistItems     ChecklistItem[]
+  movements          ActionMovement[]
+  kanbanOrder        KanbanOrder?
+  tags               ActionTag[]
+  attachments        ActionAttachment[]
+
+  @@map("actions")
+  @@index([companyId, status])
+  @@index([teamId, status])
+  @@index([responsibleId])
+  @@index([createdAt])
+  @@index([estimatedStartDate])
+  @@index([estimatedEndDate])
+}
+
+model ChecklistItem {
+  id          String   @id @default(uuid())
+  actionId    String   @map("action_id")
+  description String   @db.Text
+  isCompleted Boolean  @default(false) @map("is_completed")
+  order       Int
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  action      Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@map("checklist_items")
+  @@index([actionId])
+}
+
+model ActionMovement {
+  id            String       @id @default(uuid())
+  actionId      String       @map("action_id")
+  fromStatus    ActionStatus @map("from_status")
+  toStatus      ActionStatus @map("to_status")
+  movedById     String       @map("moved_by_id")
+  movedAt       DateTime     @default(now()) @map("moved_at")
+  notes         String?      @db.Text
+
+  action        Action       @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  movedBy       User         @relation(fields: [movedById], references: [id])
+
+  @@map("action_movements")
+  @@index([actionId])
+  @@index([movedAt])
+}
+
+model KanbanOrder {
+  id         String       @id @default(uuid())
+  actionId   String       @unique @map("action_id")
+  column     ActionStatus
+  position   Int
+  sortOrder  Int          @map("sort_order")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  action     Action       @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@map("kanban_orders")
+  @@index([column, position])
+}
+
+model ActionTag {
+  id        String   @id @default(uuid())
+  actionId  String   @map("action_id")
+  label     String   @db.VarChar(50)
+  color     String?  @db.VarChar(7)
+
+  action    Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@map("action_tags")
+  @@index([actionId])
+}
+
+model ActionAttachment {
+  id        String   @id @default(uuid())
+  actionId  String   @map("action_id")
+  fileName  String   @map("file_name")
+  fileUrl   String   @map("file_url") @db.Text
+  fileType  String?  @map("file_type")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  action    Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+
+  @@map("action_attachments")
+  @@index([actionId])
 }
 
