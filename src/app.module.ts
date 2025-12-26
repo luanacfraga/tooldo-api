@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ActionModule } from './api/action/action.module';
 import { AuthModule } from './api/auth/auth.module';
 import { JwtAuthGuard } from './api/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './api/auth/guards/roles.guard';
@@ -19,6 +20,7 @@ import { ConfigModule } from './infra/config/config.module';
     CompanyModule,
     EmployeeModule,
     TeamModule,
+    ActionModule,
     HealthModule,
   ],
   controllers: [],
