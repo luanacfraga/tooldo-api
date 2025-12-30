@@ -2,6 +2,7 @@ import { Action, ChecklistItem } from '@/core/domain/action';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { ChecklistItemResponseDto } from './checklist-item-response.dto';
+import { KanbanOrderResponseDto } from './kanban-order-response.dto';
 
 export class ActionResponseDto {
   @ApiProperty({
@@ -112,9 +113,17 @@ export class ActionResponseDto {
   })
   checklistItems!: ChecklistItemResponseDto[];
 
+  @ApiProperty({
+    description: 'Informações de ordenação do Kanban',
+    type: KanbanOrderResponseDto,
+    nullable: true,
+  })
+  kanbanOrder!: KanbanOrderResponseDto | null;
+
   static fromDomain(
     action: Action,
     checklistItems?: ChecklistItem[],
+    kanbanOrder?: any,
   ): ActionResponseDto {
     const response = new ActionResponseDto();
     response.id = action.id;
@@ -136,6 +145,9 @@ export class ActionResponseDto {
     response.checklistItems = checklistItems
       ? checklistItems.map((item) => ChecklistItemResponseDto.fromDomain(item))
       : [];
+    response.kanbanOrder = kanbanOrder
+      ? KanbanOrderResponseDto.fromEntity(kanbanOrder)
+      : null;
     return response;
   }
 }
