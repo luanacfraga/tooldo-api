@@ -1,5 +1,6 @@
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
+import { Action } from '@/core/domain/action';
 import type {
   ActionRepository,
   ActionWithChecklistItems,
@@ -49,7 +50,6 @@ export class ListActionsService {
           priority: input.priority,
           teamId: input.teamId,
           responsibleId: input.responsibleId,
-          isLate: input.isLate,
           isBlocked: input.isBlocked,
         },
       );
@@ -65,7 +65,6 @@ export class ListActionsService {
           status: input.status,
           priority: input.priority,
           responsibleId: input.responsibleId,
-          isLate: input.isLate,
           isBlocked: input.isBlocked,
         },
       );
@@ -76,7 +75,6 @@ export class ListActionsService {
           {
             status: input.status,
             priority: input.priority,
-            isLate: input.isLate,
             isBlocked: input.isBlocked,
           },
         );
@@ -84,8 +82,47 @@ export class ListActionsService {
       results = [];
     }
 
+    // Inspirado no weedu-api: calcula isLate dinamicamente (não depende do valor persistido)
+    // e só então aplica o filtro isLate.
+    const now = new Date();
+    let mapped = results.map((r) => ({
+      ...r,
+      action: this.withDynamicIsLate(r.action, now),
+    }));
+
+    if (input.isLate !== undefined) {
+      mapped = mapped.filter((r) => r.action.isLate === input.isLate);
+    }
+
     return {
-      results,
+      results: mapped,
     };
+  }
+
+  private withDynamicIsLate(action: Action, now: Date): Action {
+    const isLate = action.calculateIsLate(now);
+    if (isLate === action.isLate) {
+      return action;
+    }
+
+    return new Action(
+      action.id,
+      action.title,
+      action.description,
+      action.status,
+      action.priority,
+      action.estimatedStartDate,
+      action.estimatedEndDate,
+      action.actualStartDate,
+      action.actualEndDate,
+      isLate,
+      action.isBlocked,
+      action.blockedReason,
+      action.companyId,
+      action.teamId,
+      action.creatorId,
+      action.responsibleId,
+      action.deletedAt,
+    );
   }
 }

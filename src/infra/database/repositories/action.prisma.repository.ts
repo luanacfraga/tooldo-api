@@ -9,9 +9,9 @@ import type {
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import {
+  Prisma,
   Action as PrismaAction,
   ChecklistItem as PrismaChecklistItem,
-  Prisma,
 } from '@prisma/client';
 
 @Injectable()
@@ -105,7 +105,7 @@ export class ActionPrismaRepository implements ActionRepository {
 
     const actions = await client.action.findMany({
       where,
-      orderBy: [{ createdAt: 'desc' }],
+      orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
     return actions.map((action) => this.mapToDomain(action));
@@ -126,7 +126,7 @@ export class ActionPrismaRepository implements ActionRepository {
           orderBy: { order: 'asc' },
         },
       },
-      orderBy: [{ createdAt: 'desc' }],
+      orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
     return results.map((result) => ({
@@ -147,7 +147,7 @@ export class ActionPrismaRepository implements ActionRepository {
 
     const actions = await client.action.findMany({
       where,
-      orderBy: [{ createdAt: 'desc' }],
+      orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
     return actions.map((action) => this.mapToDomain(action));
@@ -168,7 +168,7 @@ export class ActionPrismaRepository implements ActionRepository {
           orderBy: { order: 'asc' },
         },
       },
-      orderBy: [{ createdAt: 'desc' }],
+      orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
     return results.map((result) => ({
@@ -192,7 +192,7 @@ export class ActionPrismaRepository implements ActionRepository {
 
     const actions = await client.action.findMany({
       where,
-      orderBy: [{ createdAt: 'desc' }],
+      orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
     return actions.map((action) => this.mapToDomain(action));
@@ -216,7 +216,7 @@ export class ActionPrismaRepository implements ActionRepository {
           orderBy: { order: 'asc' },
         },
       },
-      orderBy: [{ createdAt: 'desc' }],
+      orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
     return results.map((result) => ({
