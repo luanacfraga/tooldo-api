@@ -401,6 +401,40 @@ export class ActionPrismaRepository implements ActionRepository {
     };
   }
 
+  async findFullKanbanOrderByActionId(
+    actionId: string,
+    tx?: unknown,
+  ): Promise<{
+    id: string;
+    actionId: string;
+    column: ActionStatus;
+    position: number;
+    sortOrder: number;
+    lastMovedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const kanbanOrder = await client.kanbanOrder.findUnique({
+      where: { actionId },
+    });
+
+    if (!kanbanOrder) {
+      return null;
+    }
+
+    return {
+      id: kanbanOrder.id,
+      actionId: kanbanOrder.actionId,
+      column: kanbanOrder.column as ActionStatus,
+      position: kanbanOrder.position,
+      sortOrder: kanbanOrder.sortOrder,
+      lastMovedAt: kanbanOrder.lastMovedAt,
+      createdAt: kanbanOrder.createdAt,
+      updatedAt: kanbanOrder.updatedAt,
+    };
+  }
+
   async updateWithKanbanOrder(
     actionId: string,
     actionData: Partial<UpdateActionData>,
@@ -443,6 +477,9 @@ export class ActionPrismaRepository implements ActionRepository {
             },
           },
         },
+      },
+      include: {
+        kanbanOrder: true,
       },
     });
 

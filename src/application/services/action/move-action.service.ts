@@ -18,6 +18,16 @@ export interface MoveActionInput {
 export interface MoveActionOutput {
   action: Action;
   movement: ActionMovement;
+  kanbanOrder: {
+    id: string;
+    actionId: string;
+    column: ActionStatus;
+    position: number;
+    sortOrder: number;
+    lastMovedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+  };
 }
 
 @Injectable()
@@ -119,9 +129,21 @@ export class MoveActionService {
         this.actionMovementRepository.create(movement, tx),
       ]);
 
+      // 10. Fetch the full kanban order
+      const kanbanOrder =
+        await this.actionRepository.findFullKanbanOrderByActionId(
+          action.id,
+          tx,
+        );
+
+      if (!kanbanOrder) {
+        throw new Error('KanbanOrder not found after update');
+      }
+
       return {
         action: savedAction,
         movement: savedMovement,
+        kanbanOrder,
       };
     });
   }

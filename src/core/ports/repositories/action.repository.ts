@@ -114,6 +114,19 @@ export interface ActionRepository {
     position: number;
     lastMovedAt: Date;
   } | null>;
+  findFullKanbanOrderByActionId(
+    actionId: string,
+    tx?: unknown,
+  ): Promise<{
+    id: string;
+    actionId: string;
+    column: ActionStatus;
+    position: number;
+    sortOrder: number;
+    lastMovedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null>;
   updateWithKanbanOrder(
     actionId: string,
     actionData: Partial<UpdateActionData>,
