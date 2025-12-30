@@ -39,7 +39,7 @@ export class KanbanOrderResponseDto {
   static fromEntity(kanbanOrder: PrismaKanbanOrder): KanbanOrderResponseDto {
     const response = new KanbanOrderResponseDto();
     response.id = kanbanOrder.id;
-    response.column = kanbanOrder.column;
+    response.column = kanbanOrder.column as ActionStatus;
     response.position = kanbanOrder.position;
     response.sortOrder = kanbanOrder.sortOrder;
     response.lastMovedAt = kanbanOrder.lastMovedAt;

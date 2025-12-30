@@ -83,4 +83,17 @@ export interface ActionRepository {
   ): Promise<Action>;
   softDelete(id: string, tx?: unknown): Promise<Action>;
   delete(id: string, tx?: unknown): Promise<void>;
+  findLastKanbanOrderInColumn(
+    column: ActionStatus,
+  ): Promise<{ position: number } | null>;
+  createWithKanbanOrder(
+    action: Action,
+    column: ActionStatus,
+    position: number,
+  ): Promise<Action>;
+  updateActionsPositionInColumn(
+    column: ActionStatus,
+    fromPosition: number,
+    increment: number,
+  ): Promise<void>;
 }

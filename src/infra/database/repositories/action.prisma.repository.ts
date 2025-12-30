@@ -74,6 +74,7 @@ export class ActionPrismaRepository implements ActionRepository {
     const result = await client.action.findUnique({
       where: { id },
       include: {
+        kanbanOrder: true,
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -122,6 +123,7 @@ export class ActionPrismaRepository implements ActionRepository {
     const results = await client.action.findMany({
       where,
       include: {
+        kanbanOrder: true,
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -164,6 +166,7 @@ export class ActionPrismaRepository implements ActionRepository {
     const results = await client.action.findMany({
       where,
       include: {
+        kanbanOrder: true,
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -212,6 +215,7 @@ export class ActionPrismaRepository implements ActionRepository {
     const results = await client.action.findMany({
       where,
       include: {
+        kanbanOrder: true,
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -269,6 +273,73 @@ export class ActionPrismaRepository implements ActionRepository {
     const client = (tx as typeof this.prisma) ?? this.prisma;
     await client.action.delete({
       where: { id },
+    });
+  }
+
+  async findLastKanbanOrderInColumn(
+    column: ActionStatus,
+  ): Promise<{ position: number } | null> {
+    return this.prisma.kanbanOrder.findFirst({
+      where: { column },
+      orderBy: { position: 'desc' },
+      select: { position: true },
+    });
+  }
+
+  async createWithKanbanOrder(
+    action: Action,
+    column: ActionStatus,
+    position: number,
+  ): Promise<Action> {
+    const created = await this.prisma.action.create({
+      data: {
+        id: action.id,
+        title: action.title,
+        description: action.description,
+        status: action.status,
+        priority: action.priority,
+        estimatedStartDate: action.estimatedStartDate,
+        estimatedEndDate: action.estimatedEndDate,
+        actualStartDate: action.actualStartDate,
+        actualEndDate: action.actualEndDate,
+        isLate: action.isLate,
+        isBlocked: action.isBlocked,
+        blockedReason: action.blockedReason,
+        companyId: action.companyId,
+        teamId: action.teamId,
+        creatorId: action.creatorId,
+        responsibleId: action.responsibleId,
+        deletedAt: action.deletedAt,
+        kanbanOrder: {
+          create: {
+            column,
+            position,
+            sortOrder: position,
+          },
+        },
+      },
+      include: {
+        kanbanOrder: true,
+      },
+    });
+
+    return this.mapToDomain(created);
+  }
+
+  async updateActionsPositionInColumn(
+    column: ActionStatus,
+    fromPosition: number,
+    increment: number,
+  ): Promise<void> {
+    await this.prisma.kanbanOrder.updateMany({
+      where: {
+        column,
+        position: { gte: fromPosition },
+      },
+      data: {
+        position: { increment },
+        sortOrder: { increment },
+      },
     });
   }
 
