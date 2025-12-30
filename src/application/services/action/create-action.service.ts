@@ -44,6 +44,13 @@ export class CreateActionService {
   async execute(input: CreateActionInput): Promise<CreateActionOutput> {
     await this.validateInput(input);
 
+    // Get last position in TODO column
+    const lastKanbanOrder = await this.actionRepository.findLastKanbanOrderInColumn(
+      ActionStatus.TODO
+    );
+    const nextPosition = (lastKanbanOrder?.position ?? -1) + 1;
+
+    // Create action domain object
     const action = new Action(
       randomUUID(),
       input.title,
@@ -52,19 +59,24 @@ export class CreateActionService {
       input.priority,
       input.estimatedStartDate,
       input.estimatedEndDate,
-      null,
-      null,
-      false,
-      false,
-      null,
+      null, // actualStartDate
+      null, // actualEndDate
+      false, // isLate
+      false, // isBlocked
+      null, // blockedReason
       input.companyId,
       input.teamId ?? null,
       input.creatorId,
       input.responsibleId,
-      null,
+      null, // deletedAt
     );
 
-    const created = await this.actionRepository.create(action);
+    // Create action with kanbanOrder
+    const created = await this.actionRepository.createWithKanbanOrder(
+      action,
+      ActionStatus.TODO,
+      nextPosition
+    );
 
     return {
       action: created,
