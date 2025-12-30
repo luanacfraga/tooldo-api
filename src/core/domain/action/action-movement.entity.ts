@@ -12,6 +12,7 @@ export class ActionMovement extends Entity {
     public readonly movedById: string,
     public readonly movedAt: Date,
     public readonly notes: string | null = null,
+    public readonly timeSpent: number | null = null, // seconds spent in previous status
   ) {
     super(id);
     this.validate();

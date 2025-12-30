@@ -25,6 +25,7 @@ export class ActionMovementPrismaRepository
         movedById: movement.movedById,
         movedAt: movement.movedAt,
         notes: movement.notes,
+        timeSpent: movement.timeSpent,
       },
     });
 
@@ -62,6 +63,7 @@ export class ActionMovementPrismaRepository
       prismaMovement.movedById,
       prismaMovement.movedAt,
       prismaMovement.notes,
+      prismaMovement.timeSpent,
     );
   }
 }

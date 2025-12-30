@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 export interface MoveActionInput {
   actionId: string;
   toStatus: ActionStatus;
+  position?: number; // Optional: if not provided, will be placed at the end
   movedById: string;
   notes?: string;
 }
@@ -28,31 +29,78 @@ export class MoveActionService {
   ) {}
 
   async execute(input: MoveActionInput): Promise<MoveActionOutput> {
+    // 1. Find the action
     const action = await this.actionRepository.findById(input.actionId);
     if (!action) {
       throw new EntityNotFoundException('Ação', input.actionId);
     }
 
-    const fromStatus = action.status;
-    const updatedAction = action.updateStatus(input.toStatus);
+    // 2. Get current kanban order
+    const currentKanbanOrder =
+      await this.actionRepository.findKanbanOrderByActionId(input.actionId);
 
+    const fromStatus = action.status;
+    const toStatus = input.toStatus;
+
+    // 3. Calculate time spent in previous column (in seconds)
+    let timeSpent: number | null = null;
+    if (currentKanbanOrder) {
+      const timeSpentMs = Date.now() - currentKanbanOrder.lastMovedAt.getTime();
+      timeSpent = Math.floor(timeSpentMs / 1000);
+    }
+
+    // 4. Update action status with domain logic
+    const updatedAction = action.updateStatus(toStatus);
+
+    // 5. Determine new position
+    let newPosition = input.position;
+    if (newPosition === undefined) {
+      // Place at the end of the destination column
+      const lastInColumn =
+        await this.actionRepository.findLastKanbanOrderInColumn(toStatus);
+      newPosition = lastInColumn ? lastInColumn.position + 1 : 0;
+    }
+
+    // 6. Reorder actions in destination column if inserting at specific position
+    if (
+      fromStatus !== toStatus ||
+      (currentKanbanOrder && currentKanbanOrder.position !== newPosition)
+    ) {
+      // Make space for the new position in the destination column
+      await this.actionRepository.updateActionsPositionInColumn(
+        toStatus,
+        newPosition,
+        1,
+      );
+    }
+
+    // 7. Create movement record
     const movement = new ActionMovement(
       randomUUID(),
       action.id,
       fromStatus,
-      input.toStatus,
+      toStatus,
       input.movedById,
       new Date(),
       input.notes ?? null,
+      timeSpent,
     );
 
+    // 8. Update action with new status, timestamps, and kanban order
     const [savedAction, savedMovement] = await Promise.all([
-      this.actionRepository.update(action.id, {
-        status: updatedAction.status,
-        actualStartDate: updatedAction.actualStartDate,
-        actualEndDate: updatedAction.actualEndDate,
-        isLate: updatedAction.isLate,
-      }),
+      this.actionRepository.updateWithKanbanOrder(
+        action.id,
+        {
+          status: updatedAction.status,
+          actualStartDate: updatedAction.actualStartDate,
+          actualEndDate: updatedAction.actualEndDate,
+          isLate: updatedAction.isLate,
+        },
+        {
+          column: toStatus,
+          position: newPosition,
+        },
+      ),
       this.actionMovementRepository.create(movement),
     ]);
 

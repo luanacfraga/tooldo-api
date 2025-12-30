@@ -343,6 +343,83 @@ export class ActionPrismaRepository implements ActionRepository {
     });
   }
 
+  async findKanbanOrderByActionId(
+    actionId: string,
+    tx?: unknown,
+  ): Promise<{
+    column: ActionStatus;
+    position: number;
+    lastMovedAt: Date;
+  } | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const kanbanOrder = await client.kanbanOrder.findUnique({
+      where: { actionId },
+      select: {
+        column: true,
+        position: true,
+        lastMovedAt: true,
+      },
+    });
+
+    if (!kanbanOrder) {
+      return null;
+    }
+
+    return {
+      column: kanbanOrder.column as ActionStatus,
+      position: kanbanOrder.position,
+      lastMovedAt: kanbanOrder.lastMovedAt,
+    };
+  }
+
+  async updateWithKanbanOrder(
+    actionId: string,
+    actionData: Partial<UpdateActionData>,
+    kanbanData: {
+      column: ActionStatus;
+      position: number;
+    },
+    tx?: unknown,
+  ): Promise<Action> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const updated = await client.action.update({
+      where: { id: actionId },
+      data: {
+        title: actionData.title,
+        description: actionData.description,
+        status: actionData.status,
+        priority: actionData.priority,
+        estimatedStartDate: actionData.estimatedStartDate,
+        estimatedEndDate: actionData.estimatedEndDate,
+        actualStartDate: actionData.actualStartDate,
+        actualEndDate: actionData.actualEndDate,
+        isLate: actionData.isLate,
+        isBlocked: actionData.isBlocked,
+        blockedReason: actionData.blockedReason,
+        responsibleId: actionData.responsibleId,
+        teamId: actionData.teamId,
+        kanbanOrder: {
+          upsert: {
+            create: {
+              column: kanbanData.column,
+              position: kanbanData.position,
+              sortOrder: kanbanData.position,
+              lastMovedAt: new Date(),
+            },
+            update: {
+              column: kanbanData.column,
+              position: kanbanData.position,
+              sortOrder: kanbanData.position,
+              lastMovedAt: new Date(),
+            },
+          },
+        },
+      },
+    });
+
+    return this.mapToDomain(updated);
+  }
+
   private buildWhereClause(
     companyId?: string,
     teamId?: string,
