@@ -1,5 +1,6 @@
 import { ActionStatus } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
+import { KanbanOrder as PrismaKanbanOrder } from '@prisma/client';
 
 export class KanbanOrderResponseDto {
   @ApiProperty({
@@ -13,6 +14,8 @@ export class KanbanOrderResponseDto {
     enum: ActionStatus,
     example: ActionStatus.IN_PROGRESS,
   })
+  // Note: Uses ActionStatus enum as Kanban columns map directly to action statuses
+  // (TODO, IN_PROGRESS, DONE) as defined in the database schema
   column!: ActionStatus;
 
   @ApiProperty({
@@ -33,7 +36,7 @@ export class KanbanOrderResponseDto {
   })
   lastMovedAt!: Date;
 
-  static fromEntity(kanbanOrder: any): KanbanOrderResponseDto {
+  static fromEntity(kanbanOrder: PrismaKanbanOrder): KanbanOrderResponseDto {
     const response = new KanbanOrderResponseDto();
     response.id = kanbanOrder.id;
     response.column = kanbanOrder.column;

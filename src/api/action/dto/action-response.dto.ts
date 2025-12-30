@@ -1,6 +1,7 @@
 import { Action, ChecklistItem } from '@/core/domain/action';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
+import { KanbanOrder as PrismaKanbanOrder } from '@prisma/client';
 import { ChecklistItemResponseDto } from './checklist-item-response.dto';
 import { KanbanOrderResponseDto } from './kanban-order-response.dto';
 
@@ -115,7 +116,7 @@ export class ActionResponseDto {
 
   @ApiProperty({
     description: 'Informações de ordenação do Kanban',
-    type: KanbanOrderResponseDto,
+    type: () => KanbanOrderResponseDto,
     nullable: true,
   })
   kanbanOrder!: KanbanOrderResponseDto | null;
@@ -123,7 +124,7 @@ export class ActionResponseDto {
   static fromDomain(
     action: Action,
     checklistItems?: ChecklistItem[],
-    kanbanOrder?: any,
+    kanbanOrder?: PrismaKanbanOrder | null,
   ): ActionResponseDto {
     const response = new ActionResponseDto();
     response.id = action.id;
