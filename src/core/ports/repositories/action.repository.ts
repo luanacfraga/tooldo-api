@@ -27,6 +27,13 @@ export interface UpdateActionData {
   teamId?: string | null;
 }
 
+import { ChecklistItem } from '@/core/domain/action';
+
+export interface ActionWithChecklistItems {
+  action: Action;
+  checklistItems: ChecklistItem[];
+}
+
 export interface ActionRepository {
   create(action: Action, tx?: unknown): Promise<Action>;
   findById(
@@ -34,21 +41,41 @@ export interface ActionRepository {
     includeDeleted?: boolean,
     tx?: unknown,
   ): Promise<Action | null>;
+  findByIdWithChecklistItems(
+    id: string,
+    includeDeleted?: boolean,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems | null>;
   findByCompanyId(
     companyId: string,
     filters?: ActionFilters,
     tx?: unknown,
   ): Promise<Action[]>;
+  findByCompanyIdWithChecklistItems(
+    companyId: string,
+    filters?: ActionFilters,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems[]>;
   findByTeamId(
     teamId: string,
     filters?: ActionFilters,
     tx?: unknown,
   ): Promise<Action[]>;
+  findByTeamIdWithChecklistItems(
+    teamId: string,
+    filters?: ActionFilters,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems[]>;
   findByResponsibleId(
     responsibleId: string,
     filters?: ActionFilters,
     tx?: unknown,
   ): Promise<Action[]>;
+  findByResponsibleIdWithChecklistItems(
+    responsibleId: string,
+    filters?: ActionFilters,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems[]>;
   update(
     id: string,
     data: Partial<UpdateActionData>,

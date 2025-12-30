@@ -26,8 +26,11 @@ export class ToggleChecklistItemService {
       throw new EntityNotFoundException('Item da checklist', input.itemId);
     }
 
+    const toggled = item.toggleComplete();
+
     const updated = await this.checklistItemRepository.update(input.itemId, {
-      isCompleted: !item.isCompleted,
+      isCompleted: toggled.isCompleted,
+      completedAt: toggled.completedAt,
     });
 
     return {

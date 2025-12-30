@@ -19,6 +19,7 @@ export class ChecklistItemPrismaRepository implements ChecklistItemRepository {
         actionId: item.actionId,
         description: item.description,
         isCompleted: item.isCompleted,
+        completedAt: item.completedAt,
         order: item.order,
       },
     });
@@ -59,6 +60,7 @@ export class ChecklistItemPrismaRepository implements ChecklistItemRepository {
       data: {
         description: data.description,
         isCompleted: data.isCompleted,
+        completedAt: data.completedAt,
         order: data.order,
       },
     });
@@ -86,6 +88,7 @@ export class ChecklistItemPrismaRepository implements ChecklistItemRepository {
       prismaItem.actionId,
       prismaItem.description,
       prismaItem.isCompleted,
+      prismaItem.completedAt,
       prismaItem.order,
     );
   }

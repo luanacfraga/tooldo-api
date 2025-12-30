@@ -1,13 +1,18 @@
-import { Action } from '@/core/domain/action';
+import { Action, ChecklistItem } from '@/core/domain/action';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import type {
   ActionFilters,
   ActionRepository,
+  ActionWithChecklistItems,
   UpdateActionData,
 } from '@/core/ports/repositories/action.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { Action as PrismaAction, Prisma } from '@prisma/client';
+import {
+  Action as PrismaAction,
+  ChecklistItem as PrismaChecklistItem,
+  Prisma,
+} from '@prisma/client';
 
 @Injectable()
 export class ActionPrismaRepository implements ActionRepository {
@@ -60,6 +65,36 @@ export class ActionPrismaRepository implements ActionRepository {
     return this.mapToDomain(action);
   }
 
+  async findByIdWithChecklistItems(
+    id: string,
+    includeDeleted = false,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const result = await client.action.findUnique({
+      where: { id },
+      include: {
+        checklistItems: {
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+
+    if (!result) {
+      return null;
+    }
+    if (!includeDeleted && result.deletedAt !== null) {
+      return null;
+    }
+
+    return {
+      action: this.mapToDomain(result),
+      checklistItems: result.checklistItems.map((item) =>
+        this.mapChecklistItemToDomain(item),
+      ),
+    };
+  }
+
   async findByCompanyId(
     companyId: string,
     filters?: ActionFilters,
@@ -76,6 +111,32 @@ export class ActionPrismaRepository implements ActionRepository {
     return actions.map((action) => this.mapToDomain(action));
   }
 
+  async findByCompanyIdWithChecklistItems(
+    companyId: string,
+    filters?: ActionFilters,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems[]> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const where = this.buildWhereClause(companyId, undefined, filters);
+
+    const results = await client.action.findMany({
+      where,
+      include: {
+        checklistItems: {
+          orderBy: { order: 'asc' },
+        },
+      },
+      orderBy: [{ createdAt: 'desc' }],
+    });
+
+    return results.map((result) => ({
+      action: this.mapToDomain(result),
+      checklistItems: result.checklistItems.map((item) =>
+        this.mapChecklistItemToDomain(item),
+      ),
+    }));
+  }
+
   async findByTeamId(
     teamId: string,
     filters?: ActionFilters,
@@ -90,6 +151,32 @@ export class ActionPrismaRepository implements ActionRepository {
     });
 
     return actions.map((action) => this.mapToDomain(action));
+  }
+
+  async findByTeamIdWithChecklistItems(
+    teamId: string,
+    filters?: ActionFilters,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems[]> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const where = this.buildWhereClause(undefined, teamId, filters);
+
+    const results = await client.action.findMany({
+      where,
+      include: {
+        checklistItems: {
+          orderBy: { order: 'asc' },
+        },
+      },
+      orderBy: [{ createdAt: 'desc' }],
+    });
+
+    return results.map((result) => ({
+      action: this.mapToDomain(result),
+      checklistItems: result.checklistItems.map((item) =>
+        this.mapChecklistItemToDomain(item),
+      ),
+    }));
   }
 
   async findByResponsibleId(
@@ -109,6 +196,35 @@ export class ActionPrismaRepository implements ActionRepository {
     });
 
     return actions.map((action) => this.mapToDomain(action));
+  }
+
+  async findByResponsibleIdWithChecklistItems(
+    responsibleId: string,
+    filters?: ActionFilters,
+    tx?: unknown,
+  ): Promise<ActionWithChecklistItems[]> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const where: Prisma.ActionWhereInput = {
+      responsibleId,
+      ...this.buildFilters(filters),
+    };
+
+    const results = await client.action.findMany({
+      where,
+      include: {
+        checklistItems: {
+          orderBy: { order: 'asc' },
+        },
+      },
+      orderBy: [{ createdAt: 'desc' }],
+    });
+
+    return results.map((result) => ({
+      action: this.mapToDomain(result),
+      checklistItems: result.checklistItems.map((item) =>
+        this.mapChecklistItemToDomain(item),
+      ),
+    }));
   }
 
   async update(
@@ -234,6 +350,19 @@ export class ActionPrismaRepository implements ActionRepository {
       prismaAction.creatorId,
       prismaAction.responsibleId,
       prismaAction.deletedAt,
+    );
+  }
+
+  private mapChecklistItemToDomain(
+    prismaItem: PrismaChecklistItem,
+  ): ChecklistItem {
+    return new ChecklistItem(
+      prismaItem.id,
+      prismaItem.actionId,
+      prismaItem.description,
+      prismaItem.isCompleted,
+      prismaItem.completedAt,
+      prismaItem.order,
     );
   }
 }

@@ -3,6 +3,7 @@ import { ChecklistItem } from '@/core/domain/action';
 export interface UpdateChecklistItemData {
   description?: string;
   isCompleted?: boolean;
+  completedAt?: Date | null;
   order?: number;
 }
 

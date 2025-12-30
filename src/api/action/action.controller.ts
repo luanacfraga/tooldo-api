@@ -120,7 +120,9 @@ export class ActionController {
       isLate,
       isBlocked,
     });
-    return result.actions.map((action) => ActionResponseDto.fromDomain(action));
+    return result.results.map((r) =>
+      ActionResponseDto.fromDomain(r.action, r.checklistItems),
+    );
   }
 
   @Put(':id')

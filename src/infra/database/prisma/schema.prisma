@@ -251,15 +251,16 @@ model Action {
 }
 
 model ChecklistItem {
-  id          String   @id @default(uuid())
-  actionId    String   @map("action_id")
-  description String   @db.Text
-  isCompleted Boolean  @default(false) @map("is_completed")
+  id          String    @id @default(uuid())
+  actionId    String    @map("action_id")
+  description String    @db.Text
+  isCompleted Boolean   @default(false) @map("is_completed")
+  completedAt DateTime? @map("completed_at")
   order       Int
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  action      Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  action      Action    @relation(fields: [actionId], references: [id], onDelete: Cascade)
 
   @@map("checklist_items")
   @@index([actionId])

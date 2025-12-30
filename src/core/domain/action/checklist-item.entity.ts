@@ -8,6 +8,7 @@ export class ChecklistItem extends Entity {
     public readonly actionId: string,
     public readonly description: string,
     public readonly isCompleted: boolean,
+    public readonly completedAt: Date | null,
     public readonly order: number,
   ) {
     super(id);
@@ -34,11 +35,15 @@ export class ChecklistItem extends Entity {
   }
 
   public toggleComplete(): ChecklistItem {
+    const newIsCompleted = !this.isCompleted;
+    const newCompletedAt = newIsCompleted ? new Date() : null;
+
     return new ChecklistItem(
       this.id,
       this.actionId,
       this.description,
-      !this.isCompleted,
+      newIsCompleted,
+      newCompletedAt,
       this.order,
     );
   }

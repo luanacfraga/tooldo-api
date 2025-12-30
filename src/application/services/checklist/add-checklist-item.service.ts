@@ -35,6 +35,7 @@ export class AddChecklistItemService {
       input.actionId,
       input.description,
       false,
+      null,
       input.order,
     );
 

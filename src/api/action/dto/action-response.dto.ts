@@ -1,6 +1,7 @@
-import { Action } from '@/core/domain/action';
+import { Action, ChecklistItem } from '@/core/domain/action';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
+import { ChecklistItemResponseDto } from './checklist-item-response.dto';
 
 export class ActionResponseDto {
   @ApiProperty({
@@ -105,7 +106,16 @@ export class ActionResponseDto {
   })
   responsibleId!: string;
 
-  static fromDomain(action: Action): ActionResponseDto {
+  @ApiProperty({
+    description: 'Itens da checklist',
+    type: [ChecklistItemResponseDto],
+  })
+  checklistItems!: ChecklistItemResponseDto[];
+
+  static fromDomain(
+    action: Action,
+    checklistItems?: ChecklistItem[],
+  ): ActionResponseDto {
     const response = new ActionResponseDto();
     response.id = action.id;
     response.title = action.title;
@@ -123,6 +133,9 @@ export class ActionResponseDto {
     response.teamId = action.teamId;
     response.creatorId = action.creatorId;
     response.responsibleId = action.responsibleId;
+    response.checklistItems = checklistItems
+      ? checklistItems.map((item) => ChecklistItemResponseDto.fromDomain(item))
+      : [];
     return response;
   }
 }
