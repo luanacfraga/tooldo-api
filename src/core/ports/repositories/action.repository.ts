@@ -28,10 +28,12 @@ export interface UpdateActionData {
 }
 
 import { ChecklistItem } from '@/core/domain/action';
+import { KanbanOrder as PrismaKanbanOrder } from '@prisma/client';
 
 export interface ActionWithChecklistItems {
   action: Action;
   checklistItems: ChecklistItem[];
+  kanbanOrder: PrismaKanbanOrder | null;
 }
 
 export interface ActionRepository {

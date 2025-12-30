@@ -93,6 +93,7 @@ export class ActionPrismaRepository implements ActionRepository {
       checklistItems: result.checklistItems.map((item) =>
         this.mapChecklistItemToDomain(item),
       ),
+      kanbanOrder: result.kanbanOrder || null,
     };
   }
 
@@ -136,6 +137,7 @@ export class ActionPrismaRepository implements ActionRepository {
       checklistItems: result.checklistItems.map((item) =>
         this.mapChecklistItemToDomain(item),
       ),
+      kanbanOrder: result.kanbanOrder || null,
     }));
   }
 
@@ -179,6 +181,7 @@ export class ActionPrismaRepository implements ActionRepository {
       checklistItems: result.checklistItems.map((item) =>
         this.mapChecklistItemToDomain(item),
       ),
+      kanbanOrder: result.kanbanOrder || null,
     }));
   }
 
@@ -228,6 +231,7 @@ export class ActionPrismaRepository implements ActionRepository {
       checklistItems: result.checklistItems.map((item) =>
         this.mapChecklistItemToDomain(item),
       ),
+      kanbanOrder: result.kanbanOrder || null,
     }));
   }
 
