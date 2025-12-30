@@ -3,6 +3,7 @@ import { ActionStatus } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionMovementRepository } from '@/core/ports/repositories/action-movement.repository';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
+import type { TransactionManager } from '@/core/ports/services/transaction-manager.port';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
@@ -26,6 +27,8 @@ export class MoveActionService {
     private readonly actionRepository: ActionRepository,
     @Inject('ActionMovementRepository')
     private readonly actionMovementRepository: ActionMovementRepository,
+    @Inject('TransactionManager')
+    private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: MoveActionInput): Promise<MoveActionOutput> {
@@ -52,61 +55,127 @@ export class MoveActionService {
     // 4. Update action status with domain logic
     const updatedAction = action.updateStatus(toStatus);
 
-    // 5. Determine new position
-    let newPosition = input.position;
-    if (newPosition === undefined) {
-      // Place at the end of the destination column
-      const lastInColumn =
-        await this.actionRepository.findLastKanbanOrderInColumn(toStatus);
-      newPosition = lastInColumn ? lastInColumn.position + 1 : 0;
-    }
+    // 5. Execute all database operations in a transaction
+    return this.transactionManager.execute(async (tx) => {
+      // 6. Determine new position
+      let newPosition = input.position;
+      if (newPosition === undefined) {
+        // Place at the end of the destination column
+        const lastInColumn =
+          await this.actionRepository.findLastKanbanOrderInColumn(toStatus, tx);
+        newPosition = lastInColumn ? lastInColumn.position + 1 : 0;
+      }
 
-    // 6. Reorder actions in destination column if inserting at specific position
-    if (
-      fromStatus !== toStatus ||
-      (currentKanbanOrder && currentKanbanOrder.position !== newPosition)
-    ) {
-      // Make space for the new position in the destination column
-      await this.actionRepository.updateActionsPositionInColumn(
+      const oldPosition = currentKanbanOrder?.position;
+
+      // 7. Perform reordering based on move type
+      if (fromStatus !== toStatus) {
+        // Cross-column move
+        await this.handleCrossColumnMove(
+          fromStatus,
+          toStatus,
+          oldPosition,
+          newPosition,
+          tx,
+        );
+      } else if (oldPosition !== undefined && oldPosition !== newPosition) {
+        // Same-column move
+        await this.handleSameColumnMove(
+          fromStatus,
+          oldPosition,
+          newPosition,
+          tx,
+        );
+      }
+
+      // 8. Create movement record
+      const movement = new ActionMovement(
+        randomUUID(),
+        action.id,
+        fromStatus,
         toStatus,
-        newPosition,
-        1,
+        input.movedById,
+        new Date(),
+        input.notes ?? null,
+        timeSpent,
       );
-    }
 
-    // 7. Create movement record
-    const movement = new ActionMovement(
-      randomUUID(),
-      action.id,
-      fromStatus,
+      // 9. Update action with new status, timestamps, and kanban order
+      const [savedAction, savedMovement] = await Promise.all([
+        this.actionRepository.updateWithKanbanOrder(
+          action.id,
+          {
+            status: updatedAction.status,
+            actualStartDate: updatedAction.actualStartDate,
+            actualEndDate: updatedAction.actualEndDate,
+            isLate: updatedAction.isLate,
+          },
+          {
+            column: toStatus,
+            position: newPosition,
+          },
+          tx,
+        ),
+        this.actionMovementRepository.create(movement, tx),
+      ]);
+
+      return {
+        action: savedAction,
+        movement: savedMovement,
+      };
+    });
+  }
+
+  private async handleCrossColumnMove(
+    fromStatus: ActionStatus,
+    toStatus: ActionStatus,
+    oldPosition: number | undefined,
+    newPosition: number,
+    tx: unknown,
+  ): Promise<void> {
+    // 1. Make space in destination column at newPosition (increment positions >= newPosition)
+    await this.actionRepository.updateActionsPositionInColumn(
       toStatus,
-      input.movedById,
-      new Date(),
-      input.notes ?? null,
-      timeSpent,
+      newPosition,
+      1,
+      tx,
     );
 
-    // 8. Update action with new status, timestamps, and kanban order
-    const [savedAction, savedMovement] = await Promise.all([
-      this.actionRepository.updateWithKanbanOrder(
-        action.id,
-        {
-          status: updatedAction.status,
-          actualStartDate: updatedAction.actualStartDate,
-          actualEndDate: updatedAction.actualEndDate,
-          isLate: updatedAction.isLate,
-        },
-        {
-          column: toStatus,
-          position: newPosition,
-        },
-      ),
-      this.actionMovementRepository.create(movement),
-    ]);
+    // 2. Clean up source column (decrement positions > oldPosition)
+    if (oldPosition !== undefined) {
+      await this.actionRepository.updateActionsPositionInColumn(
+        fromStatus,
+        oldPosition + 1,
+        -1,
+        tx,
+      );
+    }
+  }
 
-    return {
-      action: savedAction,
-      movement: savedMovement,
-    };
+  private async handleSameColumnMove(
+    column: ActionStatus,
+    oldPosition: number,
+    newPosition: number,
+    tx: unknown,
+  ): Promise<void> {
+    if (newPosition < oldPosition) {
+      // Moving up: shift items at positions [newPosition..oldPosition) down by 1
+      await this.actionRepository.updateActionsPositionInRange(
+        column,
+        newPosition,
+        oldPosition - 1,
+        1,
+        tx,
+      );
+    } else {
+      // Moving down: shift items at positions (oldPosition..newPosition] up by 1
+      await this.actionRepository.updateActionsPositionInRange(
+        column,
+        oldPosition + 1,
+        newPosition,
+        -1,
+        tx,
+      );
+    }
   }
 }

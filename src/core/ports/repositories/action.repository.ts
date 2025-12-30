@@ -85,16 +85,26 @@ export interface ActionRepository {
   delete(id: string, tx?: unknown): Promise<void>;
   findLastKanbanOrderInColumn(
     column: ActionStatus,
+    tx?: unknown,
   ): Promise<{ position: number } | null>;
   createWithKanbanOrder(
     action: Action,
     column: ActionStatus,
     position: number,
+    tx?: unknown,
   ): Promise<Action>;
   updateActionsPositionInColumn(
     column: ActionStatus,
     fromPosition: number,
     increment: number,
+    tx?: unknown,
+  ): Promise<void>;
+  updateActionsPositionInRange(
+    column: ActionStatus,
+    minPosition: number,
+    maxPosition: number,
+    increment: number,
+    tx?: unknown,
   ): Promise<void>;
   findKanbanOrderByActionId(
     actionId: string,

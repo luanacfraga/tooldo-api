@@ -278,8 +278,10 @@ export class ActionPrismaRepository implements ActionRepository {
 
   async findLastKanbanOrderInColumn(
     column: ActionStatus,
+    tx?: unknown,
   ): Promise<{ position: number } | null> {
-    return this.prisma.kanbanOrder.findFirst({
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    return client.kanbanOrder.findFirst({
       where: { column },
       orderBy: { position: 'desc' },
       select: { position: true },
@@ -290,8 +292,10 @@ export class ActionPrismaRepository implements ActionRepository {
     action: Action,
     column: ActionStatus,
     position: number,
+    tx?: unknown,
   ): Promise<Action> {
-    const created = await this.prisma.action.create({
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const created = await client.action.create({
       data: {
         id: action.id,
         title: action.title,
@@ -330,11 +334,36 @@ export class ActionPrismaRepository implements ActionRepository {
     column: ActionStatus,
     fromPosition: number,
     increment: number,
+    tx?: unknown,
   ): Promise<void> {
-    await this.prisma.kanbanOrder.updateMany({
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    await client.kanbanOrder.updateMany({
       where: {
         column,
         position: { gte: fromPosition },
+      },
+      data: {
+        position: { increment },
+        sortOrder: { increment },
+      },
+    });
+  }
+
+  async updateActionsPositionInRange(
+    column: ActionStatus,
+    minPosition: number,
+    maxPosition: number,
+    increment: number,
+    tx?: unknown,
+  ): Promise<void> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    await client.kanbanOrder.updateMany({
+      where: {
+        column,
+        position: {
+          gte: minPosition,
+          lte: maxPosition,
+        },
       },
       data: {
         position: { increment },
