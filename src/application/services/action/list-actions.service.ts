@@ -1,6 +1,6 @@
+import { Action } from '@/core/domain/action';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
-import { Action } from '@/core/domain/action';
 import type {
   ActionRepository,
   ActionWithChecklistItems,
