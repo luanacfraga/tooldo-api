@@ -3,12 +3,12 @@ import { ActionStatus, PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Starting data migration for Kanban Ordering...\n');
+  console.warn('Starting data migration for Kanban Ordering...\n');
 
   // ============================================
   // Step 1: Create KanbanOrder for actions without one
   // ============================================
-  console.log('Step 1: Checking for actions without KanbanOrder...');
+  console.warn('Step 1: Checking for actions without KanbanOrder...');
 
   const actionsWithoutOrder = await prisma.action.findMany({
     where: {
@@ -18,7 +18,7 @@ async function main() {
   });
 
   if (actionsWithoutOrder.length > 0) {
-    console.log(
+    console.warn(
       `Found ${actionsWithoutOrder.length} actions without KanbanOrder, creating...\n`,
     );
 
@@ -43,7 +43,7 @@ async function main() {
       }
     }
 
-    console.log('Current max positions per column:', columnPositions);
+    console.warn('Current max positions per column:', columnPositions);
 
     // Create KanbanOrder for each action without one
     for (const action of actionsWithoutOrder) {
@@ -64,17 +64,17 @@ async function main() {
       columnPositions[column]++;
     }
 
-    console.log(
+    console.warn(
       `✓ Created KanbanOrder for ${actionsWithoutOrder.length} actions\n`,
     );
   } else {
-    console.log('✓ All actions already have KanbanOrder records\n');
+    console.warn('✓ All actions already have KanbanOrder records\n');
   }
 
   // ============================================
   // Step 2: Update existing KanbanOrder records
   // ============================================
-  console.log(
+  console.warn(
     'Step 2: Updating existing KanbanOrder records with new fields...',
   );
 
@@ -86,7 +86,7 @@ async function main() {
     },
   });
 
-  console.log(
+  console.warn(
     `Found ${ordersToUpdate.length} existing KanbanOrder records to potentially update`,
   );
 
@@ -110,17 +110,19 @@ async function main() {
   }
 
   if (updatedCount > 0) {
-    console.log(
+    console.warn(
       `✓ Updated ${updatedCount} KanbanOrder records with accurate timestamps\n`,
     );
   } else {
-    console.log('✓ All KanbanOrder records already have accurate timestamps\n');
+    console.warn(
+      '✓ All KanbanOrder records already have accurate timestamps\n',
+    );
   }
 
   // ============================================
   // Step 3: Calculate timeSpent for ActionMovements
   // ============================================
-  console.log('Step 3: Calculating timeSpent for existing ActionMovements...');
+  console.warn('Step 3: Calculating timeSpent for existing ActionMovements...');
 
   // Get all actions with movements
   const actionsWithMovements = await prisma.action.findMany({
@@ -136,7 +138,7 @@ async function main() {
     },
   });
 
-  console.log(
+  console.warn(
     `Found ${actionsWithMovements.length} actions with movement history`,
   );
 
@@ -180,11 +182,11 @@ async function main() {
   }
 
   if (movementsUpdated > 0) {
-    console.log(
+    console.warn(
       `✓ Updated ${movementsUpdated} ActionMovement records with timeSpent\n`,
     );
   } else {
-    console.log(
+    console.warn(
       '✓ All ActionMovement records already have timeSpent calculated\n',
     );
   }
@@ -192,12 +194,12 @@ async function main() {
   // ============================================
   // Summary
   // ============================================
-  console.log('=======================================');
-  console.log('Data migration completed successfully!');
-  console.log('=======================================');
-  console.log(`Actions with KanbanOrder: ${await prisma.kanbanOrder.count()}`);
-  console.log(`Total ActionMovements: ${await prisma.actionMovement.count()}`);
-  console.log('=======================================\n');
+  console.warn('=======================================');
+  console.warn('Data migration completed successfully!');
+  console.warn('=======================================');
+  console.warn(`Actions with KanbanOrder: ${await prisma.kanbanOrder.count()}`);
+  console.warn(`Total ActionMovements: ${await prisma.actionMovement.count()}`);
+  console.warn('=======================================\n');
 }
 
 main()

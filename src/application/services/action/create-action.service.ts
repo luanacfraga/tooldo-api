@@ -45,9 +45,10 @@ export class CreateActionService {
     await this.validateInput(input);
 
     // Get last position in TODO column
-    const lastKanbanOrder = await this.actionRepository.findLastKanbanOrderInColumn(
-      ActionStatus.TODO
-    );
+    const lastKanbanOrder =
+      await this.actionRepository.findLastKanbanOrderInColumn(
+        ActionStatus.TODO,
+      );
     const nextPosition = (lastKanbanOrder?.position ?? -1) + 1;
 
     // Create action domain object
@@ -75,7 +76,7 @@ export class CreateActionService {
     const created = await this.actionRepository.createWithKanbanOrder(
       action,
       ActionStatus.TODO,
-      nextPosition
+      nextPosition,
     );
 
     return {

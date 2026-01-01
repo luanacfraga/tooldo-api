@@ -168,7 +168,8 @@ export class ActionController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Mover ação no kanban',
-    description: 'Move a ação para um novo status e posição, registrando o movimento',
+    description:
+      'Move a ação para um novo status e posição, registrando o movimento',
   })
   @ApiOkResponse({
     description: 'Ação movida com sucesso',
@@ -188,7 +189,11 @@ export class ActionController {
       movedById: req.user.sub,
       notes: dto.notes,
     });
-    return ActionResponseDto.fromDomain(result.action, undefined, result.kanbanOrder);
+    return ActionResponseDto.fromDomain(
+      result.action,
+      undefined,
+      result.kanbanOrder,
+    );
   }
 
   @Patch(':id/block')

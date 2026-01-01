@@ -1,4 +1,4 @@
-import { Action } from '@/core/domain/action';
+import { Action, ChecklistItem } from '@/core/domain/action';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 
 export interface ActionFilters {
@@ -27,7 +27,6 @@ export interface UpdateActionData {
   teamId?: string | null;
 }
 
-import { ChecklistItem } from '@/core/domain/action';
 import { KanbanOrder as PrismaKanbanOrder } from '@prisma/client';
 
 export interface ActionWithChecklistItems {
