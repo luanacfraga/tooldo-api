@@ -1,4 +1,4 @@
-import { PrismaClient, ActionStatus } from '@prisma/client';
+import { ActionStatus, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +18,9 @@ async function main() {
   });
 
   if (actionsWithoutOrder.length > 0) {
-    console.log(`Found ${actionsWithoutOrder.length} actions without KanbanOrder, creating...\n`);
+    console.log(
+      `Found ${actionsWithoutOrder.length} actions without KanbanOrder, creating...\n`,
+    );
 
     // Track positions per column
     const columnPositions: Record<ActionStatus, number> = {
@@ -62,7 +64,9 @@ async function main() {
       columnPositions[column]++;
     }
 
-    console.log(`✓ Created KanbanOrder for ${actionsWithoutOrder.length} actions\n`);
+    console.log(
+      `✓ Created KanbanOrder for ${actionsWithoutOrder.length} actions\n`,
+    );
   } else {
     console.log('✓ All actions already have KanbanOrder records\n');
   }
@@ -70,7 +74,9 @@ async function main() {
   // ============================================
   // Step 2: Update existing KanbanOrder records
   // ============================================
-  console.log('Step 2: Updating existing KanbanOrder records with new fields...');
+  console.log(
+    'Step 2: Updating existing KanbanOrder records with new fields...',
+  );
 
   // The new fields (created_at, last_moved_at) have default values from the migration,
   // but we want to set them based on the action data for accuracy
@@ -80,7 +86,9 @@ async function main() {
     },
   });
 
-  console.log(`Found ${ordersToUpdate.length} existing KanbanOrder records to potentially update`);
+  console.log(
+    `Found ${ordersToUpdate.length} existing KanbanOrder records to potentially update`,
+  );
 
   let updatedCount = 0;
   for (const order of ordersToUpdate) {
@@ -102,7 +110,9 @@ async function main() {
   }
 
   if (updatedCount > 0) {
-    console.log(`✓ Updated ${updatedCount} KanbanOrder records with accurate timestamps\n`);
+    console.log(
+      `✓ Updated ${updatedCount} KanbanOrder records with accurate timestamps\n`,
+    );
   } else {
     console.log('✓ All KanbanOrder records already have accurate timestamps\n');
   }
@@ -126,7 +136,9 @@ async function main() {
     },
   });
 
-  console.log(`Found ${actionsWithMovements.length} actions with movement history`);
+  console.log(
+    `Found ${actionsWithMovements.length} actions with movement history`,
+  );
 
   let movementsUpdated = 0;
   for (const action of actionsWithMovements) {
@@ -146,13 +158,14 @@ async function main() {
       if (i === 0) {
         // First movement: time from action creation to first move
         timeSpent = Math.floor(
-          (movement.movedAt.getTime() - action.createdAt.getTime()) / 1000
+          (movement.movedAt.getTime() - action.createdAt.getTime()) / 1000,
         );
       } else {
         // Subsequent movements: time from previous movement to current
         const previousMovement = movements[i - 1];
         timeSpent = Math.floor(
-          (movement.movedAt.getTime() - previousMovement.movedAt.getTime()) / 1000
+          (movement.movedAt.getTime() - previousMovement.movedAt.getTime()) /
+            1000,
         );
       }
 
@@ -167,9 +180,13 @@ async function main() {
   }
 
   if (movementsUpdated > 0) {
-    console.log(`✓ Updated ${movementsUpdated} ActionMovement records with timeSpent\n`);
+    console.log(
+      `✓ Updated ${movementsUpdated} ActionMovement records with timeSpent\n`,
+    );
   } else {
-    console.log('✓ All ActionMovement records already have timeSpent calculated\n');
+    console.log(
+      '✓ All ActionMovement records already have timeSpent calculated\n',
+    );
   }
 
   // ============================================
