@@ -1,3 +1,6 @@
+import { ActionMovementPrismaRepository } from '@/infra/database/repositories/action-movement.prisma.repository';
+import { ActionPrismaRepository } from '@/infra/database/repositories/action.prisma.repository';
+import { ChecklistItemPrismaRepository } from '@/infra/database/repositories/checklist-item.prisma.repository';
 import { CompanyPrismaRepository } from '@/infra/database/repositories/company.prisma.repository';
 import { CompanyUserPrismaRepository } from '@/infra/database/repositories/company-user.prisma.repository';
 import { PlanPrismaRepository } from '@/infra/database/repositories/plan.prisma.repository';
@@ -49,6 +52,21 @@ const transactionManagerProvider: ClassProvider = {
   useClass: PrismaTransactionManager,
 };
 
+const actionRepositoryProvider: ClassProvider = {
+  provide: 'ActionRepository',
+  useClass: ActionPrismaRepository,
+};
+
+const checklistItemRepositoryProvider: ClassProvider = {
+  provide: 'ChecklistItemRepository',
+  useClass: ChecklistItemPrismaRepository,
+};
+
+const actionMovementRepositoryProvider: ClassProvider = {
+  provide: 'ActionMovementRepository',
+  useClass: ActionMovementPrismaRepository,
+};
+
 @Module({
   providers: [
     PrismaService,
@@ -60,6 +78,9 @@ const transactionManagerProvider: ClassProvider = {
     subscriptionRepositoryProvider,
     planRepositoryProvider,
     transactionManagerProvider,
+    actionRepositoryProvider,
+    checklistItemRepositoryProvider,
+    actionMovementRepositoryProvider,
   ],
   exports: [
     PrismaService,
@@ -71,6 +92,9 @@ const transactionManagerProvider: ClassProvider = {
     'SubscriptionRepository',
     'PlanRepository',
     'TransactionManager',
+    'ActionRepository',
+    'ChecklistItemRepository',
+    'ActionMovementRepository',
   ],
 })
 export class DatabaseModule {}

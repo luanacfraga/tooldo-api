@@ -24,3 +24,16 @@ export enum CompanyUserStatus {
   SUSPENDED = 'SUSPENDED',
   REMOVED = 'REMOVED',
 }
+
+export enum ActionStatus {
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE',
+}
+
+export enum ActionPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
+}

@@ -1,3 +1,4 @@
+import { StubAIService } from '@/infra/services/ai/stub-ai.service';
 import { ConsoleEmailService } from '@/infra/services/email/console-email.service';
 import { NodemailerEmailService } from '@/infra/services/email/nodemailer-email.service';
 import { CryptoIdGenerator } from '@/infra/services/id-generator.service';
@@ -35,6 +36,11 @@ const passwordResetTokenServiceProvider: ClassProvider = {
   useClass: JwtPasswordResetTokenService,
 };
 
+const aiServiceProvider: ClassProvider = {
+  provide: 'AIService',
+  useClass: StubAIService,
+};
+
 @Module({
   imports: [
     JwtModule.register({
@@ -48,6 +54,7 @@ const passwordResetTokenServiceProvider: ClassProvider = {
     emailServiceProvider,
     inviteTokenServiceProvider,
     passwordResetTokenServiceProvider,
+    aiServiceProvider,
   ],
   exports: [
     'PasswordHasher',
@@ -55,6 +62,7 @@ const passwordResetTokenServiceProvider: ClassProvider = {
     'EmailService',
     'InviteTokenService',
     'PasswordResetTokenService',
+    'AIService',
   ],
 })
 export class SharedServicesModule {}
