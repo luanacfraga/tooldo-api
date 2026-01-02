@@ -7,6 +7,7 @@ import { MoveActionService } from '@/application/services/action/move-action.ser
 import { UpdateActionService } from '@/application/services/action/update-action.service';
 import { AddChecklistItemService } from '@/application/services/checklist/add-checklist-item.service';
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
+import { ReorderChecklistItemsService } from '@/application/services/checklist/reorder-checklist-items.service';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import {
   Body,
@@ -39,6 +40,7 @@ import { BlockActionDto } from './dto/block-action.dto';
 import { CreateActionDto } from './dto/create-action.dto';
 import { GenerateActionPlanDto } from './dto/generate-action-plan.dto';
 import { MoveActionDto } from './dto/move-action.dto';
+import { ReorderChecklistItemsDto } from './dto/reorder-checklist-items.dto';
 import { UpdateActionDto } from './dto/update-action.dto';
 import { JwtPayload } from '@/application/services/auth/auth.service';
 import { Request as ExpressRequest } from 'express';
@@ -60,6 +62,7 @@ export class ActionController {
     private readonly generateActionPlanService: GenerateActionPlanService,
     private readonly addChecklistItemService: AddChecklistItemService,
     private readonly toggleChecklistItemService: ToggleChecklistItemService,
+    private readonly reorderChecklistItemsService: ReorderChecklistItemsService,
   ) {}
 
   @Post()
@@ -294,7 +297,31 @@ export class ActionController {
   async toggleChecklistItem(
     @Param('itemId') itemId: string,
   ): Promise<ChecklistItem> {
+    console.log('[TOGGLE CONTROLLER] Received request for itemId:', itemId);
     const result = await this.toggleChecklistItemService.execute({ itemId });
+    console.log('[TOGGLE CONTROLLER] Toggle successful, item:', result.item.id, 'isCompleted:', result.item.isCompleted);
     return result.item;
+  }
+
+  @Patch(':id/checklist/reorder')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reordenar itens da checklist',
+    description: 'Reordena os itens da checklist da ação',
+  })
+  @ApiOkResponse({
+    description: 'Itens reordenados com sucesso',
+  })
+  @ApiBadRequestResponse({ description: 'Dados inválidos' })
+  @ApiNotFoundResponse({ description: 'Ação não encontrada' })
+  async reorderChecklistItems(
+    @Param('id') actionId: string,
+    @Body() dto: ReorderChecklistItemsDto,
+  ): Promise<ChecklistItem[]> {
+    const result = await this.reorderChecklistItemsService.execute({
+      actionId,
+      itemIds: dto.itemIds,
+    });
+    return result.items;
   }
 }
