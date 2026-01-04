@@ -29,10 +29,17 @@ export interface UpdateActionData {
 
 import { KanbanOrder as PrismaKanbanOrder } from '@prisma/client';
 
+export interface ActionResponsibleUser {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
+
 export interface ActionWithChecklistItems {
   action: Action;
   checklistItems: ChecklistItem[];
   kanbanOrder: PrismaKanbanOrder | null;
+  responsible?: ActionResponsibleUser;
 }
 
 export interface ActionRepository {

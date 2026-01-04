@@ -21,11 +21,16 @@ const idGeneratorProvider: ClassProvider = {
 
 const emailServiceProvider: ClassProvider = {
   provide: 'EmailService',
-  useClass: process.env.RESEND_API_KEY
-    ? ResendEmailService
-    : process.env.SMTP_USER && process.env.SMTP_PASSWORD
-      ? NodemailerEmailService
-      : ConsoleEmailService,
+  // Default behavior (especially for local/dev): do NOT depend on external email providers.
+  // This prevents local envs from breaking when a RESEND_API_KEY is present but the domain isn't verified.
+  useClass:
+    process.env.NODE_ENV === 'production' &&
+    process.env.EMAIL_PROVIDER === 'resend' &&
+    process.env.RESEND_API_KEY
+      ? ResendEmailService
+      : process.env.SMTP_USER && process.env.SMTP_PASSWORD
+        ? NodemailerEmailService
+        : ConsoleEmailService,
 };
 
 const inviteTokenServiceProvider: ClassProvider = {

@@ -44,7 +44,6 @@ interface CompanyUserWithUser extends CompanyUser {
     phone: string;
     role: string;
     initials?: string | null;
-    avatarColor?: string | null;
     [key: string]: any;
   };
 }
@@ -52,6 +51,35 @@ interface CompanyUserWithUser extends CompanyUser {
 @Injectable()
 export class CompanyUserPrismaRepository implements CompanyUserRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * IMPORTANT:
+   * Our current DB does NOT have the `users.avatar_color` nor `users.initials` columns.
+   * So we must ALWAYS use explicit selects to avoid Prisma selecting it by default.
+   */
+  private readonly safeUserSelect = {
+    id: true,
+    firstName: true,
+    lastName: true,
+    email: true,
+    phone: true,
+    role: true,
+    status: true,
+    profileImageUrl: true,
+  } as const;
+
+  private mapUserForCompanyUser(user: PrismaUser): CompanyUserWithUser['user'] {
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone,
+      role: String(user.role),
+      initials: null,
+      // avatarColor intentionally omitted (column not present)
+    };
+  }
 
   async create(companyUser: CompanyUser, tx?: unknown): Promise<CompanyUser> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
@@ -119,7 +147,12 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       userIds.length > 0
         ? (
             await Promise.all(
-              userIds.map((id) => client.user.findUnique({ where: { id } })),
+              userIds.map((id) =>
+                client.user.findUnique({
+                  where: { id },
+                  select: this.safeUserSelect,
+                }),
+              ),
             )
           ).filter((user): user is PrismaUser => user !== null)
         : [];
@@ -174,7 +207,12 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       userIds.length > 0
         ? (
             await Promise.all(
-              userIds.map((id) => client.user.findUnique({ where: { id } })),
+              userIds.map((id) =>
+                client.user.findUnique({
+                  where: { id },
+                  select: this.safeUserSelect,
+                }),
+              ),
             )
           ).filter((user): user is PrismaUser => user !== null)
         : [];
@@ -244,7 +282,12 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         userIds.length > 0
           ? (
               await Promise.all(
-                userIds.map((id) => client.user.findUnique({ where: { id } })),
+                userIds.map((id) =>
+                  client.user.findUnique({
+                    where: { id },
+                    select: this.safeUserSelect,
+                  }),
+                ),
               )
             ).filter((user): user is PrismaUser => user !== null)
           : [];
@@ -294,7 +337,12 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
         userIds.length > 0
           ? (
               await Promise.all(
-                userIds.map((id) => client.user.findUnique({ where: { id } })),
+                userIds.map((id) =>
+                  client.user.findUnique({
+                    where: { id },
+                    select: this.safeUserSelect,
+                  }),
+                ),
               )
             ).filter((user): user is PrismaUser => user !== null)
           : [];
@@ -404,7 +452,8 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     ) as CompanyUserWithUser;
 
     if (prismaCompanyUser.user) {
-      result.user = prismaCompanyUser.user;
+      // Ensure we only expose fields that are safe to query in the current DB
+      result.user = this.mapUserForCompanyUser(prismaCompanyUser.user);
     }
 
     return result;

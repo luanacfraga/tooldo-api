@@ -124,7 +124,12 @@ export class ActionController {
       isBlocked,
     });
     return result.results.map((r) =>
-      ActionResponseDto.fromDomain(r.action, r.checklistItems, r.kanbanOrder),
+      ActionResponseDto.fromDomain(
+        r.action,
+        r.checklistItems,
+        r.kanbanOrder,
+        r.responsible,
+      ),
     );
   }
 

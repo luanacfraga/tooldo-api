@@ -11,7 +11,6 @@ export interface CompanyUserWithUser extends CompanyUser {
     phone: string;
     role: string;
     initials?: string | null;
-    avatarColor?: string | null;
   };
 }
 
@@ -95,7 +94,6 @@ export class EmployeeResponseDto {
     phone: string;
     role: string;
     initials?: string | null;
-    avatarColor?: string | null;
   };
 
   static fromDomain(
@@ -122,7 +120,6 @@ export class EmployeeResponseDto {
         phone: companyUser.user.phone,
         role: companyUser.user.role,
         initials: companyUser.user.initials,
-        avatarColor: companyUser.user.avatarColor,
       };
     }
 
