@@ -43,6 +43,9 @@ interface CompanyUserWithUser extends CompanyUser {
     email: string;
     phone: string;
     role: string;
+    initials?: string | null;
+    avatarColor?: string | null;
+    [key: string]: any;
   };
 }
 

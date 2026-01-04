@@ -1,6 +1,7 @@
 import { StubAIService } from '@/infra/services/ai/stub-ai.service';
 import { ConsoleEmailService } from '@/infra/services/email/console-email.service';
 import { NodemailerEmailService } from '@/infra/services/email/nodemailer-email.service';
+import { ResendEmailService } from '@/infra/services/email/resend-email.service';
 import { CryptoIdGenerator } from '@/infra/services/id-generator.service';
 import { JwtInviteTokenService } from '@/infra/services/invite-token.service';
 import { BcryptPasswordHasher } from '@/infra/services/password-hasher.service';
@@ -20,8 +21,9 @@ const idGeneratorProvider: ClassProvider = {
 
 const emailServiceProvider: ClassProvider = {
   provide: 'EmailService',
-  useClass:
-    process.env.SMTP_USER && process.env.SMTP_PASSWORD
+  useClass: process.env.RESEND_API_KEY
+    ? ResendEmailService
+    : process.env.SMTP_USER && process.env.SMTP_PASSWORD
       ? NodemailerEmailService
       : ConsoleEmailService,
 };

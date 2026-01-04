@@ -49,6 +49,8 @@ model User {
   document        String       @unique @map("document")
   documentType    DocumentType @map("document_type")
   profileImageUrl String?      @map("profile_image_url")
+  avatarColor     String?      @map("avatar_color")
+  initials        String?      @map("initials")
   status          UserStatus   @default(PENDING) @map("status")
   password        String
   role            UserRole

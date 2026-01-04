@@ -60,6 +60,8 @@ export class UserPrismaRepository implements UserRepository {
         role: user.role,
         status: user.status,
         profileImageUrl: user.profileImageUrl,
+        avatarColor: user.avatarColor,
+        initials: user.initials,
       },
     });
 
@@ -80,6 +82,8 @@ export class UserPrismaRepository implements UserRepository {
         role: data.role,
         status: data.status,
         profileImageUrl: data.profileImageUrl,
+        avatarColor: data.avatarColor,
+        initials: data.initials,
       },
     });
 
@@ -99,6 +103,8 @@ export class UserPrismaRepository implements UserRepository {
       prismaUser.role as UserRole,
       prismaUser.status as UserStatus,
       prismaUser.profileImageUrl,
+      prismaUser.avatarColor,
+      prismaUser.initials,
     );
   }
 }
