@@ -159,6 +159,8 @@ export class EmployeeController {
         limit: result.limit,
         total: result.total,
         totalPages: result.totalPages,
+        hasNextPage: result.totalPages > 0 && result.page < result.totalPages,
+        hasPreviousPage: result.totalPages > 0 && result.page > 1,
       },
     };
   }

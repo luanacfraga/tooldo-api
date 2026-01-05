@@ -17,10 +17,18 @@ export interface ListActionsInput {
   priority?: ActionPriority;
   isLate?: boolean;
   isBlocked?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 export interface ListActionsOutput {
   results: ActionWithChecklistItems[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 @Injectable()
@@ -82,6 +90,9 @@ export class ListActionsService {
       results = [];
     }
 
+    const page = input.page ?? 1;
+    const limit = input.limit ?? 20;
+
     // Inspirado no weedu-api: calcula isLate dinamicamente (não depende do valor persistido)
     // e só então aplica o filtro isLate.
     const now = new Date();
@@ -94,8 +105,22 @@ export class ListActionsService {
       mapped = mapped.filter((r) => r.action.isLate === input.isLate);
     }
 
+    const total = mapped.length;
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+    const hasNextPage = totalPages > 0 && page < totalPages;
+    const hasPreviousPage = totalPages > 0 && page > 1;
+
+    const start = (page - 1) * limit;
+    const paginated = mapped.slice(start, start + limit);
+
     return {
-      results: mapped,
+      results: paginated,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
     };
   }
 

@@ -1,6 +1,7 @@
 import { BlockActionService } from '@/application/services/action/block-action.service';
 import { CreateActionService } from '@/application/services/action/create-action.service';
 import { DeleteActionService } from '@/application/services/action/delete-action.service';
+import { GetActionService } from '@/application/services/action/get-action.service';
 import { GenerateActionPlanService } from '@/application/services/action/generate-action-plan.service';
 import { ListActionsService } from '@/application/services/action/list-actions.service';
 import { MoveActionService } from '@/application/services/action/move-action.service';
@@ -39,12 +40,14 @@ import { AddChecklistItemDto } from './dto/add-checklist-item.dto';
 import { BlockActionDto } from './dto/block-action.dto';
 import { CreateActionDto } from './dto/create-action.dto';
 import { GenerateActionPlanDto } from './dto/generate-action-plan.dto';
+import { ListActionsQueryDto } from './dto/list-actions.dto';
 import { MoveActionDto } from './dto/move-action.dto';
 import { ReorderChecklistItemsDto } from './dto/reorder-checklist-items.dto';
 import { UpdateActionDto } from './dto/update-action.dto';
 import { JwtPayload } from '@/application/services/auth/auth.service';
 import { Request as ExpressRequest } from 'express';
 import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
+import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
 
 type RequestWithUser = ExpressRequest & { user: JwtPayload };
 
@@ -54,6 +57,7 @@ type RequestWithUser = ExpressRequest & { user: JwtPayload };
 export class ActionController {
   constructor(
     private readonly createActionService: CreateActionService,
+    private readonly getActionService: GetActionService,
     private readonly listActionsService: ListActionsService,
     private readonly updateActionService: UpdateActionService,
     private readonly deleteActionService: DeleteActionService,
@@ -101,35 +105,64 @@ export class ActionController {
   @ApiQuery({ name: 'priority', required: false, enum: ActionPriority })
   @ApiQuery({ name: 'isLate', required: false, type: Boolean })
   @ApiQuery({ name: 'isBlocked', required: false, type: Boolean })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({
     description: 'Lista de ações',
-    type: [ActionResponseDto],
+    type: PaginatedResponseDto<ActionResponseDto>,
   })
   async list(
-    @Query('companyId') companyId?: string,
-    @Query('teamId') teamId?: string,
-    @Query('responsibleId') responsibleId?: string,
-    @Query('status') status?: ActionStatus,
-    @Query('priority') priority?: ActionPriority,
-    @Query('isLate') isLate?: boolean,
-    @Query('isBlocked') isBlocked?: boolean,
-  ): Promise<ActionResponseDto[]> {
+    @Query() query: ListActionsQueryDto,
+  ): Promise<PaginatedResponseDto<ActionResponseDto>> {
     const result = await this.listActionsService.execute({
-      companyId,
-      teamId,
-      responsibleId,
-      status,
-      priority,
-      isLate,
-      isBlocked,
+      companyId: query.companyId,
+      teamId: query.teamId,
+      responsibleId: query.responsibleId,
+      status: query.status,
+      priority: query.priority,
+      isLate: query.isLate,
+      isBlocked: query.isBlocked,
+      page: query.page,
+      limit: query.limit,
     });
-    return result.results.map((r) =>
-      ActionResponseDto.fromDomain(
-        r.action,
-        r.checklistItems,
-        r.kanbanOrder,
-        r.responsible,
+    return {
+      data: result.results.map((r) =>
+        ActionResponseDto.fromDomain(
+          r.action,
+          r.checklistItems,
+          r.kanbanOrder,
+          r.responsible,
+        ),
       ),
+      meta: {
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+        totalPages: result.totalPages,
+        hasNextPage: result.hasNextPage,
+        hasPreviousPage: result.hasPreviousPage,
+      },
+    };
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Buscar ação por id',
+    description: 'Retorna uma ação com checklist, kanbanOrder e responsável (quando disponível)',
+  })
+  @ApiOkResponse({
+    description: 'Ação encontrada',
+    type: ActionResponseDto,
+  })
+  @ApiNotFoundResponse({ description: 'Ação não encontrada' })
+  async getById(@Param('id') id: string): Promise<ActionResponseDto> {
+    const result = await this.getActionService.execute({ actionId: id });
+    return ActionResponseDto.fromDomain(
+      result.result.action,
+      result.result.checklistItems,
+      result.result.kanbanOrder,
+      result.result.responsible,
     );
   }
 
