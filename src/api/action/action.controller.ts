@@ -10,6 +10,7 @@ import { AddChecklistItemService } from '@/application/services/checklist/add-ch
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
 import { ReorderChecklistItemsService } from '@/application/services/checklist/reorder-checklist-items.service';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import { UnblockActionService } from '@/application/services/action/unblock-action.service';
 import {
   Body,
   Controller,
@@ -63,6 +64,7 @@ export class ActionController {
     private readonly deleteActionService: DeleteActionService,
     private readonly moveActionService: MoveActionService,
     private readonly blockActionService: BlockActionService,
+    private readonly unblockActionService: UnblockActionService,
     private readonly generateActionPlanService: GenerateActionPlanService,
     private readonly addChecklistItemService: AddChecklistItemService,
     private readonly toggleChecklistItemService: ToggleChecklistItemService,
@@ -272,10 +274,7 @@ export class ActionController {
   })
   @ApiNotFoundResponse({ description: 'Ação não encontrada' })
   async unblock(@Param('id') id: string): Promise<ActionResponseDto> {
-    // For now, we'll use the update service to unblock
-    const result = await this.updateActionService.execute({
-      actionId: id,
-    });
+    const result = await this.unblockActionService.execute({ actionId: id });
     return ActionResponseDto.fromDomain(result.action);
   }
 

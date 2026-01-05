@@ -5,6 +5,7 @@ import { GetActionService } from '@/application/services/action/get-action.servi
 import { GenerateActionPlanService } from '@/application/services/action/generate-action-plan.service';
 import { ListActionsService } from '@/application/services/action/list-actions.service';
 import { MoveActionService } from '@/application/services/action/move-action.service';
+import { UnblockActionService } from '@/application/services/action/unblock-action.service';
 import { UpdateActionService } from '@/application/services/action/update-action.service';
 import { AddChecklistItemService } from '@/application/services/checklist/add-checklist-item.service';
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
@@ -23,6 +24,7 @@ import { Module } from '@nestjs/common';
     DeleteActionService,
     MoveActionService,
     BlockActionService,
+    UnblockActionService,
     GenerateActionPlanService,
     AddChecklistItemService,
     ToggleChecklistItemService,
@@ -36,6 +38,7 @@ import { Module } from '@nestjs/common';
     DeleteActionService,
     MoveActionService,
     BlockActionService,
+    UnblockActionService,
     GenerateActionPlanService,
     AddChecklistItemService,
     ToggleChecklistItemService,
