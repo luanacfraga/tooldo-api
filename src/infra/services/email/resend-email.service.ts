@@ -6,18 +6,19 @@ import type {
 } from '@/core/ports/services/email-service.port';
 import { Injectable, Logger } from '@nestjs/common';
 import { Resend } from 'resend';
+import type * as React from 'react';
 import {
-  getEmployeeInviteAcceptedTemplate,
-  type EmployeeInviteAcceptedTemplateParams,
-} from './templates/employee-invite-accepted.template';
+  EmployeeInviteAcceptedEmail,
+  getEmployeeInviteAcceptedPlainText,
+} from './react-templates/employee-invite-accepted.email';
 import {
-  getEmployeeInviteTemplate,
-  type EmployeeInviteTemplateParams,
-} from './templates/employee-invite.template';
+  EmployeeInviteEmail,
+  getEmployeeInvitePlainText,
+} from './react-templates/employee-invite.email';
 import {
-  getPasswordResetTemplate,
-  type PasswordResetTemplateParams,
-} from './templates/password-reset.template';
+  PasswordResetEmail,
+  getPasswordResetPlainText,
+} from './react-templates/password-reset.email';
 
 @Injectable()
 export class ResendEmailService implements EmailService {
@@ -41,7 +42,7 @@ export class ResendEmailService implements EmailService {
   }
 
   async sendEmployeeInvite(params: SendEmployeeInviteParams): Promise<void> {
-    const templateParams: EmployeeInviteTemplateParams = {
+    const templateParams = {
       employeeName: params.employeeName,
       companyName: params.companyName,
       inviteLink: this.buildInviteLink(params.inviteToken),
@@ -49,13 +50,15 @@ export class ResendEmailService implements EmailService {
       role: params.role,
     };
 
-    const html = getEmployeeInviteTemplate(templateParams);
+    const react = EmployeeInviteEmail(templateParams);
+    const text = getEmployeeInvitePlainText(templateParams);
     const subject = `Convite para ${params.companyName} - Tooldo`;
 
     await this.send({
       to: params.to,
       subject,
-      html,
+      react,
+      text,
       logLabel: `Employee Invite to ${params.to}`,
     });
   }
@@ -63,36 +66,40 @@ export class ResendEmailService implements EmailService {
   async sendEmployeeInviteAccepted(
     params: SendEmployeeInviteAcceptedParams,
   ): Promise<void> {
-    const templateParams: EmployeeInviteAcceptedTemplateParams = {
+    const templateParams = {
       employeeName: params.employeeName,
       companyName: params.companyName,
       adminName: params.adminName,
     };
 
-    const html = getEmployeeInviteAcceptedTemplate(templateParams);
+    const react = EmployeeInviteAcceptedEmail(templateParams);
+    const text = getEmployeeInviteAcceptedPlainText(templateParams);
     const subject = `${params.employeeName} aceitou o convite - ${params.companyName}`;
 
     await this.send({
       to: params.to,
       subject,
-      html,
+      react,
+      text,
       logLabel: `Employee Invite Accepted to ${params.to}`,
     });
   }
 
   async sendPasswordReset(params: SendPasswordResetParams): Promise<void> {
-    const templateParams: PasswordResetTemplateParams = {
+    const templateParams = {
       userName: params.userName,
       resetLink: this.buildResetLink(params.resetToken),
     };
 
-    const html = getPasswordResetTemplate(templateParams);
+    const react = PasswordResetEmail(templateParams);
+    const text = getPasswordResetPlainText(templateParams);
     const subject = 'Recuperação de Senha - Tooldo';
 
     await this.send({
       to: params.to,
       subject,
-      html,
+      react,
+      text,
       logLabel: `Password Reset to ${params.to}`,
     });
   }
@@ -100,7 +107,8 @@ export class ResendEmailService implements EmailService {
   private async send(input: {
     to: string;
     subject: string;
-    html: string;
+    react: React.ReactElement;
+    text: string;
     logLabel: string;
   }): Promise<void> {
     try {
@@ -108,7 +116,8 @@ export class ResendEmailService implements EmailService {
         from: this.from,
         to: input.to,
         subject: input.subject,
-        html: input.html,
+        react: input.react,
+        text: input.text,
       });
 
       if (result.error) {

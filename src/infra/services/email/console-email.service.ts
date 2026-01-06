@@ -6,24 +6,25 @@ import type {
 } from '@/core/ports/services/email-service.port';
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  getEmployeeInviteAcceptedTemplate,
-  type EmployeeInviteAcceptedTemplateParams,
-} from './templates/employee-invite-accepted.template';
+  EmployeeInviteAcceptedEmail,
+  getEmployeeInviteAcceptedPlainText,
+} from './react-templates/employee-invite-accepted.email';
 import {
-  getEmployeeInviteTemplate,
-  type EmployeeInviteTemplateParams,
-} from './templates/employee-invite.template';
+  EmployeeInviteEmail,
+  getEmployeeInvitePlainText,
+} from './react-templates/employee-invite.email';
 import {
-  getPasswordResetTemplate,
-  type PasswordResetTemplateParams,
-} from './templates/password-reset.template';
+  PasswordResetEmail,
+  getPasswordResetPlainText,
+} from './react-templates/password-reset.email';
+import { renderEmail } from './react-templates/render-email';
 
 @Injectable()
 export class ConsoleEmailService implements EmailService {
   private readonly logger = new Logger(ConsoleEmailService.name);
 
-  sendEmployeeInvite(params: SendEmployeeInviteParams): Promise<void> {
-    const templateParams: EmployeeInviteTemplateParams = {
+  async sendEmployeeInvite(params: SendEmployeeInviteParams): Promise<void> {
+    const templateParams = {
       employeeName: params.employeeName,
       companyName: params.companyName,
       inviteLink: this.buildInviteLink(params.inviteToken),
@@ -31,61 +32,70 @@ export class ConsoleEmailService implements EmailService {
       role: params.role,
     };
 
-    const html = getEmployeeInviteTemplate(templateParams);
+    const react = EmployeeInviteEmail(templateParams);
+    const { html } = await renderEmail({ react });
+    const text = getEmployeeInvitePlainText(templateParams);
 
     this.logger.log('📧 [EMAIL] Employee Invite');
     this.logger.log(`To: ${params.to}`);
     this.logger.log(`Subject: Convite para ${params.companyName} - Tooldo`);
     this.logger.log(`Invite Link: ${templateParams.inviteLink}`);
     this.logger.log(`Token: ${params.inviteToken}`);
+    this.logger.log(`Text:\n${text}`);
     this.logger.log('---');
 
     void html;
 
-    return Promise.resolve();
+    return;
   }
 
-  sendEmployeeInviteAccepted(
+  async sendEmployeeInviteAccepted(
     params: SendEmployeeInviteAcceptedParams,
   ): Promise<void> {
-    const templateParams: EmployeeInviteAcceptedTemplateParams = {
+    const templateParams = {
       employeeName: params.employeeName,
       companyName: params.companyName,
       adminName: params.adminName,
     };
 
-    const html = getEmployeeInviteAcceptedTemplate(templateParams);
+    const react = EmployeeInviteAcceptedEmail(templateParams);
+    const { html } = await renderEmail({ react });
+    const text = getEmployeeInviteAcceptedPlainText(templateParams);
 
     this.logger.log('📧 [EMAIL] Employee Invite Accepted');
     this.logger.log(`To: ${params.to}`);
     this.logger.log(
       `Subject: ${params.employeeName} aceitou o convite - ${params.companyName}`,
     );
+    this.logger.log(`Text:\n${text}`);
     this.logger.log('---');
 
     void html;
 
-    return Promise.resolve();
+    return;
   }
 
-  sendPasswordReset(params: SendPasswordResetParams): Promise<void> {
-    const templateParams: PasswordResetTemplateParams = {
+  async sendPasswordReset(params: SendPasswordResetParams): Promise<void> {
+    const templateParams = {
       userName: params.userName,
       resetLink: this.buildResetLink(params.resetToken),
     };
 
-    const html = getPasswordResetTemplate(templateParams);
+    const react = PasswordResetEmail(templateParams);
+    const { html } = await renderEmail({ react });
+    const text = getPasswordResetPlainText(templateParams);
 
     this.logger.log('📧 [EMAIL] Password Reset');
     this.logger.log(`To: ${params.to}`);
     this.logger.log(`Subject: Recuperação de Senha - Tooldo`);
     this.logger.log(`Reset Link: ${templateParams.resetLink}`);
     this.logger.log(`Token: ${params.resetToken}`);
+    this.logger.log(`Text:\n${text}`);
     this.logger.log('---');
 
     void html;
 
-    return Promise.resolve();
+    return;
   }
 
   private buildInviteLink(token: string): string {
