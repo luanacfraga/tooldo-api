@@ -103,10 +103,18 @@ export class ActionController {
   @ApiQuery({ name: 'companyId', required: false, type: String })
   @ApiQuery({ name: 'teamId', required: false, type: String })
   @ApiQuery({ name: 'responsibleId', required: false, type: String })
+  @ApiQuery({ name: 'creatorId', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, enum: ActionStatus })
+  @ApiQuery({ name: 'statuses', required: false, enum: ActionStatus, isArray: true })
   @ApiQuery({ name: 'priority', required: false, enum: ActionPriority })
   @ApiQuery({ name: 'isLate', required: false, type: Boolean })
   @ApiQuery({ name: 'isBlocked', required: false, type: Boolean })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    type: String,
+    description: 'Busca por título ou descrição (case-insensitive)',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({
@@ -120,10 +128,13 @@ export class ActionController {
       companyId: query.companyId,
       teamId: query.teamId,
       responsibleId: query.responsibleId,
+      creatorId: query.creatorId,
       status: query.status,
+      statuses: query.statuses,
       priority: query.priority,
       isLate: query.isLate,
       isBlocked: query.isBlocked,
+      q: query.q,
       page: query.page,
       limit: query.limit,
     });

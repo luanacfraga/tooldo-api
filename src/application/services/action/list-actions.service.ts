@@ -13,10 +13,13 @@ export interface ListActionsInput {
   companyId?: string;
   teamId?: string;
   responsibleId?: string;
+  creatorId?: string;
   status?: ActionStatus;
+  statuses?: ActionStatus[];
   priority?: ActionPriority;
   isLate?: boolean;
   isBlocked?: boolean;
+  q?: string;
   page?: number;
   limit?: number;
 }
@@ -54,7 +57,7 @@ export class ListActionsService {
       results = await this.actionRepository.findByCompanyIdWithChecklistItems(
         input.companyId,
         {
-          status: input.status,
+          status: input.statuses?.length ? undefined : input.status,
           priority: input.priority,
           teamId: input.teamId,
           responsibleId: input.responsibleId,
@@ -70,7 +73,7 @@ export class ListActionsService {
       results = await this.actionRepository.findByTeamIdWithChecklistItems(
         input.teamId,
         {
-          status: input.status,
+          status: input.statuses?.length ? undefined : input.status,
           priority: input.priority,
           responsibleId: input.responsibleId,
           isBlocked: input.isBlocked,
@@ -81,7 +84,7 @@ export class ListActionsService {
         await this.actionRepository.findByResponsibleIdWithChecklistItems(
           input.responsibleId,
           {
-            status: input.status,
+            status: input.statuses?.length ? undefined : input.status,
             priority: input.priority,
             isBlocked: input.isBlocked,
           },
@@ -103,6 +106,23 @@ export class ListActionsService {
 
     if (input.isLate !== undefined) {
       mapped = mapped.filter((r) => r.action.isLate === input.isLate);
+    }
+
+    if (input.creatorId) {
+      mapped = mapped.filter((r) => r.action.creatorId === input.creatorId);
+    }
+
+    const q = input.q?.trim().toLowerCase();
+    if (q) {
+      mapped = mapped.filter((r) => {
+        const haystack = `${r.action.title ?? ''} ${r.action.description ?? ''}`.toLowerCase();
+        return haystack.includes(q);
+      });
+    }
+
+    if (input.statuses?.length) {
+      const set = new Set(input.statuses);
+      mapped = mapped.filter((r) => set.has(r.action.status));
     }
 
     const total = mapped.length;
