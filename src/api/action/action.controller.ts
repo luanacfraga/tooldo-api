@@ -110,6 +110,24 @@ export class ActionController {
   @ApiQuery({ name: 'isLate', required: false, type: Boolean })
   @ApiQuery({ name: 'isBlocked', required: false, type: Boolean })
   @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: String,
+    description: 'Filtrar por data inicial (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: String,
+    description: 'Filtrar por data final (ISO 8601)',
+  })
+  @ApiQuery({
+    name: 'dateFilterType',
+    required: false,
+    enum: ['createdAt', 'startDate'],
+    description: 'Tipo de filtro de data: createdAt (data de criação) ou startDate (data de início)',
+  })
+  @ApiQuery({
     name: 'q',
     required: false,
     type: String,
@@ -134,6 +152,9 @@ export class ActionController {
       priority: query.priority,
       isLate: query.isLate,
       isBlocked: query.isBlocked,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
+      dateFilterType: query.dateFilterType,
       q: query.q,
       page: query.page,
       limit: query.limit,

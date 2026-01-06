@@ -66,6 +66,34 @@ export class ListActionsQueryDto {
 
   @ApiProperty({
     required: false,
+    description: 'Filtrar por data inicial (ISO 8601)',
+    example: '2024-01-01T00:00:00.000Z'
+  })
+  @IsString({ message: 'dateFrom deve ser string ISO' })
+  @IsOptional()
+  dateFrom?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Filtrar por data final (ISO 8601)',
+    example: '2024-12-31T23:59:59.999Z'
+  })
+  @IsString({ message: 'dateTo deve ser string ISO' })
+  @IsOptional()
+  dateTo?: string;
+
+  @ApiProperty({
+    required: false,
+    description: 'Tipo de filtro de data: createdAt (data de criação) ou startDate (data de início)',
+    enum: ['createdAt', 'startDate'],
+    example: 'createdAt'
+  })
+  @IsEnum(['createdAt', 'startDate'], { message: 'dateFilterType deve ser createdAt ou startDate' })
+  @IsOptional()
+  dateFilterType?: 'createdAt' | 'startDate';
+
+  @ApiProperty({
+    required: false,
     description: 'Busca por título ou descrição (case-insensitive)',
     example: 'melhorar onboarding',
   })

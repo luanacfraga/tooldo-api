@@ -19,6 +19,9 @@ export interface ListActionsInput {
   priority?: ActionPriority;
   isLate?: boolean;
   isBlocked?: boolean;
+  dateFrom?: string;
+  dateTo?: string;
+  dateFilterType?: 'createdAt' | 'startDate';
   q?: string;
   page?: number;
   limit?: number;
@@ -123,6 +126,36 @@ export class ListActionsService {
     if (input.statuses?.length) {
       const set = new Set(input.statuses);
       mapped = mapped.filter((r) => set.has(r.action.status));
+    }
+
+    // Date range filtering
+    if (input.dateFrom || input.dateTo) {
+      const dateFilterType = input.dateFilterType ?? 'createdAt';
+
+      mapped = mapped.filter((r) => {
+        // Get the date to compare based on filter type
+        const compareDate = dateFilterType === 'createdAt'
+          ? r.createdAt
+          : r.action.estimatedStartDate;
+
+        // Apply from date filter
+        if (input.dateFrom) {
+          const fromDate = new Date(input.dateFrom);
+          if (compareDate < fromDate) {
+            return false;
+          }
+        }
+
+        // Apply to date filter
+        if (input.dateTo) {
+          const toDate = new Date(input.dateTo);
+          if (compareDate > toDate) {
+            return false;
+          }
+        }
+
+        return true;
+      });
     }
 
     const total = mapped.length;

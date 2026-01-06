@@ -119,6 +119,7 @@ export class ActionPrismaRepository implements ActionRepository {
       ),
       kanbanOrder: result.kanbanOrder ?? null,
       responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     };
   }
 
@@ -171,6 +172,7 @@ export class ActionPrismaRepository implements ActionRepository {
       ),
       kanbanOrder: result.kanbanOrder ?? null,
       responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     }));
   }
 
@@ -223,6 +225,7 @@ export class ActionPrismaRepository implements ActionRepository {
       ),
       kanbanOrder: result.kanbanOrder ?? null,
       responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     }));
   }
 
@@ -281,6 +284,7 @@ export class ActionPrismaRepository implements ActionRepository {
       ),
       kanbanOrder: result.kanbanOrder ?? null,
       responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     }));
   }
 

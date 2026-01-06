@@ -40,6 +40,7 @@ export interface ActionWithChecklistItems {
   checklistItems: ChecklistItem[];
   kanbanOrder: PrismaKanbanOrder | null;
   responsible?: ActionResponsibleUser;
+  createdAt: Date;
 }
 
 export interface ActionRepository {
