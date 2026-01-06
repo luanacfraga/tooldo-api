@@ -1,16 +1,19 @@
+import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
 import { BlockActionService } from '@/application/services/action/block-action.service';
 import { CreateActionService } from '@/application/services/action/create-action.service';
 import { DeleteActionService } from '@/application/services/action/delete-action.service';
-import { GetActionService } from '@/application/services/action/get-action.service';
 import { GenerateActionPlanService } from '@/application/services/action/generate-action-plan.service';
+import { GetActionService } from '@/application/services/action/get-action.service';
 import { ListActionsService } from '@/application/services/action/list-actions.service';
 import { MoveActionService } from '@/application/services/action/move-action.service';
-import { UpdateActionService } from '@/application/services/action/update-action.service';
-import { AddChecklistItemService } from '@/application/services/checklist/add-checklist-item.service';
-import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
-import { ReorderChecklistItemsService } from '@/application/services/checklist/reorder-checklist-items.service';
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { UnblockActionService } from '@/application/services/action/unblock-action.service';
+import { UpdateActionService } from '@/application/services/action/update-action.service';
+import { JwtPayload } from '@/application/services/auth/auth.service';
+import { AddChecklistItemService } from '@/application/services/checklist/add-checklist-item.service';
+import { ReorderChecklistItemsService } from '@/application/services/checklist/reorder-checklist-items.service';
+import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
+import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
+import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import {
   Body,
   Controller,
@@ -35,6 +38,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 import { ActionResponseDto } from './dto/action-response.dto';
 import { ActionSuggestionResponseDto } from './dto/action-suggestion-response.dto';
 import { AddChecklistItemDto } from './dto/add-checklist-item.dto';
@@ -45,10 +49,6 @@ import { ListActionsQueryDto } from './dto/list-actions.dto';
 import { MoveActionDto } from './dto/move-action.dto';
 import { ReorderChecklistItemsDto } from './dto/reorder-checklist-items.dto';
 import { UpdateActionDto } from './dto/update-action.dto';
-import { JwtPayload } from '@/application/services/auth/auth.service';
-import { Request as ExpressRequest } from 'express';
-import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
-import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
 
 type RequestWithUser = ExpressRequest & { user: JwtPayload };
 
@@ -105,7 +105,12 @@ export class ActionController {
   @ApiQuery({ name: 'responsibleId', required: false, type: String })
   @ApiQuery({ name: 'creatorId', required: false, type: String })
   @ApiQuery({ name: 'status', required: false, enum: ActionStatus })
-  @ApiQuery({ name: 'statuses', required: false, enum: ActionStatus, isArray: true })
+  @ApiQuery({
+    name: 'statuses',
+    required: false,
+    enum: ActionStatus,
+    isArray: true,
+  })
   @ApiQuery({ name: 'priority', required: false, enum: ActionPriority })
   @ApiQuery({ name: 'isLate', required: false, type: Boolean })
   @ApiQuery({ name: 'isBlocked', required: false, type: Boolean })
@@ -125,7 +130,8 @@ export class ActionController {
     name: 'dateFilterType',
     required: false,
     enum: ['createdAt', 'startDate'],
-    description: 'Tipo de filtro de data: createdAt (data de criação) ou startDate (data de início)',
+    description:
+      'Tipo de filtro de data: createdAt (data de criação) ou startDate (data de início)',
   })
   @ApiQuery({
     name: 'q',
@@ -183,7 +189,8 @@ export class ActionController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Buscar ação por id',
-    description: 'Retorna uma ação com checklist, kanbanOrder e responsável (quando disponível)',
+    description:
+      'Retorna uma ação com checklist, kanbanOrder e responsável (quando disponível)',
   })
   @ApiOkResponse({
     description: 'Ação encontrada',
@@ -366,9 +373,8 @@ export class ActionController {
   async toggleChecklistItem(
     @Param('itemId') itemId: string,
   ): Promise<ChecklistItem> {
-    console.log('[TOGGLE CONTROLLER] Received request for itemId:', itemId);
     const result = await this.toggleChecklistItemService.execute({ itemId });
-    console.log('[TOGGLE CONTROLLER] Toggle successful, item:', result.item.id, 'isCompleted:', result.item.isCompleted);
+
     return result.item;
   }
 

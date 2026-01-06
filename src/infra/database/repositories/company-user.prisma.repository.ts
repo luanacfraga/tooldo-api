@@ -44,7 +44,7 @@ interface CompanyUserWithUser extends CompanyUser {
     phone: string;
     role: string;
     initials?: string | null;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

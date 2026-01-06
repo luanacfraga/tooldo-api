@@ -118,7 +118,8 @@ export class ListActionsService {
     const q = input.q?.trim().toLowerCase();
     if (q) {
       mapped = mapped.filter((r) => {
-        const haystack = `${r.action.title ?? ''} ${r.action.description ?? ''}`.toLowerCase();
+        const haystack =
+          `${r.action.title ?? ''} ${r.action.description ?? ''}`.toLowerCase();
         return haystack.includes(q);
       });
     }
@@ -134,9 +135,10 @@ export class ListActionsService {
 
       mapped = mapped.filter((r) => {
         // Get the date to compare based on filter type
-        const compareDate = dateFilterType === 'createdAt'
-          ? r.createdAt
-          : r.action.estimatedStartDate;
+        const compareDate =
+          dateFilterType === 'createdAt'
+            ? r.createdAt
+            : r.action.estimatedStartDate;
 
         // Apply from date filter
         if (input.dateFrom) {

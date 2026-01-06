@@ -1,7 +1,14 @@
+import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class ListActionsQueryDto {
   @ApiProperty({ required: false, description: 'Filtrar por empresa' })
@@ -31,12 +38,15 @@ export class ListActionsQueryDto {
 
   @ApiProperty({
     required: false,
-    description: 'Filtrar por múltiplos status (use query param repetido: statuses=TODO&statuses=DONE)',
+    description:
+      'Filtrar por múltiplos status (use query param repetido: statuses=TODO&statuses=DONE)',
     isArray: true,
     enum: ActionStatus,
   })
   @Transform(({ value }) => {
-    if (value === undefined || value === null || value === '') return undefined;
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
     return Array.isArray(value) ? value : [value];
   })
   @IsEnum(ActionStatus, { each: true, message: 'Status inválido' })
@@ -52,13 +62,21 @@ export class ListActionsQueryDto {
   @IsOptional()
   priority?: ActionPriority;
 
-  @ApiProperty({ required: false, description: 'Filtrar por atrasadas', type: Boolean })
+  @ApiProperty({
+    required: false,
+    description: 'Filtrar por atrasadas',
+    type: Boolean,
+  })
   @Type(() => Boolean)
   @IsBoolean({ message: 'isLate deve ser boolean' })
   @IsOptional()
   isLate?: boolean;
 
-  @ApiProperty({ required: false, description: 'Filtrar por bloqueadas', type: Boolean })
+  @ApiProperty({
+    required: false,
+    description: 'Filtrar por bloqueadas',
+    type: Boolean,
+  })
   @Type(() => Boolean)
   @IsBoolean({ message: 'isBlocked deve ser boolean' })
   @IsOptional()
@@ -67,7 +85,7 @@ export class ListActionsQueryDto {
   @ApiProperty({
     required: false,
     description: 'Filtrar por data inicial (ISO 8601)',
-    example: '2024-01-01T00:00:00.000Z'
+    example: '2024-01-01T00:00:00.000Z',
   })
   @IsString({ message: 'dateFrom deve ser string ISO' })
   @IsOptional()
@@ -76,7 +94,7 @@ export class ListActionsQueryDto {
   @ApiProperty({
     required: false,
     description: 'Filtrar por data final (ISO 8601)',
-    example: '2024-12-31T23:59:59.999Z'
+    example: '2024-12-31T23:59:59.999Z',
   })
   @IsString({ message: 'dateTo deve ser string ISO' })
   @IsOptional()
@@ -84,11 +102,14 @@ export class ListActionsQueryDto {
 
   @ApiProperty({
     required: false,
-    description: 'Tipo de filtro de data: createdAt (data de criação) ou startDate (data de início)',
+    description:
+      'Tipo de filtro de data: createdAt (data de criação) ou startDate (data de início)',
     enum: ['createdAt', 'startDate'],
-    example: 'createdAt'
+    example: 'createdAt',
   })
-  @IsEnum(['createdAt', 'startDate'], { message: 'dateFilterType deve ser createdAt ou startDate' })
+  @IsEnum(['createdAt', 'startDate'], {
+    message: 'dateFilterType deve ser createdAt ou startDate',
+  })
   @IsOptional()
   dateFilterType?: 'createdAt' | 'startDate';
 
@@ -101,19 +122,27 @@ export class ListActionsQueryDto {
   @IsOptional()
   q?: string;
 
-  @ApiProperty({ required: false, description: 'Página', example: 1, minimum: 1 })
+  @ApiProperty({
+    required: false,
+    description: 'Página',
+    example: 1,
+    minimum: 1,
+  })
   @Type(() => Number)
   @IsInt({ message: 'Página deve ser um número inteiro' })
   @Min(1, { message: 'Página deve ser maior ou igual a 1' })
   @IsOptional()
   page?: number = 1;
 
-  @ApiProperty({ required: false, description: 'Limite por página', example: 20, minimum: 1 })
+  @ApiProperty({
+    required: false,
+    description: 'Limite por página',
+    example: 20,
+    minimum: 1,
+  })
   @Type(() => Number)
   @IsInt({ message: 'Limite deve ser um número inteiro' })
   @Min(1, { message: 'Limite deve ser maior ou igual a 1' })
   @IsOptional()
   limit?: number = 20;
 }
-
-

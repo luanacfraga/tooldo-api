@@ -1,5 +1,5 @@
-import type * as React from 'react';
 import { render } from '@react-email/render';
+import type * as React from 'react';
 
 export async function renderEmail(input: {
   react: React.ReactElement;
@@ -8,5 +8,3 @@ export async function renderEmail(input: {
   const text = await render(input.react, { plainText: true });
   return { html, text };
 }
-
-
