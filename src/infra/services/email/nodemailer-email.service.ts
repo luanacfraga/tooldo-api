@@ -1,23 +1,25 @@
+import { Injectable, Logger } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
+
 import type {
   EmailService,
   SendEmployeeInviteAcceptedParams,
   SendEmployeeInviteParams,
   SendPasswordResetParams,
 } from '@/core/ports/services/email-service.port';
-import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
 import {
-  getEmployeeInviteAcceptedTemplate,
-  type EmployeeInviteAcceptedTemplateParams,
-} from './templates/employee-invite-accepted.template';
+  EmployeeInviteAcceptedEmail,
+  getEmployeeInviteAcceptedPlainText,
+} from './react-templates/employee-invite-accepted.email';
 import {
-  getEmployeeInviteTemplate,
-  type EmployeeInviteTemplateParams,
-} from './templates/employee-invite.template';
+  EmployeeInviteEmail,
+  getEmployeeInvitePlainText,
+} from './react-templates/employee-invite.email';
 import {
-  getPasswordResetTemplate,
-  type PasswordResetTemplateParams,
-} from './templates/password-reset.template';
+  PasswordResetEmail,
+  getPasswordResetPlainText,
+} from './react-templates/password-reset.email';
+import { renderEmail } from './react-templates/render-email';
 
 @Injectable()
 export class NodemailerEmailService implements EmailService {
@@ -78,7 +80,7 @@ export class NodemailerEmailService implements EmailService {
   }
 
   async sendEmployeeInvite(params: SendEmployeeInviteParams): Promise<void> {
-    const templateParams: EmployeeInviteTemplateParams = {
+    const templateParams = {
       employeeName: params.employeeName,
       companyName: params.companyName,
       inviteLink: this.buildInviteLink(params.inviteToken),
@@ -86,7 +88,9 @@ export class NodemailerEmailService implements EmailService {
       role: params.role,
     };
 
-    const html = getEmployeeInviteTemplate(templateParams);
+    const react = EmployeeInviteEmail(templateParams);
+    const { html } = await renderEmail({ react });
+    const text = getEmployeeInvitePlainText(templateParams);
     const subject = `Convite para ${params.companyName} - Tooldo`;
 
     try {
@@ -95,6 +99,7 @@ export class NodemailerEmailService implements EmailService {
         to: params.to,
         subject,
         html,
+        text,
       });
 
       this.logger.log(`✅ Email sent: Employee Invite to ${params.to}`);
@@ -110,13 +115,15 @@ export class NodemailerEmailService implements EmailService {
   async sendEmployeeInviteAccepted(
     params: SendEmployeeInviteAcceptedParams,
   ): Promise<void> {
-    const templateParams: EmployeeInviteAcceptedTemplateParams = {
+    const templateParams = {
       employeeName: params.employeeName,
       companyName: params.companyName,
       adminName: params.adminName,
     };
 
-    const html = getEmployeeInviteAcceptedTemplate(templateParams);
+    const react = EmployeeInviteAcceptedEmail(templateParams);
+    const { html } = await renderEmail({ react });
+    const text = getEmployeeInviteAcceptedPlainText(templateParams);
     const subject = `${params.employeeName} aceitou o convite - ${params.companyName}`;
 
     try {
@@ -125,6 +132,7 @@ export class NodemailerEmailService implements EmailService {
         to: params.to,
         subject,
         html,
+        text,
       });
 
       this.logger.log(
@@ -140,12 +148,14 @@ export class NodemailerEmailService implements EmailService {
   }
 
   async sendPasswordReset(params: SendPasswordResetParams): Promise<void> {
-    const templateParams: PasswordResetTemplateParams = {
+    const templateParams = {
       userName: params.userName,
       resetLink: this.buildResetLink(params.resetToken),
     };
 
-    const html = getPasswordResetTemplate(templateParams);
+    const react = PasswordResetEmail(templateParams);
+    const { html } = await renderEmail({ react });
+    const text = getPasswordResetPlainText(templateParams);
     const subject = 'Recuperação de Senha - Tooldo';
 
     try {
@@ -154,6 +164,7 @@ export class NodemailerEmailService implements EmailService {
         to: params.to,
         subject,
         html,
+        text,
       });
 
       this.logger.log(`✅ Email sent: Password Reset to ${params.to}`);

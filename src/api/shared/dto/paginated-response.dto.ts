@@ -24,6 +24,20 @@ export class PaginationMetaDto {
     example: 10,
   })
   totalPages!: number;
+
+  @ApiProperty({
+    description: 'Se existe próxima página',
+    example: true,
+    required: false,
+  })
+  hasNextPage?: boolean;
+
+  @ApiProperty({
+    description: 'Se existe página anterior',
+    example: false,
+    required: false,
+  })
+  hasPreviousPage?: boolean;
 }
 
 export class PaginatedResponseDto<T> {

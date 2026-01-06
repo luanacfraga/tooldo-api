@@ -59,7 +59,7 @@ Para habilitar o envio real de emails, configure as seguintes variáveis. **Se n
 
 **Variáveis opcionais de configuração SMTP:**
 
-- `EMAIL_PROVIDER` - Provedor de email (`smtp` ou `aws-ses`, padrão: `smtp`)
+- `EMAIL_PROVIDER` - Provedor de email (`smtp`, `aws-ses` ou `resend`, padrão: `smtp`)
 - `SMTP_HOST` - Host do servidor SMTP
   - Para AWS SES: `email-smtp.us-east-1.amazonaws.com` (ajuste a região)
   - Para Gmail: `smtp.gmail.com`
@@ -74,6 +74,7 @@ Para habilitar o envio real de emails, configure as seguintes variáveis. **Se n
 - `SMTP_REQUIRE_TLS` - Exigir TLS (`true` ou `false`, padrão: `false`)
 - `EMAIL_FROM` - Email remetente (padrão: usa `SMTP_USER` ou `noreply@tooldo.com`)
 - `EMAIL_FROM_NAME` - Nome do remetente (padrão: `Tooldo`)
+- `RESEND_API_KEY` - Chave da API do Resend (obrigatória quando `EMAIL_PROVIDER=resend` em produção)
 
 **Exemplo de configuração para AWS SES:**
 

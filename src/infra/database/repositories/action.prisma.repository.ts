@@ -3,6 +3,7 @@ import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import type {
   ActionFilters,
   ActionRepository,
+  ActionResponsibleUser,
   ActionWithChecklistItems,
   UpdateActionData,
 } from '@/core/ports/repositories/action.repository';
@@ -17,6 +18,22 @@ import {
 @Injectable()
 export class ActionPrismaRepository implements ActionRepository {
   constructor(private readonly prisma: PrismaService) {}
+
+  private mapResponsibleToDto(
+    responsible:
+      | { id: string; firstName: string; lastName: string }
+      | null
+      | undefined,
+  ): ActionResponsibleUser | undefined {
+    if (!responsible) {
+      return undefined;
+    }
+    return {
+      id: responsible.id,
+      firstName: responsible.firstName,
+      lastName: responsible.lastName,
+    };
+  }
 
   async create(action: Action, tx?: unknown): Promise<Action> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
@@ -75,6 +92,13 @@ export class ActionPrismaRepository implements ActionRepository {
       where: { id },
       include: {
         kanbanOrder: true,
+        responsible: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -94,6 +118,8 @@ export class ActionPrismaRepository implements ActionRepository {
         this.mapChecklistItemToDomain(item),
       ),
       kanbanOrder: result.kanbanOrder ?? null,
+      responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     };
   }
 
@@ -125,6 +151,13 @@ export class ActionPrismaRepository implements ActionRepository {
       where,
       include: {
         kanbanOrder: true,
+        responsible: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -138,6 +171,8 @@ export class ActionPrismaRepository implements ActionRepository {
         this.mapChecklistItemToDomain(item),
       ),
       kanbanOrder: result.kanbanOrder ?? null,
+      responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     }));
   }
 
@@ -169,6 +204,13 @@ export class ActionPrismaRepository implements ActionRepository {
       where,
       include: {
         kanbanOrder: true,
+        responsible: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -182,6 +224,8 @@ export class ActionPrismaRepository implements ActionRepository {
         this.mapChecklistItemToDomain(item),
       ),
       kanbanOrder: result.kanbanOrder ?? null,
+      responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     }));
   }
 
@@ -219,6 +263,13 @@ export class ActionPrismaRepository implements ActionRepository {
       where,
       include: {
         kanbanOrder: true,
+        responsible: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
         checklistItems: {
           orderBy: { order: 'asc' },
         },
@@ -232,6 +283,8 @@ export class ActionPrismaRepository implements ActionRepository {
         this.mapChecklistItemToDomain(item),
       ),
       kanbanOrder: result.kanbanOrder ?? null,
+      responsible: this.mapResponsibleToDto(result.responsible),
+      createdAt: result.createdAt,
     }));
   }
 

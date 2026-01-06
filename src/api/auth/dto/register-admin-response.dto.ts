@@ -65,6 +65,22 @@ export class UserResponseDto {
     nullable: true,
   })
   profileImageUrl?: string | null;
+
+  @ApiProperty({
+    description: 'Iniciais do usuário',
+    example: 'JD',
+    required: false,
+    nullable: true,
+  })
+  initials?: string | null;
+
+  @ApiProperty({
+    description: 'Cor do avatar do usuário',
+    example: '#FF5733',
+    required: false,
+    nullable: true,
+  })
+  avatarColor?: string | null;
 }
 
 export class CompanyResponseDto {

@@ -109,6 +109,22 @@ export class ActionResponseDto {
   responsibleId!: string;
 
   @ApiProperty({
+    description: 'Dados resumidos do responsável pela ação',
+    required: false,
+    nullable: true,
+    example: {
+      id: '123e4567-e89b-12d3-a456-426614174003',
+      firstName: 'João',
+      lastName: 'Silva',
+    },
+  })
+  responsible?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+  } | null;
+
+  @ApiProperty({
     description: 'Itens da checklist',
     type: [ChecklistItemResponseDto],
   })
@@ -125,6 +141,11 @@ export class ActionResponseDto {
     action: Action,
     checklistItems?: ChecklistItem[],
     kanbanOrder?: PrismaKanbanOrder | null,
+    responsible?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+    },
   ): ActionResponseDto {
     const response = new ActionResponseDto();
     response.id = action.id;
@@ -143,6 +164,7 @@ export class ActionResponseDto {
     response.teamId = action.teamId;
     response.creatorId = action.creatorId;
     response.responsibleId = action.responsibleId;
+    response.responsible = responsible ?? null;
     response.checklistItems = checklistItems
       ? checklistItems.map((item) => ChecklistItemResponseDto.fromDomain(item))
       : [];

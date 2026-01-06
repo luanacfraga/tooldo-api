@@ -16,6 +16,8 @@ export class User extends Entity {
     public readonly role: UserRole,
     public readonly status: UserStatus,
     public readonly profileImageUrl: string | null = null,
+    public readonly avatarColor: string | null = null,
+    public readonly initials: string | null = null,
   ) {
     super(id);
     this.validate();

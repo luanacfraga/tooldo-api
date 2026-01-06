@@ -15,6 +15,8 @@ export class UserMapper {
       role: user.role,
       status: user.status,
       profileImageUrl: user.profileImageUrl,
+      initials: user.initials,
+      avatarColor: user.avatarColor,
     };
   }
 
@@ -25,6 +27,8 @@ export class UserMapper {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
+      initials: user.initials,
+      avatarColor: user.avatarColor,
     };
   }
 }

@@ -10,6 +10,7 @@ export interface CompanyUserWithUser extends CompanyUser {
     email: string;
     phone: string;
     role: string;
+    initials?: string | null;
   };
 }
 
@@ -92,6 +93,7 @@ export class EmployeeResponseDto {
     email: string;
     phone: string;
     role: string;
+    initials?: string | null;
   };
 
   static fromDomain(
@@ -117,6 +119,7 @@ export class EmployeeResponseDto {
         email: companyUser.user.email,
         phone: companyUser.user.phone,
         role: companyUser.user.role,
+        initials: companyUser.user.initials,
       };
     }
 
