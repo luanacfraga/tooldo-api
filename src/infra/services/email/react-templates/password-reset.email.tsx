@@ -50,7 +50,9 @@ export function PasswordResetEmail(
   );
 }
 
-export function getPasswordResetPlainText(props: PasswordResetEmailProps): string {
+export function getPasswordResetPlainText(
+  props: PasswordResetEmailProps,
+): string {
   return [
     `Olá, ${props.userName}!`,
     '',
@@ -63,5 +65,3 @@ export function getPasswordResetPlainText(props: PasswordResetEmailProps): strin
     'Se você não solicitou a redefinição de senha, ignore este email com segurança.',
   ].join('\n');
 }
-
-

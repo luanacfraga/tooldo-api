@@ -50,5 +50,3 @@ export function getEmployeeInviteAcceptedPlainText(
     'Você pode gerenciar permissões e acessos pelo painel administrativo.',
   ].join('\n');
 }
-
-

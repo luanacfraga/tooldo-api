@@ -3,6 +3,41 @@ import * as React from 'react';
 const fontFamily =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
 
+const BRAND = {
+  name: 'ToolDo',
+  primary: '#554B7F', // brand purple
+  secondary: '#0D9488', // teal
+  bg: '#f3f4f6',
+  surface: '#ffffff',
+  border: '#e5e7eb',
+  text: '#111827',
+  muted: '#6b7280',
+} as const;
+
+function trimTrailingSlash(url: string): string {
+  return url.endsWith('/') ? url.slice(0, -1) : url;
+}
+
+function getFrontendUrl(): string | undefined {
+  const raw = process.env.FRONTEND_URL;
+  if (!raw) {
+    return undefined;
+  }
+  if (!/^https?:\/\//i.test(raw)) {
+    return undefined;
+  }
+  return trimTrailingSlash(raw);
+}
+
+function getLogoUrl(): string | undefined {
+  const baseUrl = getFrontendUrl();
+  if (!baseUrl) {
+    return undefined;
+  }
+  // `tooldo-app/public/images/logo.png`
+  return `${baseUrl}/images/logo.png`;
+}
+
 export type BaseEmailProps = {
   title: string;
   preheader: string;
@@ -12,6 +47,8 @@ export type BaseEmailProps = {
 
 export function BaseEmail(props: BaseEmailProps): React.ReactElement {
   const year = new Date().getFullYear();
+  const baseUrl = getFrontendUrl();
+  const logoUrl = getLogoUrl();
 
   return (
     <html lang="pt-BR">
@@ -22,7 +59,7 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
         <meta name="supported-color-schemes" content="light dark" />
         <title>{props.title}</title>
       </head>
-      <body style={{ margin: 0, padding: 0, backgroundColor: '#f3f4f6' }}>
+      <body style={{ margin: 0, padding: 0, backgroundColor: BRAND.bg }}>
         <div
           style={{
             display: 'none',
@@ -43,7 +80,7 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
           cellSpacing={0}
           border={0}
           width="100%"
-          style={{ backgroundColor: '#f3f4f6', padding: '24px 12px' }}
+          style={{ backgroundColor: BRAND.bg, padding: '24px 12px' }}
         >
           <tbody>
             <tr>
@@ -59,30 +96,59 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
                   <tbody>
                     <tr>
                       <td align="center" style={{ padding: '12px 0 16px 0' }}>
-                        <div
-                          style={{
-                            fontFamily,
-                            fontSize: 22,
-                            fontWeight: 800,
-                            color: '#4F46E5',
-                            letterSpacing: '-0.2px',
-                          }}
-                        >
-                          Tooldo
-                        </div>
+                        {logoUrl ? (
+                          <a
+                            href={baseUrl ?? undefined}
+                            target={baseUrl ? '_blank' : undefined}
+                            rel={baseUrl ? 'noreferrer' : undefined}
+                            style={{
+                              display: 'inline-block',
+                              textDecoration: 'none',
+                            }}
+                          >
+                            <img
+                              src={logoUrl}
+                              width={160}
+                              height={52}
+                              alt={BRAND.name}
+                              style={{
+                                display: 'block',
+                                width: 160,
+                                height: 'auto',
+                                maxWidth: '100%',
+                                border: 0,
+                                outline: 'none',
+                                textDecoration: 'none',
+                              }}
+                            />
+                          </a>
+                        ) : (
+                          <div
+                            style={{
+                              fontFamily,
+                              fontSize: 22,
+                              fontWeight: 800,
+                              color: BRAND.primary,
+                              letterSpacing: '-0.2px',
+                            }}
+                          >
+                            {BRAND.name}
+                          </div>
+                        )}
                       </td>
                     </tr>
 
                     <tr>
                       <td
                         style={{
-                          backgroundColor: '#ffffff',
+                          backgroundColor: BRAND.surface,
                           borderRadius: 12,
                           padding: '28px 24px',
-                          border: '1px solid #e5e7eb',
+                          border: `1px solid ${BRAND.border}`,
+                          borderTop: `4px solid ${BRAND.primary}`,
                         }}
                       >
-                        <div style={{ fontFamily, color: '#111827' }}>
+                        <div style={{ fontFamily, color: BRAND.text }}>
                           <div
                             style={{
                               fontSize: 20,
@@ -104,7 +170,7 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
                         <div
                           style={{
                             fontFamily,
-                            color: '#6b7280',
+                            color: BRAND.muted,
                             fontSize: 12,
                             lineHeight: 1.5,
                             textAlign: 'center',
@@ -116,7 +182,7 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
                             </div>
                           ) : null}
                           <div style={{ margin: 0 }}>
-                            © {year} Tooldo. Todos os direitos reservados.
+                            © {year} {BRAND.name}. Todos os direitos reservados.
                           </div>
                         </div>
                       </td>
@@ -153,7 +219,7 @@ export function PrimaryButton(props: {
               rel="noreferrer"
               style={{
                 display: 'inline-block',
-                backgroundColor: '#4F46E5',
+                backgroundColor: BRAND.primary,
                 color: '#ffffff',
                 textDecoration: 'none',
                 fontFamily,
@@ -161,6 +227,7 @@ export function PrimaryButton(props: {
                 fontWeight: 700,
                 padding: '12px 18px',
                 borderRadius: 10,
+                border: `1px solid ${BRAND.primary}`,
               }}
             >
               {props.label}
@@ -179,7 +246,7 @@ export function Callout(props: {
   const styles =
     props.variant === 'warning'
       ? { bg: '#FFFBEB', border: '#F59E0B', text: '#92400E' }
-      : { bg: '#EFF6FF', border: '#60A5FA', text: '#1E3A8A' };
+      : { bg: '#EFF6FF', border: '#3B82F6', text: '#1E3A8A' };
 
   return (
     <div
@@ -207,7 +274,7 @@ export function MutedText(props: {
     <div
       style={{
         margin: '14px 0 0 0',
-        color: '#6b7280',
+        color: BRAND.muted,
         fontSize: 12,
         lineHeight: 1.6,
       }}
@@ -222,7 +289,7 @@ export function FallbackLink(props: { url: string }): React.ReactElement {
     <div style={{ margin: '14px 0 0 0', fontSize: 13, lineHeight: 1.6 }}>
       Se o botão não funcionar, copie e cole este link no navegador:
       <br />
-      <span style={{ wordBreak: 'break-all', color: '#4F46E5' }}>
+      <span style={{ wordBreak: 'break-all', color: BRAND.primary }}>
         {props.url}
       </span>
     </div>
