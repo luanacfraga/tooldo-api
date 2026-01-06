@@ -1,11 +1,7 @@
 type BaseEmailLayoutParams = {
-  /** Used in <title> and as the main heading (h1-like) inside the email body */
   title: string;
-  /** Hidden preview text shown in some inboxes (Gmail/Apple Mail) */
   preheader: string;
-  /** Main content HTML (already escaped where needed) */
   bodyHtml: string;
-  /** Optional footer note (plain text, will be escaped) */
   footerNote?: string;
 };
 
@@ -24,8 +20,6 @@ export function renderBaseEmailLayout(params: BaseEmailLayoutParams): string {
   const preheader = escapeHtml(params.preheader);
   const footerNote = params.footerNote ? escapeHtml(params.footerNote) : null;
 
-  // Table-based layout for better compatibility (Outlook, etc.).
-  // Keep most styles inline to reduce reliance on <style> support.
   return `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -87,10 +81,9 @@ export function renderPrimaryButton(params: {
   href: string;
   label: string;
 }): string {
-  const href = params.href; // keep raw to preserve URL
+  const href = params.href;
   const label = escapeHtml(params.label);
 
-  // Use <a> with inline styles; avoid :hover for email-client compatibility.
   return `
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 10px 0;">
   <tr>

@@ -1,10 +1,11 @@
+import { Injectable, Logger } from '@nestjs/common';
+
 import type {
   EmailService,
   SendEmployeeInviteAcceptedParams,
   SendEmployeeInviteParams,
   SendPasswordResetParams,
 } from '@/core/ports/services/email-service.port';
-import { Injectable, Logger } from '@nestjs/common';
 import {
   EmployeeInviteAcceptedEmail,
   getEmployeeInviteAcceptedPlainText,

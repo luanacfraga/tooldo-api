@@ -23,7 +23,6 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
         <title>{props.title}</title>
       </head>
       <body style={{ margin: 0, padding: 0, backgroundColor: '#f3f4f6' }}>
-        {/* Preheader (hidden) */}
         <div
           style={{
             display: 'none',
@@ -55,7 +54,7 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
                   cellSpacing={0}
                   border={0}
                   width={600}
-                  style={{ width: 600, maxWidth: 600 as unknown as string }}
+                  style={{ width: 600, maxWidth: 600 }}
                 >
                   <tbody>
                     <tr>
@@ -229,5 +228,3 @@ export function FallbackLink(props: { url: string }): React.ReactElement {
     </div>
   );
 }
-
-

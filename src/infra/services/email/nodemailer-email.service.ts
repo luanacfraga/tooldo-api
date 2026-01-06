@@ -1,11 +1,12 @@
+import { Injectable, Logger } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
+
 import type {
   EmailService,
   SendEmployeeInviteAcceptedParams,
   SendEmployeeInviteParams,
   SendPasswordResetParams,
 } from '@/core/ports/services/email-service.port';
-import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
 import {
   EmployeeInviteAcceptedEmail,
   getEmployeeInviteAcceptedPlainText,

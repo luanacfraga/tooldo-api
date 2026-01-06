@@ -1,12 +1,13 @@
+import { Injectable, Logger } from '@nestjs/common';
+import type * as React from 'react';
+import { Resend } from 'resend';
+
 import type {
   EmailService,
   SendEmployeeInviteAcceptedParams,
   SendEmployeeInviteParams,
   SendPasswordResetParams,
 } from '@/core/ports/services/email-service.port';
-import { Injectable, Logger } from '@nestjs/common';
-import { Resend } from 'resend';
-import type * as React from 'react';
 import {
   EmployeeInviteAcceptedEmail,
   getEmployeeInviteAcceptedPlainText,
