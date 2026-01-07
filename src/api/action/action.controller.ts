@@ -14,6 +14,7 @@ import { ReorderChecklistItemsService } from '@/application/services/checklist/r
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
 import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
 import { ActionPriority, ActionStatus, UserRole } from '@/core/domain/shared/enums';
+import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import {
   Body,
   Controller,
@@ -70,6 +71,18 @@ export class ActionController {
     private readonly toggleChecklistItemService: ToggleChecklistItemService,
     private readonly reorderChecklistItemsService: ReorderChecklistItemsService,
   ) {}
+
+  private async assertExecutorOwnsAction(
+    actionId: string,
+    req: RequestWithUser,
+  ): Promise<void> {
+    if (req.user.role !== UserRole.EXECUTOR) return;
+    const result = await this.getActionService.execute({ actionId });
+    if (result.result.action.responsibleId !== req.user.sub) {
+      // Hide existence for unauthorized access
+      throw new EntityNotFoundException('Ação', actionId);
+    }
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -139,6 +152,13 @@ export class ActionController {
     type: String,
     description: 'Busca por título ou descrição (case-insensitive)',
   })
+  @ApiQuery({
+    name: 'objective',
+    required: false,
+    type: String,
+    description:
+      'Filtrar por objetivo vinculado à ação (armazenado na descrição como metadata ToolDo)',
+  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({
@@ -165,6 +185,7 @@ export class ActionController {
       dateTo: query.dateTo,
       dateFilterType: query.dateFilterType,
       q: query.q,
+      objective: query.objective,
       page: query.page,
       limit: query.limit,
     });
@@ -200,7 +221,11 @@ export class ActionController {
     type: ActionResponseDto,
   })
   @ApiNotFoundResponse({ description: 'Ação não encontrada' })
-  async getById(@Param('id') id: string): Promise<ActionResponseDto> {
+  async getById(
+    @Param('id') id: string,
+    @Request() req: RequestWithUser,
+  ): Promise<ActionResponseDto> {
+    await this.assertExecutorOwnsAction(id, req);
     const result = await this.getActionService.execute({ actionId: id });
     return ActionResponseDto.fromDomain(
       result.result.action,
@@ -225,7 +250,9 @@ export class ActionController {
   async update(
     @Param('id') id: string,
     @Body() dto: UpdateActionDto,
+    @Request() req: RequestWithUser,
   ): Promise<ActionResponseDto> {
+    await this.assertExecutorOwnsAction(id, req);
     const result = await this.updateActionService.execute({
       actionId: id,
       ...dto,
@@ -244,7 +271,11 @@ export class ActionController {
     type: ActionResponseDto,
   })
   @ApiNotFoundResponse({ description: 'Ação não encontrada' })
-  async delete(@Param('id') id: string): Promise<ActionResponseDto> {
+  async delete(
+    @Param('id') id: string,
+    @Request() req: RequestWithUser,
+  ): Promise<ActionResponseDto> {
+    await this.assertExecutorOwnsAction(id, req);
     const result = await this.deleteActionService.execute({ actionId: id });
     return ActionResponseDto.fromDomain(result.action);
   }
@@ -267,6 +298,7 @@ export class ActionController {
     @Body() dto: MoveActionDto,
     @Request() req: RequestWithUser,
   ): Promise<ActionResponseDto> {
+    await this.assertExecutorOwnsAction(id, req);
     const result = await this.moveActionService.execute({
       actionId: id,
       toStatus: dto.toStatus,
@@ -296,7 +328,9 @@ export class ActionController {
   async block(
     @Param('id') id: string,
     @Body() dto: BlockActionDto,
+    @Request() req: RequestWithUser,
   ): Promise<ActionResponseDto> {
+    await this.assertExecutorOwnsAction(id, req);
     const result = await this.blockActionService.execute({
       actionId: id,
       reason: dto.reason,
@@ -315,7 +349,11 @@ export class ActionController {
     type: ActionResponseDto,
   })
   @ApiNotFoundResponse({ description: 'Ação não encontrada' })
-  async unblock(@Param('id') id: string): Promise<ActionResponseDto> {
+  async unblock(
+    @Param('id') id: string,
+    @Request() req: RequestWithUser,
+  ): Promise<ActionResponseDto> {
+    await this.assertExecutorOwnsAction(id, req);
     const result = await this.unblockActionService.execute({ actionId: id });
     return ActionResponseDto.fromDomain(result.action);
   }
@@ -355,7 +393,9 @@ export class ActionController {
   async addChecklistItem(
     @Param('id') actionId: string,
     @Body() dto: AddChecklistItemDto,
+    @Request() req: RequestWithUser,
   ): Promise<ChecklistItem> {
+    await this.assertExecutorOwnsAction(actionId, req);
     const result = await this.addChecklistItemService.execute({
       actionId,
       ...dto,
@@ -395,7 +435,9 @@ export class ActionController {
   async reorderChecklistItems(
     @Param('id') actionId: string,
     @Body() dto: ReorderChecklistItemsDto,
+    @Request() req: RequestWithUser,
   ): Promise<ChecklistItem[]> {
+    await this.assertExecutorOwnsAction(actionId, req);
     const result = await this.reorderChecklistItemsService.execute({
       actionId,
       itemIds: dto.itemIds,

@@ -1,6 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 
+type ImpactCategory =
+  | 'receita'
+  | 'cliente'
+  | 'eficiencia'
+  | 'qualidade'
+  | 'risco'
+  | 'pessoas'
+  | 'outro'
+  | 'nao-informado';
+
 class ExecutorDashboardTotalsDto {
   @ApiProperty({ example: 10 })
   total!: number;
@@ -81,8 +91,66 @@ class ExecutorNextActionDto {
   @ApiProperty({ example: false })
   isBlocked!: boolean;
 
+  @ApiProperty({ required: false, nullable: true, example: 'Aguardando aprovação do financeiro' })
+  blockedReason?: string | null;
+
   @ApiProperty({ example: '2026-01-06T12:00:00.000Z' })
   estimatedEndDate!: Date;
+}
+
+class ImpactCategoriesDto {
+  @ApiProperty({ example: 2 })
+  receita!: number;
+  @ApiProperty({ example: 1 })
+  cliente!: number;
+  @ApiProperty({ example: 3 })
+  eficiencia!: number;
+  @ApiProperty({ example: 0 })
+  qualidade!: number;
+  @ApiProperty({ example: 0 })
+  risco!: number;
+  @ApiProperty({ example: 1 })
+  pessoas!: number;
+  @ApiProperty({ example: 0 })
+  outro!: number;
+  @ApiProperty({ example: 5 })
+  ['nao-informado']!: number;
+}
+
+class ImpactTopObjectiveDto {
+  @ApiProperty({ example: 'Reduzir churn' })
+  objective!: string;
+
+  @ApiProperty({ example: 3 })
+  count!: number;
+}
+
+class ImpactSummaryDto {
+  @ApiProperty({ type: ImpactCategoriesDto })
+  categories!: Record<ImpactCategory, number>;
+
+  @ApiProperty({ type: [ImpactTopObjectiveDto] })
+  topObjectives!: ImpactTopObjectiveDto[];
+}
+
+class QualitySummaryDto {
+  @ApiProperty({ example: 8 })
+  doneOnTime!: number;
+
+  @ApiProperty({ example: 2 })
+  doneLate!: number;
+
+  @ApiProperty({ example: 1 })
+  reopened!: number;
+
+  @ApiProperty({ example: 6.5, nullable: true })
+  avgCycleTimeHours!: number | null;
+
+  @ApiProperty({ example: 12.3, nullable: true })
+  avgInProgressAgeHours!: number | null;
+
+  @ApiProperty({ example: 18.2 })
+  blockedRatePercent!: number;
 }
 
 class ExecutorTeamContextDto {
@@ -128,6 +196,18 @@ export class ExecutorDashboardResponseDto {
   doneTrend!: DoneTrendDto;
 
   @ApiProperty({ type: [ExecutorNextActionDto] })
+  todayTop3!: ExecutorNextActionDto[];
+
+  @ApiProperty({ type: [ExecutorNextActionDto] })
+  blockedActions!: ExecutorNextActionDto[];
+
+  @ApiProperty({ type: ImpactSummaryDto })
+  impact!: ImpactSummaryDto;
+
+  @ApiProperty({ type: QualitySummaryDto })
+  quality!: QualitySummaryDto;
+
+  @ApiProperty({ type: [ExecutorNextActionDto] })
   nextActions!: ExecutorNextActionDto[];
 
   @ApiProperty({ type: ExecutorTeamContextDto, nullable: true })
@@ -141,6 +221,10 @@ export class ExecutorDashboardResponseDto {
     completionRate: number;
     doneInPeriod: DoneDeltaDto;
     doneTrend: DoneTrendDto;
+    todayTop3: ExecutorNextActionDto[];
+    blockedActions: ExecutorNextActionDto[];
+    impact: ImpactSummaryDto;
+    quality: QualitySummaryDto;
     nextActions: ExecutorNextActionDto[];
     team: ExecutorTeamContextDto | null;
   }): ExecutorDashboardResponseDto {
@@ -152,6 +236,10 @@ export class ExecutorDashboardResponseDto {
     dto.completionRate = input.completionRate;
     dto.doneInPeriod = input.doneInPeriod;
     dto.doneTrend = input.doneTrend;
+    dto.todayTop3 = input.todayTop3;
+    dto.blockedActions = input.blockedActions;
+    dto.impact = input.impact;
+    dto.quality = input.quality;
     dto.nextActions = input.nextActions;
     dto.team = input.team;
     return dto;

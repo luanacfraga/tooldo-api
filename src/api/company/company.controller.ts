@@ -288,6 +288,7 @@ export class CompanyController {
       userId: user.sub,
       dateFrom: query.dateFrom,
       dateTo: query.dateTo,
+      objective: query.objective,
     });
 
     return ExecutorDashboardResponseDto.fromDomain({
@@ -298,6 +299,10 @@ export class CompanyController {
       completionRate: result.completionRate,
       doneInPeriod: result.doneInPeriod,
       doneTrend: result.doneTrend,
+      todayTop3: result.todayTop3,
+      blockedActions: result.blockedActions,
+      impact: result.impact,
+      quality: result.quality,
       nextActions: result.nextActions,
       team: result.team,
     });

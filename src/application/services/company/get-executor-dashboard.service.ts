@@ -1,5 +1,6 @@
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
+import type { ActionMovementRepository } from '@/core/ports/repositories/action-movement.repository';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { TeamRepository } from '@/core/ports/repositories/team.repository';
@@ -50,6 +51,92 @@ function priorityWeight(p: ActionPriority): number {
   }
 }
 
+export type ImpactCategory =
+  | 'receita'
+  | 'cliente'
+  | 'eficiencia'
+  | 'qualidade'
+  | 'risco'
+  | 'pessoas'
+  | 'outro'
+  | 'nao-informado';
+
+function normalizeText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toLowerCase();
+}
+
+function parseObjectiveAndImpact(description: string | null | undefined): {
+  objective?: string;
+  impact?: string;
+} {
+  const text = description ?? '';
+  if (!text) return {};
+
+  // Preferred format (stored by the frontend ActionForm):
+  // [[tooldo-meta]]
+  // objective: <value>
+  // objectiveDue: <YYYY-MM-DD>
+  // [[/tooldo-meta]]
+  const start = text.indexOf('[[tooldo-meta]]');
+  const end = text.indexOf('[[/tooldo-meta]]');
+  let objective: string | undefined;
+  if (start !== -1 && end !== -1 && end >= start) {
+    const inside = text.slice(start + '[[tooldo-meta]]'.length, end).trim();
+    for (const line of inside.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      const [k, ...rest] = trimmed.split(':');
+      const key = (k ?? '').trim().toLowerCase();
+      const value = rest.join(':').trim();
+      if (!value) continue;
+      if (key === 'objective') objective = value;
+    }
+  }
+
+  // Legacy free-text format used in movement notes / older descriptions
+  const objectiveMatch = text.match(/(?:^|\n)\s*objetivo\s*:\s*(.+)\s*$/im);
+  const impactMatch = text.match(/(?:^|\n)\s*impacto\s*:\s*(.+)\s*$/im);
+
+  const legacyObjective = objectiveMatch?.[1]?.trim();
+  const impact = impactMatch?.[1]?.trim();
+
+  return {
+    objective: objective?.trim() || legacyObjective || undefined,
+    impact: impact || undefined,
+  };
+}
+
+function mapImpactCategory(raw: string | undefined): ImpactCategory {
+  if (!raw) return 'nao-informado';
+  const v = normalizeText(raw);
+
+  if (v.includes('receita') || v.includes('vendas') || v.includes('fatur')) {
+    return 'receita';
+  }
+  if (v.includes('cliente') || v.includes('nps') || v.includes('satisf')) {
+    return 'cliente';
+  }
+  if (v.includes('eficien') || v.includes('tempo') || v.includes('produt')) {
+    return 'eficiencia';
+  }
+  if (v.includes('qualid') || v.includes('bug') || v.includes('incidente')) {
+    return 'qualidade';
+  }
+  if (v.includes('risco') || v.includes('compliance') || v.includes('multa')) {
+    return 'risco';
+  }
+  if (v.includes('pessoas') || v.includes('rh') || v.includes('cultura')) {
+    return 'pessoas';
+  }
+  if (v.includes('outro')) return 'outro';
+
+  return 'outro';
+}
+
 export type ExecutorDashboardNextAction = {
   id: string;
   title: string;
@@ -57,6 +144,7 @@ export type ExecutorDashboardNextAction = {
   priority: ActionPriority;
   isLate: boolean;
   isBlocked: boolean;
+  blockedReason?: string | null;
   estimatedEndDate: Date;
 };
 
@@ -96,6 +184,20 @@ export type ExecutorDashboardResponse = {
     current: DoneTrendPoint[];
     previous: DoneTrendPoint[];
   };
+  todayTop3: ExecutorDashboardNextAction[];
+  blockedActions: ExecutorDashboardNextAction[];
+  impact: {
+    categories: Record<ImpactCategory, number>;
+    topObjectives: Array<{ objective: string; count: number }>;
+  };
+  quality: {
+    doneOnTime: number;
+    doneLate: number;
+    reopened: number;
+    avgCycleTimeHours: number | null;
+    avgInProgressAgeHours: number | null;
+    blockedRatePercent: number; // 0..100
+  };
   nextActions: ExecutorDashboardNextAction[];
   team: ExecutorDashboardTeamContext | null;
 };
@@ -105,6 +207,8 @@ export class GetExecutorDashboardService {
   constructor(
     @Inject('ActionRepository')
     private readonly actionRepository: ActionRepository,
+    @Inject('ActionMovementRepository')
+    private readonly actionMovementRepository: ActionMovementRepository,
     @Inject('CompanyRepository')
     private readonly companyRepository: CompanyRepository,
     @Inject('TeamRepository')
@@ -118,6 +222,7 @@ export class GetExecutorDashboardService {
     userId: string;
     dateFrom: string;
     dateTo: string;
+    objective?: string;
   }): Promise<ExecutorDashboardResponse> {
     const company = await this.companyRepository.findById(input.companyId);
     if (!company) {
@@ -147,9 +252,19 @@ export class GetExecutorDashboardService {
       responsibleId: input.userId,
     });
 
-    const normalized = myActions
+    let normalized = myActions
       .filter((a) => !a.isDeleted())
       .map((a) => ({ action: a, isLate: a.calculateIsLate(now) }));
+
+    const objectiveFilter = input.objective?.trim().toLowerCase();
+    if (objectiveFilter) {
+      normalized = normalized.filter((a) => {
+        const meta = parseObjectiveAndImpact(a.action.description);
+        const obj = meta.objective?.trim().toLowerCase();
+        if (!obj) return false;
+        return obj.includes(objectiveFilter);
+      });
+    }
 
     const todo = normalized.filter((a) => a.action.status === ActionStatus.TODO);
     const inProgress = normalized.filter(
@@ -194,6 +309,91 @@ export class GetExecutorDashboardService {
       }));
     };
 
+    const doneCurrentItems = normalized.filter((a) => doneInRange(a, fromDay, toDay));
+
+    const doneOnTime = doneCurrentItems.filter((a) => {
+      const end = a.action.actualEndDate ?? a.action.estimatedEndDate;
+      return end.getTime() <= a.action.estimatedEndDate.getTime();
+    }).length;
+    const doneLateCount = Math.max(0, doneCurrent - doneOnTime);
+
+    const avgCycleTimeHours = (() => {
+      const durationsMs = doneCurrentItems
+        .map((a) => {
+          const start = a.action.actualStartDate ?? a.action.estimatedStartDate;
+          const end = a.action.actualEndDate ?? a.action.estimatedEndDate;
+          const ms = end.getTime() - start.getTime();
+          return ms > 0 ? ms : null;
+        })
+        .filter((v): v is number => typeof v === 'number');
+      if (!durationsMs.length) return null;
+      const avgMs = durationsMs.reduce((acc, v) => acc + v, 0) / durationsMs.length;
+      return Math.round((avgMs / (1000 * 60 * 60)) * 10) / 10;
+    })();
+
+    const avgInProgressAgeHours = (() => {
+      const agesMs = inProgress
+        .map((a) => {
+          const start = a.action.actualStartDate ?? a.action.estimatedStartDate;
+          const ms = now.getTime() - start.getTime();
+          return ms > 0 ? ms : null;
+        })
+        .filter((v): v is number => typeof v === 'number');
+      if (!agesMs.length) return null;
+      const avgMs = agesMs.reduce((acc, v) => acc + v, 0) / agesMs.length;
+      return Math.round((avgMs / (1000 * 60 * 60)) * 10) / 10;
+    })();
+
+    const blockedRatePercent = total > 0 ? (blocked.length / total) * 100 : 0;
+
+    const doneCurrentIds = doneCurrentItems.map((a) => a.action.id);
+    const endExclusive = addDaysUtc(toDay, 1);
+    const movementsByActionId = new Map<string, Awaited<ReturnType<ActionMovementRepository['findByActionId']>>>();
+    await Promise.all(
+      doneCurrentIds.map(async (id) => {
+        movementsByActionId.set(id, await this.actionMovementRepository.findByActionId(id));
+      }),
+    );
+
+    const reopened = doneCurrentIds.filter((id) => {
+      const movements = movementsByActionId.get(id) ?? [];
+      return movements.some(
+        (m) =>
+          m.fromStatus === ActionStatus.DONE &&
+          m.toStatus !== ActionStatus.DONE &&
+          isBetweenInclusive(m.movedAt, fromDay, endExclusive),
+      );
+    }).length;
+
+    const impactCategories: Record<ImpactCategory, number> = {
+      receita: 0,
+      cliente: 0,
+      eficiencia: 0,
+      qualidade: 0,
+      risco: 0,
+      pessoas: 0,
+      outro: 0,
+      'nao-informado': 0,
+    };
+    const objectiveCounts = new Map<string, number>();
+    for (const a of doneCurrentItems) {
+      const movements = movementsByActionId.get(a.action.id) ?? [];
+      const doneMove = movements.find(
+        (m) =>
+          m.toStatus === ActionStatus.DONE &&
+          isBetweenInclusive(m.movedAt, fromDay, endExclusive),
+      );
+      const parsed = parseObjectiveAndImpact(doneMove?.notes);
+      impactCategories[mapImpactCategory(parsed.impact)] += 1;
+      if (parsed.objective) {
+        objectiveCounts.set(parsed.objective, (objectiveCounts.get(parsed.objective) ?? 0) + 1);
+      }
+    }
+    const topObjectives = [...objectiveCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([objective, count]) => ({ objective, count }));
+
     const nextActions = normalized
       .filter(
         (a) =>
@@ -217,6 +417,25 @@ export class GetExecutorDashboardService {
         priority: a.action.priority,
         isLate: a.isLate,
         isBlocked: a.action.isBlocked,
+        blockedReason: a.action.blockedReason,
+        estimatedEndDate: a.action.estimatedEndDate,
+      }));
+
+    const todayTop3 = nextActions.slice(0, 3);
+
+    const blockedActions = normalized
+      .filter((a) => a.action.isBlocked)
+      .slice()
+      .sort((a, b) => a.action.estimatedEndDate.getTime() - b.action.estimatedEndDate.getTime())
+      .slice(0, 5)
+      .map((a) => ({
+        id: a.action.id,
+        title: a.action.title,
+        status: a.action.status,
+        priority: a.action.priority,
+        isLate: a.isLate,
+        isBlocked: a.action.isBlocked,
+        blockedReason: a.action.blockedReason,
         estimatedEndDate: a.action.estimatedEndDate,
       }));
 
@@ -297,6 +516,20 @@ export class GetExecutorDashboardService {
       doneTrend: {
         current: buildTrend(fromDay, toDay),
         previous: buildTrend(prevFromDay, prevToDay),
+      },
+      todayTop3,
+      blockedActions,
+      impact: {
+        categories: impactCategories,
+        topObjectives,
+      },
+      quality: {
+        doneOnTime,
+        doneLate: doneLateCount,
+        reopened,
+        avgCycleTimeHours,
+        avgInProgressAgeHours,
+        blockedRatePercent: Math.round(blockedRatePercent * 10) / 10,
       },
       nextActions,
       team,
