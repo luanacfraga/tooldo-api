@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { getEmailLogoUrl, getFrontendUrl } from './email-assets';
 
 const fontFamily =
   "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
@@ -7,36 +8,15 @@ const BRAND = {
   name: 'ToolDo',
   primary: '#554B7F', // brand purple
   secondary: '#0D9488', // teal
-  bg: '#f3f4f6',
+  // palette alinhada ao sistema (slate/gray)
+  bg: '#F8FAFC',
   surface: '#ffffff',
-  border: '#e5e7eb',
+  border: '#E2E8F0',
   text: '#111827',
   muted: '#6b7280',
+  info: '#3B82F6',
+  warning: '#F59E0B',
 } as const;
-
-function trimTrailingSlash(url: string): string {
-  return url.endsWith('/') ? url.slice(0, -1) : url;
-}
-
-function getFrontendUrl(): string | undefined {
-  const raw = process.env.FRONTEND_URL;
-  if (!raw) {
-    return undefined;
-  }
-  if (!/^https?:\/\//i.test(raw)) {
-    return undefined;
-  }
-  return trimTrailingSlash(raw);
-}
-
-function getLogoUrl(): string | undefined {
-  const baseUrl = getFrontendUrl();
-  if (!baseUrl) {
-    return undefined;
-  }
-  // `tooldo-app/public/images/logo.png`
-  return `${baseUrl}/images/logo.png`;
-}
 
 export type BaseEmailProps = {
   title: string;
@@ -48,7 +28,7 @@ export type BaseEmailProps = {
 export function BaseEmail(props: BaseEmailProps): React.ReactElement {
   const year = new Date().getFullYear();
   const baseUrl = getFrontendUrl();
-  const logoUrl = getLogoUrl();
+  const logoUrl = getEmailLogoUrl();
 
   return (
     <html lang="pt-BR">
@@ -80,7 +60,7 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
           cellSpacing={0}
           border={0}
           width="100%"
-          style={{ backgroundColor: BRAND.bg, padding: '24px 12px' }}
+          style={{ backgroundColor: BRAND.bg, padding: '28px 12px' }}
         >
           <tbody>
             <tr>
@@ -108,12 +88,12 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
                           >
                             <img
                               src={logoUrl}
-                              width={160}
-                              height={52}
+                              width={180}
+                              height={60}
                               alt={BRAND.name}
                               style={{
                                 display: 'block',
-                                width: 160,
+                                width: 180,
                                 height: 'auto',
                                 maxWidth: '100%',
                                 border: 0,
@@ -142,10 +122,11 @@ export function BaseEmail(props: BaseEmailProps): React.ReactElement {
                       <td
                         style={{
                           backgroundColor: BRAND.surface,
-                          borderRadius: 12,
-                          padding: '28px 24px',
+                          borderRadius: 16,
+                          padding: '30px 26px',
                           border: `1px solid ${BRAND.border}`,
                           borderTop: `4px solid ${BRAND.primary}`,
+                          boxShadow: '0 10px 25px rgba(15, 23, 42, 0.06)',
                         }}
                       >
                         <div style={{ fontFamily, color: BRAND.text }}>
@@ -226,8 +207,9 @@ export function PrimaryButton(props: {
                 fontSize: 14,
                 fontWeight: 700,
                 padding: '12px 18px',
-                borderRadius: 10,
+                borderRadius: 12,
                 border: `1px solid ${BRAND.primary}`,
+                boxShadow: '0 8px 18px rgba(85, 75, 127, 0.18)',
               }}
             >
               {props.label}
@@ -245,8 +227,8 @@ export function Callout(props: {
 }): React.ReactElement {
   const styles =
     props.variant === 'warning'
-      ? { bg: '#FFFBEB', border: '#F59E0B', text: '#92400E' }
-      : { bg: '#EFF6FF', border: '#3B82F6', text: '#1E3A8A' };
+      ? { bg: '#FFFBEB', border: BRAND.warning, text: '#92400E' }
+      : { bg: '#EFF6FF', border: BRAND.info, text: '#1E3A8A' };
 
   return (
     <div

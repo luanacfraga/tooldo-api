@@ -47,6 +47,8 @@ As seguintes variáveis devem ser configuradas no **AWS Secrets Manager** (chave
 - `JWT_RESET_SECRET` - Chave para tokens de reset de senha (usa `JWT_SECRET` se não definido)
 - `JWT_INVITE_SECRET` - Chave para tokens de convite (usa `JWT_SECRET` se não definido)
 - `FRONTEND_URL` - URL do frontend para links de email (padrão: `http://localhost:3001`)
+- `EMAIL_ASSETS_BASE_URL` - URL base de assets para emails (logo/imagens). Se não definido, usa `FRONTEND_URL`.
+- `EMAIL_LOGO_URL` - URL absoluta da logo no email. Se não definido, usa `EMAIL_ASSETS_BASE_URL + /images/logo.png`.
 
 #### Configuração de Email (Opcional)
 

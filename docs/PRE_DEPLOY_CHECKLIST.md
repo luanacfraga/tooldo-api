@@ -5,6 +5,7 @@ Este documento descreve o processo completo de validação que deve ser executad
 ## 🎯 Objetivo
 
 Garantir que o código está pronto para produção, validando:
+
 - ✅ Tipos TypeScript corretos
 - ✅ Código seguindo padrões de lint
 - ✅ Formatação consistente
@@ -71,6 +72,7 @@ Este comando executa apenas: typecheck + lint + format check.
 - [ ] Não há dependências faltando ou com versões conflitantes
 
 **Comando:**
+
 ```bash
 npm install
 ```
@@ -81,6 +83,7 @@ npm install
 - [ ] Schema do Prisma está sincronizado
 
 **Comando:**
+
 ```bash
 npm run prisma:generate
 ```
@@ -92,11 +95,13 @@ npm run prisma:generate
 - [ ] Tipos estão bem definidos
 
 **Comando:**
+
 ```bash
 npm run typecheck
 ```
 
 **O que verifica:**
+
 - Erros de tipo TypeScript
 - Importações inválidas
 - Tipos não definidos ou incorretos
@@ -107,16 +112,19 @@ npm run typecheck
 - [ ] Não há problemas de qualidade de código
 
 **Comando:**
+
 ```bash
 npm run lint:check
 ```
 
 **Para corrigir automaticamente:**
+
 ```bash
 npm run lint:fix
 ```
 
 **O que verifica:**
+
 - Regras do ESLint
 - Padrões de código
 - Boas práticas
@@ -127,16 +135,19 @@ npm run lint:fix
 - [ ] Consistência de estilo
 
 **Comando:**
+
 ```bash
 npm run format:check
 ```
 
 **Para formatar automaticamente:**
+
 ```bash
 npm run format
 ```
 
 **O que verifica:**
+
 - Formatação Prettier
 - Indentação
 - Quebras de linha
@@ -148,16 +159,19 @@ npm run format
 - [ ] Cobertura de testes adequada
 
 **Comando:**
+
 ```bash
 npm run test
 ```
 
 **Com cobertura:**
+
 ```bash
 npm run test:cov
 ```
 
 **O que verifica:**
+
 - Testes unitários
 - Funcionalidades críticas
 - Regras de negócio
@@ -169,17 +183,20 @@ npm run test:cov
 - [ ] Aplicação pode ser executada em produção
 
 **Comando:**
+
 ```bash
 npm run build
 ```
 
 **Para testar localmente:**
+
 ```bash
 npm run build
 npm run start:prod
 ```
 
 **O que verifica:**
+
 - Compilação TypeScript → JavaScript
 - Geração de arquivos de produção
 - Dependências de build
@@ -195,6 +212,7 @@ npm run test:e2e
 ```
 
 **Requisitos:**
+
 - Banco de dados de teste configurado
 - Variáveis de ambiente de teste configuradas
 
@@ -203,13 +221,17 @@ npm run test:e2e
 Antes do deploy, certifique-se de que todas as variáveis necessárias estão configuradas:
 
 **Obrigatórias:**
+
 - `DATABASE_URL` - String de conexão PostgreSQL
 - `JWT_SECRET` - Chave secreta JWT (mínimo 32 caracteres)
 
 **Opcionais (mas recomendadas):**
+
 - `NODE_ENV=production`
 - `PORT=3000`
 - `FRONTEND_URL` - URL do frontend
+- `EMAIL_ASSETS_BASE_URL` - Base URL de assets para emails (logo/imagens)
+- `EMAIL_LOGO_URL` - URL absoluta da logo no email
 - `ALLOWED_ORIGINS` - Origens CORS permitidas
 
 Para mais detalhes, consulte [docs/AWS_DEPLOY.md](./AWS_DEPLOY.md).
@@ -265,6 +287,7 @@ O pipeline de CI/CD (GitHub Actions) executa automaticamente estas validações 
 ### Validações no CI/CD
 
 O pipeline executa:
+
 - ✅ Type check
 - ✅ Lint check
 - ✅ Format check
@@ -289,4 +312,3 @@ Se qualquer validação falhar no CI/CD, o deploy não será executado.
 ---
 
 **Lembre-se:** Sempre execute `npm run pre-deploy` antes de fazer deploy manual ou push para produção! 🚀
-

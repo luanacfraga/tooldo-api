@@ -4,6 +4,7 @@ import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { CreateCompanyService } from '@/application/services/company/create-company.service';
 import { DeleteCompanyService } from '@/application/services/company/delete-company.service';
 import { GetCompanyDashboardSummaryService } from '@/application/services/company/get-company-dashboard-summary.service';
+import { GetExecutorDashboardService } from '@/application/services/company/get-executor-dashboard.service';
 import { ListCompaniesService } from '@/application/services/company/list-companies.service';
 import { UpdateCompanyService } from '@/application/services/company/update-company.service';
 import { Company } from '@/core/domain/company/company.entity';
@@ -12,7 +13,6 @@ import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import {
-  Body,
   Controller,
   Delete,
   Get,
@@ -22,6 +22,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -35,6 +36,8 @@ import {
 import { CompanyResponseDto } from './dto/company-response.dto';
 import { CompanyDashboardSummaryResponseDto } from './dto/company-dashboard-summary-response.dto';
 import { CreateCompanyDto } from './dto/create-company.dto';
+import { ExecutorDashboardQueryDto } from './dto/executor-dashboard-query.dto';
+import { ExecutorDashboardResponseDto } from './dto/executor-dashboard-response.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 
 @ApiTags('Company')
@@ -46,6 +49,7 @@ export class CompanyController {
     private readonly updateCompanyService: UpdateCompanyService,
     private readonly deleteCompanyService: DeleteCompanyService,
     private readonly getCompanyDashboardSummaryService: GetCompanyDashboardSummaryService,
+    private readonly getExecutorDashboardService: GetExecutorDashboardService,
     @Inject('CompanyUserRepository')
     private readonly companyUserRepository: CompanyUserRepository,
     @Inject('CompanyRepository')
@@ -228,6 +232,73 @@ export class CompanyController {
       completionRate: summary.completionRate,
       focusNow: summary.focusNow,
       nextSteps: summary.nextSteps,
+    });
+  }
+
+  @Get(':id/executor-dashboard')
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.MANAGER,
+    UserRole.EXECUTOR,
+    UserRole.CONSULTANT,
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Dashboard do executor (pessoal + contexto da equipe)',
+    description:
+      'Retorna métricas pessoais do usuário autenticado (totais, concluídas no período, tendência) e, quando aplicável, posição na equipe e próximas ações.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Dashboard do executor retornado com sucesso',
+    type: ExecutorDashboardResponseDto,
+  })
+  async executorDashboard(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+    @Query() query: ExecutorDashboardQueryDto,
+  ): Promise<ExecutorDashboardResponseDto> {
+    // Access check: same logic as dashboard-summary
+    const company = await this.companyRepository.findById(id);
+    if (!company) {
+      throw new EntityNotFoundException('Empresa', id);
+    }
+
+    if (user.role === UserRole.ADMIN) {
+      if (company.adminId !== user.sub) {
+        throw new EntityNotFoundException('Empresa', id);
+      }
+    } else {
+      const membership = await this.companyUserRepository.findByCompanyAndUser(
+        id,
+        user.sub,
+      );
+      if (!membership || membership.status !== CompanyUserStatus.ACTIVE) {
+        throw new EntityNotFoundException('Empresa', id);
+      }
+    }
+
+    const result = await this.getExecutorDashboardService.execute({
+      companyId: id,
+      userId: user.sub,
+      dateFrom: query.dateFrom,
+      dateTo: query.dateTo,
+    });
+
+    return ExecutorDashboardResponseDto.fromDomain({
+      companyId: result.companyId,
+      userId: result.userId,
+      period: result.period,
+      totals: result.totals,
+      completionRate: result.completionRate,
+      doneInPeriod: result.doneInPeriod,
+      doneTrend: result.doneTrend,
+      nextActions: result.nextActions,
+      team: result.team,
     });
   }
 
