@@ -13,6 +13,7 @@ import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import {
+  Body,
   Controller,
   Delete,
   Get,

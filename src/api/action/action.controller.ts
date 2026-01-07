@@ -13,7 +13,7 @@ import { AddChecklistItemService } from '@/application/services/checklist/add-ch
 import { ReorderChecklistItemsService } from '@/application/services/checklist/reorder-checklist-items.service';
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
 import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import { ActionPriority, ActionStatus, UserRole } from '@/core/domain/shared/enums';
 import {
   Body,
   Controller,
@@ -147,11 +147,14 @@ export class ActionController {
   })
   async list(
     @Query() query: ListActionsQueryDto,
+    @Request() req: RequestWithUser,
   ): Promise<PaginatedResponseDto<ActionResponseDto>> {
+    const effectiveResponsibleId =
+      req.user.role === UserRole.EXECUTOR ? req.user.sub : query.responsibleId;
     const result = await this.listActionsService.execute({
       companyId: query.companyId,
       teamId: query.teamId,
-      responsibleId: query.responsibleId,
+      responsibleId: effectiveResponsibleId,
       creatorId: query.creatorId,
       status: query.status,
       statuses: query.statuses,
