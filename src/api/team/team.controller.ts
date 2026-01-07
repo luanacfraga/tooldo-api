@@ -4,6 +4,7 @@ import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { AddTeamMemberService } from '@/application/services/team/add-team-member.service';
 import { CreateTeamService } from '@/application/services/team/create-team.service';
 import { DeleteTeamService } from '@/application/services/team/delete-team.service';
+import { ListAvailableExecutorsForTeamService } from '@/application/services/team/list-available-executors.service';
 import { ListTeamMembersService } from '@/application/services/team/list-team-members.service';
 import { ListTeamsByManagerService } from '@/application/services/team/list-teams-by-manager.service';
 import { ListTeamsService } from '@/application/services/team/list-teams.service';
@@ -49,6 +50,7 @@ export class TeamController {
     private readonly addTeamMemberService: AddTeamMemberService,
     private readonly removeTeamMemberService: RemoveTeamMemberService,
     private readonly listTeamMembersService: ListTeamMembersService,
+    private readonly listAvailableExecutorsForTeamService: ListAvailableExecutorsForTeamService,
   ) {}
 
   @Post()
@@ -274,5 +276,35 @@ export class TeamController {
     return result.members.map((member) =>
       TeamMemberResponseDto.fromDomain(member),
     );
+  }
+
+  @Get(':id/available-executors')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List available executors for a team',
+    description:
+      'Lista executores ativos disponíveis de uma empresa para adicionar em uma equipe específica. Usa as mesmas regras de disponibilidade do endpoint de executores por empresa, considerando a equipe atual.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da equipe',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Available executors for team successfully retrieved',
+    type: TeamMemberResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Team not found',
+  })
+  async listAvailableExecutors(
+    @Param('id') teamId: string,
+  ): Promise<unknown[]> {
+    const result = await this.listAvailableExecutorsForTeamService.execute({
+      teamId,
+    });
+
+    return result.executors;
   }
 }
