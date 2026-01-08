@@ -1,5 +1,5 @@
-import { User } from '@/core/domain/user/user.entity';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
+import { User } from '@/core/domain/user/user.entity';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -21,22 +21,8 @@ export class UpdateUserAvatarColorService {
       throw new EntityNotFoundException('Usuário', input.userId);
     }
 
-    const updatedUser = new User(
-      existingUser.id,
-      existingUser.firstName,
-      existingUser.lastName,
-      existingUser.email,
-      existingUser.phone,
-      existingUser.document,
-      existingUser.documentType,
-      existingUser.password,
-      existingUser.role,
-      existingUser.status,
-      existingUser.profileImageUrl,
-      input.avatarColor,
-      existingUser.initials,
-    );
-
-    return this.userRepository.update(updatedUser);
+    return this.userRepository.update(existingUser.id, {
+      avatarColor: input.avatarColor,
+    });
   }
 }

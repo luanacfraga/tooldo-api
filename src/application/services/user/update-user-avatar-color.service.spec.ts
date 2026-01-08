@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { AVATAR_COLORS } from '@/shared/constants/avatar-colors';
-import { User } from '@/core/domain/user/user.entity';
+import { DocumentType, UserRole, UserStatus } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
+import { User } from '@/core/domain/user/user.entity';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
+import { AVATAR_COLORS } from '@/shared/constants/avatar-colors';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdateUserAvatarColorService } from './update-user-avatar-color.service';
-import { DocumentType, UserRole, UserStatus } from '@/core/domain/shared/enums';
 
 describe('UpdateUserAvatarColorService', () => {
   let service: UpdateUserAvatarColorService;
@@ -61,10 +61,23 @@ describe('UpdateUserAvatarColorService', () => {
   describe('execute', () => {
     it('should update user avatar color successfully', async () => {
       const newColor = '#10B981';
-      userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.update.mockImplementation((user: User) =>
-        Promise.resolve(user),
+      const updatedUser = new User(
+        mockUser.id,
+        mockUser.firstName,
+        mockUser.lastName,
+        mockUser.email,
+        mockUser.phone,
+        mockUser.document,
+        mockUser.documentType,
+        mockUser.password,
+        mockUser.role,
+        mockUser.status,
+        mockUser.profileImageUrl,
+        newColor,
+        mockUser.initials,
       );
+      userRepository.findById.mockResolvedValue(mockUser);
+      userRepository.update.mockResolvedValue(updatedUser);
 
       const result = await service.execute({
         userId: mockUserId,
@@ -75,9 +88,9 @@ describe('UpdateUserAvatarColorService', () => {
       expect(result.avatarColor).toBe(newColor);
       expect(userRepository.findById).toHaveBeenCalledWith(mockUserId);
       expect(userRepository.update).toHaveBeenCalledTimes(1);
-      const updateCall = userRepository.update.mock.calls[0][0];
-      expect(updateCall).toBeInstanceOf(User);
-      expect(updateCall.avatarColor).toBe(newColor);
+      expect(userRepository.update).toHaveBeenCalledWith(mockUserId, {
+        avatarColor: newColor,
+      });
     });
 
     it('should throw EntityNotFoundException when user does not exist', async () => {
@@ -104,9 +117,24 @@ describe('UpdateUserAvatarColorService', () => {
 
     it('should update to each of the predefined colors', async () => {
       userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.update.mockImplementation((user: User) =>
-        Promise.resolve(user),
-      );
+      userRepository.update.mockImplementation((_id: string, data: Partial<User>) => {
+        const updatedUser = new User(
+          mockUser.id,
+          mockUser.firstName,
+          mockUser.lastName,
+          mockUser.email,
+          mockUser.phone,
+          mockUser.document,
+          mockUser.documentType,
+          mockUser.password,
+          mockUser.role,
+          mockUser.status,
+          mockUser.profileImageUrl,
+          data.avatarColor ?? mockUser.avatarColor,
+          mockUser.initials,
+        );
+        return Promise.resolve(updatedUser);
+      });
 
       for (const color of AVATAR_COLORS) {
         const result = await service.execute({
@@ -122,10 +150,23 @@ describe('UpdateUserAvatarColorService', () => {
 
     it('should preserve other user properties when updating color', async () => {
       const newColor = '#EF4444';
-      userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.update.mockImplementation((user: User) =>
-        Promise.resolve(user),
+      const updatedUser = new User(
+        mockUser.id,
+        mockUser.firstName,
+        mockUser.lastName,
+        mockUser.email,
+        mockUser.phone,
+        mockUser.document,
+        mockUser.documentType,
+        mockUser.password,
+        mockUser.role,
+        mockUser.status,
+        mockUser.profileImageUrl,
+        newColor,
+        mockUser.initials,
       );
+      userRepository.findById.mockResolvedValue(mockUser);
+      userRepository.update.mockResolvedValue(updatedUser);
 
       const result = await service.execute({
         userId: mockUserId,

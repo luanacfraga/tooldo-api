@@ -39,6 +39,13 @@ export class UserResponseDto {
   document!: string;
 
   @ApiProperty({
+    description: 'Tipo de documento',
+    example: 'CPF',
+    enum: ['CPF', 'CNPJ'],
+  })
+  documentType!: string;
+
+  @ApiProperty({
     description: 'Papel do usuário',
     enum: UserRole,
     example: UserRole.EXECUTOR,

@@ -11,6 +11,7 @@ export class UserMapper {
     dto.email = user.email;
     dto.phone = user.phone;
     dto.document = user.document;
+    dto.documentType = user.documentType;
     dto.role = user.role;
     dto.status = user.status;
     dto.profileImageUrl = user.profileImageUrl;
