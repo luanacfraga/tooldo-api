@@ -240,7 +240,7 @@ export class GetExecutorDashboardService {
       },
     );
 
-    let normalized = myActions
+    const normalized = myActions
       .filter((a) => !a.isDeleted())
       .map((a) => ({ action: a, isLate: a.calculateIsLate(now) }));
 

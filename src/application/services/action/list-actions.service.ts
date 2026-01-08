@@ -205,5 +205,4 @@ export class ListActionsService {
       action.deletedAt,
     );
   }
-
 }
