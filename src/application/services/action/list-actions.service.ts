@@ -254,7 +254,6 @@ export class ListActionsService {
       }
     }
 
-    // Legacy format: "Objetivo: <texto>" somewhere in description
     const legacy = raw.match(/(?:^|\n)\s*objetivo\s*:\s*(.+)\s*$/im);
     const legacyObjective = legacy?.[1]?.trim();
     if (legacyObjective) {
