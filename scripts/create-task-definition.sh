@@ -36,10 +36,12 @@ echo ""
 echo -e "${YELLOW}🔐 Obtendo ARNs dos segredos...${NC}"
 RDS_SECRET_ARN=$(aws secretsmanager describe-secret --secret-id "rds!db-88e2c3ab-7e5b-4a52-835b-83d97a389c6b" --region ${AWS_REGION} --query 'ARN' --output text)
 JWT_SECRET_ARN=$(aws secretsmanager describe-secret --secret-id tooldo/jwt/secret --region ${AWS_REGION} --query 'ARN' --output text)
+DB_URL_SECRET_ARN=$(aws secretsmanager describe-secret --secret-id tooldo/db/url --region ${AWS_REGION} --query 'ARN' --output text)
 EXECUTION_ROLE_ARN=$(aws iam get-role --role-name ${EXECUTION_ROLE} --query 'Role.Arn' --output text)
 
 echo "  RDS Secret (auto-rotated): ${RDS_SECRET_ARN}"
 echo "  JWT_SECRET: ${JWT_SECRET_ARN}"
+echo "  DB_URL (tooldo/db/url): ${DB_URL_SECRET_ARN}"
 echo "  Execution Role: ${EXECUTION_ROLE_ARN}"
 echo ""
 
@@ -109,6 +111,10 @@ cat > ${TASK_DEF_FILE} <<EOF
         {
           "name": "DB_PASS",
           "valueFrom": "${RDS_SECRET_ARN}:password::"
+        },
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "${DB_URL_SECRET_ARN}"
         },
         {
           "name": "JWT_SECRET",
