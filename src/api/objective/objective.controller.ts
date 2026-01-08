@@ -82,7 +82,9 @@ export class ObjectiveController {
       throw new Error('companyId é obrigatório');
     }
 
-    const objectives = await (this.prisma as any).objective.findMany({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prismaAny = this.prisma as any;
+    const objectives = await prismaAny.objective.findMany({
       where: {
         companyId,
         ...(teamId ? { teamId } : {}),
@@ -97,6 +99,7 @@ export class ObjectiveController {
       ],
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return objectives.map((o: any) => ({
       id: o.id,
       companyId: o.companyId,
@@ -127,21 +130,23 @@ export class ObjectiveController {
     description: 'Not Found - Company or team not found',
   })
   async create(@Body() dto: CreateObjectiveDto): Promise<ObjectiveResponseDto> {
-    const company = await (this.prisma as any).company.findUnique({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prismaAny = this.prisma as any;
+    const company = await prismaAny.company.findUnique({
       where: { id: dto.companyId },
     });
     if (!company) {
       throw new EntityNotFoundException('Empresa', dto.companyId);
     }
 
-    const team = await (this.prisma as any).team.findUnique({
+    const team = await prismaAny.team.findUnique({
       where: { id: dto.teamId },
     });
     if (team?.companyId !== dto.companyId) {
       throw new EntityNotFoundException('Equipe', dto.teamId);
     }
 
-    const created = await (this.prisma as any).objective.create({
+    const created = await prismaAny.objective.create({
       data: {
         companyId: dto.companyId,
         teamId: dto.teamId,
@@ -183,14 +188,16 @@ export class ObjectiveController {
     @Param('id') id: string,
     @Body() dto: UpdateObjectiveDto,
   ): Promise<ObjectiveResponseDto> {
-    const existing = await (this.prisma as any).objective.findUnique({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prismaAny = this.prisma as any;
+    const existing = await prismaAny.objective.findUnique({
       where: { id },
     });
     if (!existing) {
       throw new EntityNotFoundException('Objetivo', id);
     }
 
-    const updated = await (this.prisma as any).objective.update({
+    const updated = await prismaAny.objective.update({
       where: { id },
       data: {
         ...(dto.title !== undefined ? { title: dto.title.trim() } : {}),
@@ -229,13 +236,15 @@ export class ObjectiveController {
     description: 'Not Found - Objective not found',
   })
   async delete(@Param('id') id: string): Promise<void> {
-    const existing = await (this.prisma as any).objective.findUnique({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const prismaAny = this.prisma as any;
+    const existing = await prismaAny.objective.findUnique({
       where: { id },
     });
     if (!existing) {
       throw new EntityNotFoundException('Objetivo', id);
     }
 
-    await (this.prisma as any).objective.delete({ where: { id } });
+    await prismaAny.objective.delete({ where: { id } });
   }
 }

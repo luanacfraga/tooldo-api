@@ -115,8 +115,8 @@ function parseObjectiveAndImpact(description: string | null | undefined): {
   const impact = impactMatch?.[1]?.trim();
 
   return {
-    objective: objective?.trim() || legacyObjective || undefined,
-    impact: impact || undefined,
+    objective: objective?.trim() ?? legacyObjective ?? undefined,
+    impact: impact ?? undefined,
   };
 }
 
