@@ -14,6 +14,8 @@ import type { CompanyUserRepository } from '@/core/ports/repositories/company-us
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';
+import type { TeamUserRepository } from '@/core/ports/repositories/team-user.repository';
+import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import {
   Body,
@@ -37,6 +39,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { EmployeeResponseDto } from '../employee/dto/employee-response.dto';
 import { CompanyDashboardSummaryResponseDto } from './dto/company-dashboard-summary-response.dto';
 import { CompanyResponseDto } from './dto/company-response.dto';
 import { CompanySettingsResponseDto } from './dto/company-settings-response.dto';
@@ -65,6 +68,10 @@ export class CompanyController {
     private readonly planRepository: PlanRepository,
     @Inject('UserRepository')
     private readonly userRepository: UserRepository,
+    @Inject('TeamRepository')
+    private readonly teamRepository: TeamRepository,
+    @Inject('TeamUserRepository')
+    private readonly teamUserRepository: TeamUserRepository,
   ) {}
 
   @Post()
@@ -228,7 +235,7 @@ export class CompanyController {
         id,
         user.sub,
       );
-      if (!membership || membership.status !== CompanyUserStatus.ACTIVE) {
+      if (membership?.status !== CompanyUserStatus.ACTIVE) {
         throw new EntityNotFoundException('Empresa', id);
       }
     }
@@ -288,7 +295,7 @@ export class CompanyController {
         id,
         user.sub,
       );
-      if (!membership || membership.status !== CompanyUserStatus.ACTIVE) {
+      if (membership?.status !== CompanyUserStatus.ACTIVE) {
         throw new EntityNotFoundException('Empresa', id);
       }
     }
@@ -319,12 +326,7 @@ export class CompanyController {
   }
 
   @Get(':id/settings')
-  @Roles(
-    UserRole.ADMIN,
-    UserRole.MANAGER,
-    UserRole.EXECUTOR,
-    UserRole.CONSULTANT,
-  )
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Detalhes da empresa e plano ativo',
@@ -364,18 +366,16 @@ export class CompanyController {
         id,
         user.sub,
       );
-      if (!membership || membership.status !== CompanyUserStatus.ACTIVE) {
+      if (membership?.status !== CompanyUserStatus.ACTIVE) {
         throw new EntityNotFoundException('Empresa', id);
       }
     }
 
-    const subscription =
-      await this.subscriptionRepository.findActiveByAdminId(company.adminId);
+    const subscription = await this.subscriptionRepository.findActiveByAdminId(
+      company.adminId,
+    );
     if (!subscription) {
-      throw new EntityNotFoundException(
-        'Assinatura ativa',
-        company.adminId,
-      );
+      throw new EntityNotFoundException('Assinatura ativa', company.adminId);
     }
 
     const plan = await this.planRepository.findById(subscription.planId);
@@ -394,6 +394,116 @@ export class CompanyController {
       subscription,
       admin,
     });
+  }
+
+  @Get(':id/responsibles')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List possible responsibles for actions in a company',
+    description:
+      'Retorna os usuários que podem ser responsáveis por ações na empresa, aplicando as regras por papel do usuário (admin, gestor ou executor).',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Company responsibles successfully retrieved',
+    type: [EmployeeResponseDto],
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Company, team or user not found',
+  })
+  async listCompanyResponsibles(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<EmployeeResponseDto[]> {
+    const company = await this.companyRepository.findById(id);
+    if (!company) {
+      throw new EntityNotFoundException('Empresa', id);
+    }
+
+    // Acesso:
+    // - Admin: apenas para as próprias empresas
+    // - Outros papéis: precisam ser membros ativos da empresa
+    if (user.role === UserRole.ADMIN) {
+      if (company.adminId !== user.sub) {
+        throw new EntityNotFoundException('Empresa', id);
+      }
+    } else {
+      const membership = await this.companyUserRepository.findByCompanyAndUser(
+        id,
+        user.sub,
+      );
+      if (membership?.status !== CompanyUserStatus.ACTIVE) {
+        throw new EntityNotFoundException('Empresa', id);
+      }
+    }
+
+    const companyUsers =
+      await this.companyUserRepository.findByCompanyIdAndStatus(
+        id,
+        CompanyUserStatus.ACTIVE,
+      );
+
+    // ADMIN: pode escolher qualquer funcionário ativo da empresa
+    if (user.role === UserRole.ADMIN) {
+      return companyUsers.map((cu) => EmployeeResponseDto.fromDomain(cu));
+    }
+
+    // EXECUTOR: pode ser responsável apenas por si mesmo (desde que ativo na empresa)
+    if (user.role === UserRole.EXECUTOR) {
+      const selfCompanyUser = companyUsers.find((cu) => cu.userId === user.sub);
+      if (!selfCompanyUser) {
+        throw new EntityNotFoundException('Membro da empresa', user.sub);
+      }
+      return [EmployeeResponseDto.fromDomain(selfCompanyUser)];
+    }
+
+    // MANAGER: responsáveis são gestor + executores das equipes onde ele é gestor nesta empresa
+    if (user.role === UserRole.MANAGER) {
+      const teamsOfManager = await this.teamRepository.findByManagerId(
+        user.sub,
+      );
+      const teamsInCompany = teamsOfManager.filter(
+        (team) => team.companyId === id,
+      );
+
+      if (teamsInCompany.length === 0) {
+        return [];
+      }
+
+      // Constrói conjunto de userIds executores membros das equipes do gestor
+      const executorUserIds = new Set<string>();
+
+      for (const team of teamsInCompany) {
+        const teamUsers = await this.teamUserRepository.findByTeamId(team.id);
+        teamUsers.forEach((m) => {
+          executorUserIds.add(m.userId);
+        });
+      }
+
+      const responsibles = companyUsers.filter((cu) => {
+        // O próprio gestor sempre pode ser responsável
+        if (cu.userId === user.sub && cu.role === UserRole.MANAGER) {
+          return true;
+        }
+
+        // Executores que fazem parte de pelo menos uma das equipes dele
+        if (cu.role === UserRole.EXECUTOR && executorUserIds.has(cu.userId)) {
+          return true;
+        }
+
+        return false;
+      });
+
+      return responsibles.map((cu) => EmployeeResponseDto.fromDomain(cu));
+    }
+
+    // Outros papéis (consultant, etc.): por enquanto não retornam responsáveis
+    return [];
   }
 
   @Put(':id')

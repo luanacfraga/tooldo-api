@@ -290,7 +290,7 @@ export class TeamController {
   }
 
   @Get(':id/responsibles')
-  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'List possible responsibles for a team',
@@ -311,6 +311,7 @@ export class TeamController {
   })
   async listResponsibles(
     @Param('id') teamId: string,
+    @CurrentUser() user: JwtPayload,
   ): Promise<EmployeeResponseDto[]> {
     const team = await this.teamRepository.findById(teamId);
     if (!team) {
@@ -327,6 +328,37 @@ export class TeamController {
     // Membros executores da equipe
     const teamUsers = await this.teamUserRepository.findByTeamId(teamId);
     const executorUserIds = new Set(teamUsers.map((m) => m.userId));
+
+    // Regras por papel:
+    // - ADMIN: pode ver gestor + executores da equipe (como antes)
+    // - MANAGER: apenas se for gestor da equipe; vê gestor + executores da equipe
+    // - EXECUTOR: pode criar ações apenas para si; retorna somente o próprio registro
+
+    if (user.role === UserRole.MANAGER) {
+      if (team.managerId !== user.sub) {
+        // Oculta existência de equipes onde não é gestor
+        throw new EntityNotFoundException('Equipe', teamId);
+      }
+    }
+
+    if (user.role === UserRole.EXECUTOR) {
+      // Executor só pode ser responsável por ações dele mesmo
+      const selfCompanyUser = companyUsers.find(
+        (cu) => cu.userId === user.sub && cu.role === UserRole.EXECUTOR,
+      );
+
+      if (!selfCompanyUser) {
+        throw new EntityNotFoundException('Membro da empresa', user.sub);
+      }
+
+      const isMemberOfTeam = executorUserIds.has(user.sub);
+      if (!isMemberOfTeam) {
+        // Executor não pertence a esta equipe
+        throw new EntityNotFoundException('Membro da equipe', user.sub);
+      }
+
+      return [EmployeeResponseDto.fromDomain(selfCompanyUser)];
+    }
 
     const responsibles = companyUsers.filter((cu) => {
       // Gestor da equipe sempre pode ser responsável
