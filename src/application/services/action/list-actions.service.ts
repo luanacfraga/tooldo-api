@@ -23,7 +23,6 @@ export interface ListActionsInput {
   dateTo?: string;
   dateFilterType?: 'createdAt' | 'startDate';
   q?: string;
-  objective?: string;
   page?: number;
   limit?: number;
 }
@@ -125,19 +124,6 @@ export class ListActionsService {
       });
     }
 
-    const objectiveFilter = input.objective?.trim().toLowerCase();
-    if (objectiveFilter) {
-      mapped = mapped.filter((r) => {
-        const objective = this.extractObjectiveFromDescription(
-          r.action.description,
-        )?.toLowerCase();
-        if (!objective) {
-          return false;
-        }
-        return objective.includes(objectiveFilter);
-      });
-    }
-
     if (input.statuses?.length) {
       const set = new Set(input.statuses);
       mapped = mapped.filter((r) => set.has(r.action.status));
@@ -220,47 +206,4 @@ export class ListActionsService {
     );
   }
 
-  /**
-   * Extracts ToolDo objective from the description metadata block:
-   * [[tooldo-meta]]
-   * objective: <value>
-   * objectiveDue: <YYYY-MM-DD>
-   * [[/tooldo-meta]]
-   */
-  private extractObjectiveFromDescription(
-    description?: string,
-  ): string | undefined {
-    const raw = description ?? '';
-    const start = raw.indexOf('[[tooldo-meta]]');
-    const end = raw.indexOf('[[/tooldo-meta]]');
-    if (start !== -1 && end !== -1 && end >= start) {
-      const inside = raw.slice(start + '[[tooldo-meta]]'.length, end).trim();
-      const lines = inside.split('\n');
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed) {
-          continue;
-        }
-        const [k, ...rest] = trimmed.split(':');
-        const key = (k ?? '').trim().toLowerCase();
-        if (key !== 'objective') {
-          continue;
-        }
-        const value = rest.join(':').trim();
-        if (!value) {
-          return undefined;
-        }
-        return value.replace(/\s+/g, ' ');
-      }
-    }
-
-    // Legacy format: "Objetivo: <texto>" somewhere in description
-    const legacy = raw.match(/(?:^|\n)\s*objetivo\s*:\s*(.+)\s*$/im);
-    const legacyObjective = legacy?.[1]?.trim();
-    if (legacyObjective) {
-      return legacyObjective.replace(/\s+/g, ' ');
-    }
-
-    return undefined;
-  }
 }

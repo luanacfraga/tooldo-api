@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ExecutorDashboardQueryDto {
   @ApiProperty({
@@ -17,13 +17,4 @@ export class ExecutorDashboardQueryDto {
   @IsString({ message: 'dateTo deve ser string ISO' })
   @IsNotEmpty({ message: 'dateTo é obrigatório' })
   dateTo!: string;
-
-  @ApiProperty({
-    required: false,
-    description: 'Filtrar dashboard por objetivo vinculado à ação',
-    example: 'reduzir churn',
-  })
-  @IsString({ message: 'objective deve ser string' })
-  @IsOptional()
-  objective?: string;
 }

@@ -71,8 +71,7 @@ function normalizeText(value: string): string {
     .toLowerCase();
 }
 
-function parseObjectiveAndImpact(description: string | null | undefined): {
-  objective?: string;
+function parseImpact(description: string | null | undefined): {
   impact?: string;
 } {
   const text = description ?? '';
@@ -80,42 +79,12 @@ function parseObjectiveAndImpact(description: string | null | undefined): {
     return {};
   }
 
-  // Preferred format (stored by the frontend ActionForm):
-  // [[tooldo-meta]]
-  // objective: <value>
-  // objectiveDue: <YYYY-MM-DD>
-  // [[/tooldo-meta]]
-  const start = text.indexOf('[[tooldo-meta]]');
-  const end = text.indexOf('[[/tooldo-meta]]');
-  let objective: string | undefined;
-  if (start !== -1 && end !== -1 && end >= start) {
-    const inside = text.slice(start + '[[tooldo-meta]]'.length, end).trim();
-    for (const line of inside.split('\n')) {
-      const trimmed = line.trim();
-      if (!trimmed) {
-        continue;
-      }
-      const [k, ...rest] = trimmed.split(':');
-      const key = (k ?? '').trim().toLowerCase();
-      const value = rest.join(':').trim();
-      if (!value) {
-        continue;
-      }
-      if (key === 'objective') {
-        objective = value;
-      }
-    }
-  }
-
   // Legacy free-text format used in movement notes / older descriptions
-  const objectiveMatch = text.match(/(?:^|\n)\s*objetivo\s*:\s*(.+)\s*$/im);
   const impactMatch = text.match(/(?:^|\n)\s*impacto\s*:\s*(.+)\s*$/im);
 
-  const legacyObjective = objectiveMatch?.[1]?.trim();
   const impact = impactMatch?.[1]?.trim();
 
   return {
-    objective: objective?.trim() ?? legacyObjective ?? undefined,
     impact: impact ?? undefined,
   };
 }
@@ -202,7 +171,6 @@ export type ExecutorDashboardResponse = {
   blockedActions: ExecutorDashboardNextAction[];
   impact: {
     categories: Record<ImpactCategory, number>;
-    topObjectives: Array<{ objective: string; count: number }>;
   };
   quality: {
     doneOnTime: number;
@@ -236,7 +204,6 @@ export class GetExecutorDashboardService {
     userId: string;
     dateFrom: string;
     dateTo: string;
-    objective?: string;
   }): Promise<ExecutorDashboardResponse> {
     const company = await this.companyRepository.findById(input.companyId);
     if (!company) {
@@ -276,18 +243,6 @@ export class GetExecutorDashboardService {
     let normalized = myActions
       .filter((a) => !a.isDeleted())
       .map((a) => ({ action: a, isLate: a.calculateIsLate(now) }));
-
-    const objectiveFilter = input.objective?.trim().toLowerCase();
-    if (objectiveFilter) {
-      normalized = normalized.filter((a) => {
-        const meta = parseObjectiveAndImpact(a.action.description);
-        const obj = meta.objective?.trim().toLowerCase();
-        if (!obj) {
-          return false;
-        }
-        return obj.includes(objectiveFilter);
-      });
-    }
 
     const todo = normalized.filter(
       (a) => a.action.status === ActionStatus.TODO,
@@ -427,7 +382,6 @@ export class GetExecutorDashboardService {
       outro: 0,
       'nao-informado': 0,
     };
-    const objectiveCounts = new Map<string, number>();
     for (const a of doneCurrentItems) {
       const movements = movementsByActionId.get(a.action.id) ?? [];
       const doneMove = movements.find(
@@ -435,19 +389,9 @@ export class GetExecutorDashboardService {
           m.toStatus === ActionStatus.DONE &&
           isBetweenInclusive(m.movedAt, fromDay, endExclusive),
       );
-      const parsed = parseObjectiveAndImpact(doneMove?.notes);
+      const parsed = parseImpact(doneMove?.notes);
       impactCategories[mapImpactCategory(parsed.impact)] += 1;
-      if (parsed.objective) {
-        objectiveCounts.set(
-          parsed.objective,
-          (objectiveCounts.get(parsed.objective) ?? 0) + 1,
-        );
-      }
     }
-    const topObjectives = [...objectiveCounts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([objective, count]) => ({ objective, count }));
 
     const nextActions = normalized
       .filter(
@@ -594,7 +538,6 @@ export class GetExecutorDashboardService {
       blockedActions,
       impact: {
         categories: impactCategories,
-        topObjectives,
       },
       quality: {
         doneOnTime,

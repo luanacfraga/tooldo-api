@@ -305,7 +305,6 @@ export class CompanyController {
       userId: user.sub,
       dateFrom: query.dateFrom,
       dateTo: query.dateTo,
-      objective: query.objective,
     });
 
     return ExecutorDashboardResponseDto.fromDomain({

@@ -158,13 +158,6 @@ export class ActionController {
     type: String,
     description: 'Busca por título ou descrição (case-insensitive)',
   })
-  @ApiQuery({
-    name: 'objective',
-    required: false,
-    type: String,
-    description:
-      'Filtrar por objetivo vinculado à ação (armazenado na descrição como metadata ToolDo)',
-  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({
@@ -191,7 +184,6 @@ export class ActionController {
       dateTo: query.dateTo,
       dateFilterType: query.dateFilterType,
       q: query.q,
-      objective: query.objective,
       page: query.page,
       limit: query.limit,
     });
