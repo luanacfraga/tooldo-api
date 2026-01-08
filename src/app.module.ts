@@ -8,6 +8,7 @@ import { CompanyModule } from './api/company/company.module';
 import { EmployeeModule } from './api/employee/employee.module';
 import { HealthModule } from './api/health/health.module';
 import { PlanModule } from './api/plan/plan.module';
+import { ObjectiveModule } from './api/objective/objective.module';
 import { DomainExceptionFilter } from './api/shared/filters/domain-exception.filter';
 import { TeamModule } from './api/team/team.module';
 import { ConfigModule } from './infra/config/config.module';
@@ -21,6 +22,7 @@ import { ConfigModule } from './infra/config/config.module';
     EmployeeModule,
     TeamModule,
     ActionModule,
+    ObjectiveModule,
     HealthModule,
   ],
   controllers: [],

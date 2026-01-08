@@ -37,6 +37,18 @@ FRONTEND_URL="http://localhost:3001"
 ALLOWED_ORIGINS="http://localhost:3001"
 ```
 
+**Assets/Logo nos e-mails (opcional):**
+
+Por padrão, a logo do email usa `FRONTEND_URL + /images/logo.png`. Se você quiser apontar para um host de assets/CDN:
+
+```env
+# Base URL para imagens usadas em email (logo, etc.)
+EMAIL_ASSETS_BASE_URL="http://localhost:3001"
+
+# URL absoluta da logo (tem prioridade sobre EMAIL_ASSETS_BASE_URL)
+EMAIL_LOGO_URL="http://localhost:3001/images/logo.png"
+```
+
 **Nota:** Em desenvolvimento, `ALLOWED_ORIGINS` pode ser omitido. Em produção deve ser definido.
 
 ### 3) Subir Postgres local (opcional)

@@ -38,7 +38,7 @@ export function EmployeeInviteEmail(
 
         <div style={{ margin: '0 0 10px 0' }}>
           <strong>{props.inviterName}</strong> convidou você para fazer parte da
-          equipe <strong>{props.companyName}</strong> na Tooldo.
+          equipe <strong>{props.companyName}</strong> na ToolDo.
         </div>
 
         <Callout variant="info">
@@ -82,7 +82,7 @@ export function getEmployeeInvitePlainText(
   return [
     `Olá, ${props.employeeName}!`,
     '',
-    `${props.inviterName} convidou você para fazer parte da equipe ${props.companyName} na Tooldo.`,
+    `${props.inviterName} convidou você para fazer parte da equipe ${props.companyName} na ToolDo.`,
     `Seu cargo: ${roleName}`,
     '',
     'Para aceitar o convite e definir sua senha, acesse:',

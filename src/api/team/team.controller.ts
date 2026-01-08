@@ -1,16 +1,24 @@
 import { CurrentUser } from '@/api/auth/decorators/current-user.decorator';
 import { Roles } from '@/api/auth/decorators/roles.decorator';
+import { EmployeeResponseDto } from '@/api/employee/dto/employee-response.dto';
 import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { AddTeamMemberService } from '@/application/services/team/add-team-member.service';
 import { CreateTeamService } from '@/application/services/team/create-team.service';
 import { DeleteTeamService } from '@/application/services/team/delete-team.service';
+import { ListAvailableExecutorsForTeamService } from '@/application/services/team/list-available-executors.service';
 import { ListTeamMembersService } from '@/application/services/team/list-team-members.service';
 import { ListTeamsByManagerService } from '@/application/services/team/list-teams-by-manager.service';
 import { ListTeamsService } from '@/application/services/team/list-teams.service';
 import { RemoveTeamMemberService } from '@/application/services/team/remove-team-member.service';
 import { UpdateTeamService } from '@/application/services/team/update-team.service';
-import { DomainValidationException } from '@/core/domain/shared/exceptions/domain.exception';
-import { UserRole } from '@/core/domain/shared/enums';
+import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
+import {
+  DomainValidationException,
+  EntityNotFoundException,
+} from '@/core/domain/shared/exceptions/domain.exception';
+import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
+import type { TeamUserRepository } from '@/core/ports/repositories/team-user.repository';
+import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import {
   Body,
   Controller,
@@ -18,6 +26,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   Post,
   Put,
@@ -49,6 +58,13 @@ export class TeamController {
     private readonly addTeamMemberService: AddTeamMemberService,
     private readonly removeTeamMemberService: RemoveTeamMemberService,
     private readonly listTeamMembersService: ListTeamMembersService,
+    private readonly listAvailableExecutorsForTeamService: ListAvailableExecutorsForTeamService,
+    @Inject('TeamRepository')
+    private readonly teamRepository: TeamRepository,
+    @Inject('CompanyUserRepository')
+    private readonly companyUserRepository: CompanyUserRepository,
+    @Inject('TeamUserRepository')
+    private readonly teamUserRepository: TeamUserRepository,
   ) {}
 
   @Post()
@@ -274,5 +290,123 @@ export class TeamController {
     return result.members.map((member) =>
       TeamMemberResponseDto.fromDomain(member),
     );
+  }
+
+  @Get(':id/responsibles')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EXECUTOR)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List possible responsibles for a team',
+    description:
+      'Retorna os possíveis responsáveis por ações de uma equipe (gestor da equipe + executores membros ativos da equipe).',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da equipe',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Team responsibles successfully retrieved',
+    type: [EmployeeResponseDto],
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Team not found',
+  })
+  async listResponsibles(
+    @Param('id') teamId: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<EmployeeResponseDto[]> {
+    const team = await this.teamRepository.findById(teamId);
+    if (!team) {
+      throw new EntityNotFoundException('Equipe', teamId);
+    }
+
+    // Todos funcionários ativos da empresa com dados de usuário
+    const companyUsers =
+      await this.companyUserRepository.findByCompanyIdAndStatus(
+        team.companyId,
+        CompanyUserStatus.ACTIVE,
+      );
+
+    // Membros executores da equipe
+    const teamUsers = await this.teamUserRepository.findByTeamId(teamId);
+    const executorUserIds = new Set(teamUsers.map((m) => m.userId));
+
+    // Regras por papel:
+    // - ADMIN: pode ver gestor + executores da equipe (como antes)
+    // - MANAGER: apenas se for gestor da equipe; vê gestor + executores da equipe
+    // - EXECUTOR: pode criar ações apenas para si; retorna somente o próprio registro
+
+    if (user.role === UserRole.MANAGER) {
+      if (team.managerId !== user.sub) {
+        // Oculta existência de equipes onde não é gestor
+        throw new EntityNotFoundException('Equipe', teamId);
+      }
+    }
+
+    if (user.role === UserRole.EXECUTOR) {
+      // Executor só pode ser responsável por ações dele mesmo
+      const selfCompanyUser = companyUsers.find(
+        (cu) => cu.userId === user.sub && cu.role === UserRole.EXECUTOR,
+      );
+
+      if (!selfCompanyUser) {
+        throw new EntityNotFoundException('Membro da empresa', user.sub);
+      }
+
+      const isMemberOfTeam = executorUserIds.has(user.sub);
+      if (!isMemberOfTeam) {
+        // Executor não pertence a esta equipe
+        throw new EntityNotFoundException('Membro da equipe', user.sub);
+      }
+
+      return [EmployeeResponseDto.fromDomain(selfCompanyUser)];
+    }
+
+    const responsibles = companyUsers.filter((cu) => {
+      // Gestor da equipe sempre pode ser responsável
+      if (cu.userId === team.managerId) {
+        return true;
+      }
+
+      // Executores que fazem parte da equipe
+      if (cu.role === UserRole.EXECUTOR && executorUserIds.has(cu.userId)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return responsibles.map((cu) => EmployeeResponseDto.fromDomain(cu));
+  }
+
+  @Get(':id/available-executors')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List available executors for a team',
+    description:
+      'Lista executores ativos disponíveis de uma empresa para adicionar em uma equipe específica. Usa as mesmas regras de disponibilidade do endpoint de executores por empresa, considerando a equipe atual.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da equipe',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Available executors for team successfully retrieved',
+    type: TeamMemberResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Team not found',
+  })
+  async listAvailableExecutors(
+    @Param('id') teamId: string,
+  ): Promise<unknown[]> {
+    const result = await this.listAvailableExecutorsForTeamService.execute({
+      teamId,
+    });
+
+    return result.executors;
   }
 }

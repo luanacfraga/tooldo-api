@@ -39,7 +39,7 @@ export class ConsoleEmailService implements EmailService {
 
     this.logger.log('📧 [EMAIL] Employee Invite');
     this.logger.log(`To: ${params.to}`);
-    this.logger.log(`Subject: Convite para ${params.companyName} - Tooldo`);
+    this.logger.log(`Subject: Convite para ${params.companyName} - ToolDo`);
     this.logger.log(`Invite Link: ${templateParams.inviteLink}`);
     this.logger.log(`Token: ${params.inviteToken}`);
     this.logger.log(`Text:\n${text}`);
@@ -88,7 +88,7 @@ export class ConsoleEmailService implements EmailService {
 
     this.logger.log('📧 [EMAIL] Password Reset');
     this.logger.log(`To: ${params.to}`);
-    this.logger.log(`Subject: Recuperação de Senha - Tooldo`);
+    this.logger.log(`Subject: Recuperação de Senha - ToolDo`);
     this.logger.log(`Reset Link: ${templateParams.resetLink}`);
     this.logger.log(`Token: ${params.resetToken}`);
     this.logger.log(`Text:\n${text}`);

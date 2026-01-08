@@ -81,6 +81,14 @@ cat > ${TASK_DEF_FILE} <<EOF
           "value": "https://www.tooldo.app"
         },
         {
+          "name": "EMAIL_ASSETS_BASE_URL",
+          "value": "https://www.tooldo.app"
+        },
+        {
+          "name": "EMAIL_LOGO_URL",
+          "value": "https://www.tooldo.app/_next/image?url=/images/logo.png&w=640&q=75"
+        },
+        {
           "name": "DB_HOST",
           "value": "tooldo-db.cmvj2jytztco.us-east-1.rds.amazonaws.com"
         },

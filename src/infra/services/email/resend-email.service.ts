@@ -36,7 +36,7 @@ export class ResendEmailService implements EmailService {
     }
 
     const fromEmail = process.env.EMAIL_FROM ?? 'onboarding@resend.dev';
-    const fromName = process.env.EMAIL_FROM_NAME ?? 'Tooldo';
+    const fromName = process.env.EMAIL_FROM_NAME ?? 'ToolDo';
     this.from = `"${fromName}" <${fromEmail}>`;
 
     this.resend = new Resend(apiKey);
@@ -53,7 +53,7 @@ export class ResendEmailService implements EmailService {
 
     const react = EmployeeInviteEmail(templateParams);
     const text = getEmployeeInvitePlainText(templateParams);
-    const subject = `Convite para ${params.companyName} - Tooldo`;
+    const subject = `Convite para ${params.companyName} - ToolDo`;
 
     await this.send({
       to: params.to,
@@ -94,7 +94,7 @@ export class ResendEmailService implements EmailService {
 
     const react = PasswordResetEmail(templateParams);
     const text = getPasswordResetPlainText(templateParams);
-    const subject = 'Recuperação de Senha - Tooldo';
+    const subject = 'Recuperação de Senha - ToolDo';
 
     await this.send({
       to: params.to,

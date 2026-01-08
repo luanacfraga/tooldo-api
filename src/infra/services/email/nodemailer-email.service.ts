@@ -31,7 +31,7 @@ export class NodemailerEmailService implements EmailService {
   constructor() {
     this.fromEmail =
       process.env.EMAIL_FROM ?? process.env.SMTP_USER ?? 'noreply@tooldo.com';
-    this.fromName = process.env.EMAIL_FROM_NAME ?? 'Tooldo';
+    this.fromName = process.env.EMAIL_FROM_NAME ?? 'ToolDo';
 
     const emailProvider = process.env.EMAIL_PROVIDER ?? 'smtp';
 
@@ -91,7 +91,7 @@ export class NodemailerEmailService implements EmailService {
     const react = EmployeeInviteEmail(templateParams);
     const { html } = await renderEmail({ react });
     const text = getEmployeeInvitePlainText(templateParams);
-    const subject = `Convite para ${params.companyName} - Tooldo`;
+    const subject = `Convite para ${params.companyName} - ToolDo`;
 
     try {
       await this.transporter.sendMail({
@@ -156,7 +156,7 @@ export class NodemailerEmailService implements EmailService {
     const react = PasswordResetEmail(templateParams);
     const { html } = await renderEmail({ react });
     const text = getPasswordResetPlainText(templateParams);
-    const subject = 'Recuperação de Senha - Tooldo';
+    const subject = 'Recuperação de Senha - ToolDo';
 
     try {
       await this.transporter.sendMail({
