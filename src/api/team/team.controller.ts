@@ -1,5 +1,6 @@
 import { CurrentUser } from '@/api/auth/decorators/current-user.decorator';
 import { Roles } from '@/api/auth/decorators/roles.decorator';
+import { EmployeeResponseDto } from '@/api/employee/dto/employee-response.dto';
 import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { AddTeamMemberService } from '@/application/services/team/add-team-member.service';
 import { CreateTeamService } from '@/application/services/team/create-team.service';
@@ -10,8 +11,11 @@ import { ListTeamsByManagerService } from '@/application/services/team/list-team
 import { ListTeamsService } from '@/application/services/team/list-teams.service';
 import { RemoveTeamMemberService } from '@/application/services/team/remove-team-member.service';
 import { UpdateTeamService } from '@/application/services/team/update-team.service';
-import { DomainValidationException } from '@/core/domain/shared/exceptions/domain.exception';
-import { UserRole } from '@/core/domain/shared/enums';
+import { DomainValidationException, EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
+import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
+import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
+import type { TeamRepository } from '@/core/ports/repositories/team.repository';
+import type { TeamUserRepository } from '@/core/ports/repositories/team-user.repository';
 import {
   Body,
   Controller,
@@ -32,6 +36,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { Inject } from '@nestjs/common';
 import { AddTeamMemberDto } from './dto/add-team-member.dto';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { TeamMemberResponseDto } from './dto/team-member-response.dto';
@@ -51,6 +56,12 @@ export class TeamController {
     private readonly removeTeamMemberService: RemoveTeamMemberService,
     private readonly listTeamMembersService: ListTeamMembersService,
     private readonly listAvailableExecutorsForTeamService: ListAvailableExecutorsForTeamService,
+    @Inject('TeamRepository')
+    private readonly teamRepository: TeamRepository,
+    @Inject('CompanyUserRepository')
+    private readonly companyUserRepository: CompanyUserRepository,
+    @Inject('TeamUserRepository')
+    private readonly teamUserRepository: TeamUserRepository,
   ) {}
 
   @Post()
@@ -276,6 +287,62 @@ export class TeamController {
     return result.members.map((member) =>
       TeamMemberResponseDto.fromDomain(member),
     );
+  }
+
+  @Get(':id/responsibles')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List possible responsibles for a team',
+    description:
+      'Retorna os possíveis responsáveis por ações de uma equipe (gestor da equipe + executores membros ativos da equipe).',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da equipe',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Team responsibles successfully retrieved',
+    type: [EmployeeResponseDto],
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Team not found',
+  })
+  async listResponsibles(
+    @Param('id') teamId: string,
+  ): Promise<EmployeeResponseDto[]> {
+    const team = await this.teamRepository.findById(teamId);
+    if (!team) {
+      throw new EntityNotFoundException('Equipe', teamId);
+    }
+
+    // Todos funcionários ativos da empresa com dados de usuário
+    const companyUsers =
+      await this.companyUserRepository.findByCompanyIdAndStatus(
+        team.companyId,
+        CompanyUserStatus.ACTIVE,
+      );
+
+    // Membros executores da equipe
+    const teamUsers = await this.teamUserRepository.findByTeamId(teamId);
+    const executorUserIds = new Set(teamUsers.map((m) => m.userId));
+
+    const responsibles = companyUsers.filter((cu) => {
+      // Gestor da equipe sempre pode ser responsável
+      if (cu.userId === team.managerId) {
+        return true;
+      }
+
+      // Executores que fazem parte da equipe
+      if (cu.role === UserRole.EXECUTOR && executorUserIds.has(cu.userId)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return responsibles.map((cu) => EmployeeResponseDto.fromDomain(cu));
   }
 
   @Get(':id/available-executors')

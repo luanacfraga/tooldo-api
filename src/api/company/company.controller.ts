@@ -12,6 +12,9 @@ import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
+import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
+import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';
+import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import {
   Body,
   Controller,
@@ -34,8 +37,9 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { CompanyResponseDto } from './dto/company-response.dto';
 import { CompanyDashboardSummaryResponseDto } from './dto/company-dashboard-summary-response.dto';
+import { CompanyResponseDto } from './dto/company-response.dto';
+import { CompanySettingsResponseDto } from './dto/company-settings-response.dto';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { ExecutorDashboardQueryDto } from './dto/executor-dashboard-query.dto';
 import { ExecutorDashboardResponseDto } from './dto/executor-dashboard-response.dto';
@@ -55,6 +59,12 @@ export class CompanyController {
     private readonly companyUserRepository: CompanyUserRepository,
     @Inject('CompanyRepository')
     private readonly companyRepository: CompanyRepository,
+    @Inject('SubscriptionRepository')
+    private readonly subscriptionRepository: SubscriptionRepository,
+    @Inject('PlanRepository')
+    private readonly planRepository: PlanRepository,
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
   ) {}
 
   @Post()
@@ -305,6 +315,84 @@ export class CompanyController {
       quality: result.quality,
       nextActions: result.nextActions,
       team: result.team,
+    });
+  }
+
+  @Get(':id/settings')
+  @Roles(
+    UserRole.ADMIN,
+    UserRole.MANAGER,
+    UserRole.EXECUTOR,
+    UserRole.CONSULTANT,
+  )
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Detalhes da empresa e plano ativo',
+    description:
+      'Retorna os dados básicos da empresa e o plano atual (subscription ativa) do admin dono da empresa.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Configurações da empresa retornadas com sucesso',
+    type: CompanySettingsResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Company, subscription or plan not found',
+  })
+  async settings(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ): Promise<CompanySettingsResponseDto> {
+    const company = await this.companyRepository.findById(id);
+    if (!company) {
+      throw new EntityNotFoundException('Empresa', id);
+    }
+
+    // Mesmo modelo de acesso do dashboard:
+    // - Admin só acessa as próprias empresas
+    // - Outros papéis precisam ser membros ativos da empresa
+    if (user.role === UserRole.ADMIN) {
+      if (company.adminId !== user.sub) {
+        throw new EntityNotFoundException('Empresa', id);
+      }
+    } else {
+      const membership = await this.companyUserRepository.findByCompanyAndUser(
+        id,
+        user.sub,
+      );
+      if (!membership || membership.status !== CompanyUserStatus.ACTIVE) {
+        throw new EntityNotFoundException('Empresa', id);
+      }
+    }
+
+    const subscription =
+      await this.subscriptionRepository.findActiveByAdminId(company.adminId);
+    if (!subscription) {
+      throw new EntityNotFoundException(
+        'Assinatura ativa',
+        company.adminId,
+      );
+    }
+
+    const plan = await this.planRepository.findById(subscription.planId);
+    if (!plan) {
+      throw new EntityNotFoundException('Plano', subscription.planId);
+    }
+
+    const admin = await this.userRepository.findById(company.adminId);
+    if (!admin) {
+      throw new EntityNotFoundException('Admin', company.adminId);
+    }
+
+    return CompanySettingsResponseDto.fromDomain({
+      company,
+      plan,
+      subscription,
+      admin,
     });
   }
 
