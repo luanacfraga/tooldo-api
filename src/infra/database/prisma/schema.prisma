@@ -116,6 +116,7 @@ model Company {
   members CompanyUser[]
   teams   Team[]
   actions Action[]
+  objectives Objective[]
 
   @@map("companies")
 }
@@ -172,6 +173,7 @@ model Team {
   manager User       @relation("TeamManager", fields: [managerId], references: [id])
   members TeamUser[]
   actions Action[]
+  objectives Objective[]
 
   @@map("teams")
 }
@@ -315,6 +317,22 @@ model ActionTag {
 
   @@index([actionId])
   @@map("action_tags")
+}
+
+model Objective {
+  id        String   @id @default(uuid())
+  companyId String   @map("company_id")
+  teamId    String   @map("team_id")
+  title     String
+  dueDate   DateTime? @map("due_date")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, teamId])
+  @@map("objectives")
 }
 
 model ActionAttachment {
