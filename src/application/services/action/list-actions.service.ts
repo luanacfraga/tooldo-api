@@ -198,7 +198,6 @@ export class ListActionsService {
     if (isLate === action.isLate) {
       return action;
     }
-
     return new Action(
       action.id,
       action.title,

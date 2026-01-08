@@ -273,13 +273,14 @@ export class GetExecutorDashboardService {
       },
     );
 
-    let normalized = myActions
-      .filter((a) => !a.isDeleted())
-      .map((a) => ({ action: a, isLate: a.calculateIsLate(now) }));
-
     const objectiveFilter = input.objective?.trim().toLowerCase();
-    if (objectiveFilter) {
-      normalized = normalized.filter((a) => {
+    const normalized = myActions
+      .filter((a) => !a.isDeleted())
+      .map((a) => ({ action: a, isLate: a.calculateIsLate(now) }))
+      .filter((a) => {
+        if (!objectiveFilter) {
+          return true;
+        }
         const meta = parseObjectiveAndImpact(a.action.description);
         const obj = meta.objective?.trim().toLowerCase();
         if (!obj) {
@@ -287,7 +288,6 @@ export class GetExecutorDashboardService {
         }
         return obj.includes(objectiveFilter);
       });
-    }
 
     const todo = normalized.filter(
       (a) => a.action.status === ActionStatus.TODO,
