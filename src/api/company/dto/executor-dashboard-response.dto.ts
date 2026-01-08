@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import { ApiProperty } from '@nestjs/swagger';
 
 type ImpactCategory =
   | 'receita'
@@ -91,7 +91,11 @@ class ExecutorNextActionDto {
   @ApiProperty({ example: false })
   isBlocked!: boolean;
 
-  @ApiProperty({ required: false, nullable: true, example: 'Aguardando aprovação do financeiro' })
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    example: 'Aguardando aprovação do financeiro',
+  })
   blockedReason?: string | null;
 
   @ApiProperty({ example: '2026-01-06T12:00:00.000Z' })
@@ -245,5 +249,3 @@ export class ExecutorDashboardResponseDto {
     return dto;
   }
 }
-
-

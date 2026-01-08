@@ -63,6 +63,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
     lastName: true,
     email: true,
     phone: true,
+    document: true,
     role: true,
     status: true,
     profileImageUrl: true,
@@ -75,6 +76,7 @@ export class CompanyUserPrismaRepository implements CompanyUserRepository {
       lastName: user.lastName,
       email: user.email,
       phone: user.phone,
+      document: user.document,
       role: String(user.role),
       initials: null,
       // avatarColor intentionally omitted (column not present)

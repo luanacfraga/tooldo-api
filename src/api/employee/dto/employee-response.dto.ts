@@ -9,6 +9,7 @@ export interface CompanyUserWithUser extends CompanyUser {
     lastName: string;
     email: string;
     phone: string;
+    document: string;
     role: string;
     initials?: string | null;
   };
@@ -92,6 +93,7 @@ export class EmployeeResponseDto {
     lastName: string;
     email: string;
     phone: string;
+    document: string;
     role: string;
     initials?: string | null;
   };
@@ -118,6 +120,7 @@ export class EmployeeResponseDto {
         lastName: companyUser.user.lastName,
         email: companyUser.user.email,
         phone: companyUser.user.phone,
+        document: companyUser.user.document,
         role: companyUser.user.role,
         initials: companyUser.user.initials,
       };
