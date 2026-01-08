@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { ActionStatus } from '@/core/domain/shared/enums';
+import { ApiProperty } from '@nestjs/swagger';
 
 class CompanyDashboardSummaryActionItemDto {
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
@@ -76,5 +76,3 @@ export class CompanyDashboardSummaryResponseDto {
     return dto;
   }
 }
-
-

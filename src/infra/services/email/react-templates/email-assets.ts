@@ -3,7 +3,9 @@ function trimTrailingSlash(url: string): string {
 }
 
 function isHttpUrl(url: string | undefined): url is string {
-  if (!url) return false;
+  if (!url) {
+    return false;
+  }
   return /^https?:\/\//i.test(url);
 }
 
@@ -13,7 +15,9 @@ function isHttpUrl(url: string | undefined): url is string {
  */
 export function getFrontendUrl(): string | undefined {
   const raw = process.env.FRONTEND_URL;
-  if (!isHttpUrl(raw)) return undefined;
+  if (!isHttpUrl(raw)) {
+    return undefined;
+  }
   return trimTrailingSlash(raw);
 }
 
@@ -25,7 +29,9 @@ export function getFrontendUrl(): string | undefined {
  */
 export function getEmailAssetsBaseUrl(): string | undefined {
   const raw = process.env.EMAIL_ASSETS_BASE_URL;
-  if (isHttpUrl(raw)) return trimTrailingSlash(raw);
+  if (isHttpUrl(raw)) {
+    return trimTrailingSlash(raw);
+  }
   return getFrontendUrl();
 }
 
@@ -37,11 +43,13 @@ export function getEmailAssetsBaseUrl(): string | undefined {
  */
 export function getEmailLogoUrl(): string | undefined {
   const direct = process.env.EMAIL_LOGO_URL;
-  if (isHttpUrl(direct)) return direct;
+  if (isHttpUrl(direct)) {
+    return direct;
+  }
 
   const base = getEmailAssetsBaseUrl();
-  if (!base) return undefined;
+  if (!base) {
+    return undefined;
+  }
   return `${base}/images/logo.png`;
 }
-
-

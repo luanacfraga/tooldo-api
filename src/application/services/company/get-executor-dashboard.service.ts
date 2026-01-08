@@ -3,8 +3,8 @@ import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.
 import type { ActionMovementRepository } from '@/core/ports/repositories/action-movement.repository';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
-import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import type { TeamUserRepository } from '@/core/ports/repositories/team-user.repository';
+import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 type DoneTrendPoint = { date: string; done: number };
@@ -18,7 +18,9 @@ function assertValidDate(value: string, name: string): Date {
 }
 
 function startOfDayUtc(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
 }
 
 function addDaysUtc(date: Date, days: number): Date {
@@ -74,7 +76,9 @@ function parseObjectiveAndImpact(description: string | null | undefined): {
   impact?: string;
 } {
   const text = description ?? '';
-  if (!text) return {};
+  if (!text) {
+    return {};
+  }
 
   // Preferred format (stored by the frontend ActionForm):
   // [[tooldo-meta]]
@@ -88,12 +92,18 @@ function parseObjectiveAndImpact(description: string | null | undefined): {
     const inside = text.slice(start + '[[tooldo-meta]]'.length, end).trim();
     for (const line of inside.split('\n')) {
       const trimmed = line.trim();
-      if (!trimmed) continue;
+      if (!trimmed) {
+        continue;
+      }
       const [k, ...rest] = trimmed.split(':');
       const key = (k ?? '').trim().toLowerCase();
       const value = rest.join(':').trim();
-      if (!value) continue;
-      if (key === 'objective') objective = value;
+      if (!value) {
+        continue;
+      }
+      if (key === 'objective') {
+        objective = value;
+      }
     }
   }
 
@@ -111,7 +121,9 @@ function parseObjectiveAndImpact(description: string | null | undefined): {
 }
 
 function mapImpactCategory(raw: string | undefined): ImpactCategory {
-  if (!raw) return 'nao-informado';
+  if (!raw) {
+    return 'nao-informado';
+  }
   const v = normalizeText(raw);
 
   if (v.includes('receita') || v.includes('vendas') || v.includes('fatur')) {
@@ -132,7 +144,9 @@ function mapImpactCategory(raw: string | undefined): ImpactCategory {
   if (v.includes('pessoas') || v.includes('rh') || v.includes('cultura')) {
     return 'pessoas';
   }
-  if (v.includes('outro')) return 'outro';
+  if (v.includes('outro')) {
+    return 'outro';
+  }
 
   return 'outro';
 }
@@ -232,7 +246,9 @@ export class GetExecutorDashboardService {
     const from = assertValidDate(input.dateFrom, 'dateFrom');
     const to = assertValidDate(input.dateTo, 'dateTo');
     if (from.getTime() > to.getTime()) {
-      throw new BadRequestException('dateFrom deve ser menor ou igual a dateTo');
+      throw new BadRequestException(
+        'dateFrom deve ser menor ou igual a dateTo',
+      );
     }
 
     // Normalize to UTC day boundaries for trends/comparisons (emails/dashboard-like behavior).
@@ -241,16 +257,21 @@ export class GetExecutorDashboardService {
 
     const days = Math.max(
       1,
-      Math.round((toDay.getTime() - fromDay.getTime()) / (24 * 60 * 60 * 1000)) + 1,
+      Math.round(
+        (toDay.getTime() - fromDay.getTime()) / (24 * 60 * 60 * 1000),
+      ) + 1,
     );
     const prevToDay = addDaysUtc(fromDay, -1);
     const prevFromDay = addDaysUtc(prevToDay, -(days - 1));
 
     const now = new Date();
 
-    const myActions = await this.actionRepository.findByCompanyId(input.companyId, {
-      responsibleId: input.userId,
-    });
+    const myActions = await this.actionRepository.findByCompanyId(
+      input.companyId,
+      {
+        responsibleId: input.userId,
+      },
+    );
 
     let normalized = myActions
       .filter((a) => !a.isDeleted())
@@ -261,30 +282,43 @@ export class GetExecutorDashboardService {
       normalized = normalized.filter((a) => {
         const meta = parseObjectiveAndImpact(a.action.description);
         const obj = meta.objective?.trim().toLowerCase();
-        if (!obj) return false;
+        if (!obj) {
+          return false;
+        }
         return obj.includes(objectiveFilter);
       });
     }
 
-    const todo = normalized.filter((a) => a.action.status === ActionStatus.TODO);
+    const todo = normalized.filter(
+      (a) => a.action.status === ActionStatus.TODO,
+    );
     const inProgress = normalized.filter(
       (a) => a.action.status === ActionStatus.IN_PROGRESS,
     );
-    const done = normalized.filter((a) => a.action.status === ActionStatus.DONE);
+    const done = normalized.filter(
+      (a) => a.action.status === ActionStatus.DONE,
+    );
     const blocked = normalized.filter((a) => a.action.isBlocked);
     const late = normalized.filter((a) => a.isLate);
 
     const total = normalized.length;
     const completionRate = total > 0 ? (done.length / total) * 100 : 0;
 
-    const doneInRange = (a: (typeof normalized)[number], fromD: Date, toD: Date) => {
-      if (a.action.status !== ActionStatus.DONE) return false;
+    const doneInRange = (
+      a: (typeof normalized)[number],
+      fromD: Date,
+      toD: Date,
+    ) => {
+      if (a.action.status !== ActionStatus.DONE) {
+        return false;
+      }
       const end = a.action.actualEndDate ?? a.action.estimatedEndDate;
       return isBetweenInclusive(end, fromD, addDaysUtc(toD, 1)); // inclusive end-of-day-ish
     };
 
-    const doneCurrent = normalized.filter((a) => doneInRange(a, fromDay, toDay))
-      .length;
+    const doneCurrent = normalized.filter((a) =>
+      doneInRange(a, fromDay, toDay),
+    ).length;
     const donePrevious = normalized.filter((a) =>
       doneInRange(a, prevFromDay, prevToDay),
     ).length;
@@ -296,10 +330,15 @@ export class GetExecutorDashboardService {
         buckets[key] = 0;
       }
       for (const a of normalized) {
-        if (a.action.status !== ActionStatus.DONE) continue;
+        if (a.action.status !== ActionStatus.DONE) {
+          continue;
+        }
         const end = a.action.actualEndDate ?? a.action.estimatedEndDate;
         const dayKey = toYmdUtc(startOfDayUtc(end));
-        if (buckets[dayKey] !== undefined && isBetweenInclusive(end, fromD, addDaysUtc(toD, 1))) {
+        if (
+          buckets[dayKey] !== undefined &&
+          isBetweenInclusive(end, fromD, addDaysUtc(toD, 1))
+        ) {
           buckets[dayKey] += 1;
         }
       }
@@ -309,7 +348,9 @@ export class GetExecutorDashboardService {
       }));
     };
 
-    const doneCurrentItems = normalized.filter((a) => doneInRange(a, fromDay, toDay));
+    const doneCurrentItems = normalized.filter((a) =>
+      doneInRange(a, fromDay, toDay),
+    );
 
     const doneOnTime = doneCurrentItems.filter((a) => {
       const end = a.action.actualEndDate ?? a.action.estimatedEndDate;
@@ -326,8 +367,11 @@ export class GetExecutorDashboardService {
           return ms > 0 ? ms : null;
         })
         .filter((v): v is number => typeof v === 'number');
-      if (!durationsMs.length) return null;
-      const avgMs = durationsMs.reduce((acc, v) => acc + v, 0) / durationsMs.length;
+      if (!durationsMs.length) {
+        return null;
+      }
+      const avgMs =
+        durationsMs.reduce((acc, v) => acc + v, 0) / durationsMs.length;
       return Math.round((avgMs / (1000 * 60 * 60)) * 10) / 10;
     })();
 
@@ -339,7 +383,9 @@ export class GetExecutorDashboardService {
           return ms > 0 ? ms : null;
         })
         .filter((v): v is number => typeof v === 'number');
-      if (!agesMs.length) return null;
+      if (!agesMs.length) {
+        return null;
+      }
       const avgMs = agesMs.reduce((acc, v) => acc + v, 0) / agesMs.length;
       return Math.round((avgMs / (1000 * 60 * 60)) * 10) / 10;
     })();
@@ -348,10 +394,16 @@ export class GetExecutorDashboardService {
 
     const doneCurrentIds = doneCurrentItems.map((a) => a.action.id);
     const endExclusive = addDaysUtc(toDay, 1);
-    const movementsByActionId = new Map<string, Awaited<ReturnType<ActionMovementRepository['findByActionId']>>>();
+    const movementsByActionId = new Map<
+      string,
+      Awaited<ReturnType<ActionMovementRepository['findByActionId']>>
+    >();
     await Promise.all(
       doneCurrentIds.map(async (id) => {
-        movementsByActionId.set(id, await this.actionMovementRepository.findByActionId(id));
+        movementsByActionId.set(
+          id,
+          await this.actionMovementRepository.findByActionId(id),
+        );
       }),
     );
 
@@ -386,7 +438,10 @@ export class GetExecutorDashboardService {
       const parsed = parseObjectiveAndImpact(doneMove?.notes);
       impactCategories[mapImpactCategory(parsed.impact)] += 1;
       if (parsed.objective) {
-        objectiveCounts.set(parsed.objective, (objectiveCounts.get(parsed.objective) ?? 0) + 1);
+        objectiveCounts.set(
+          parsed.objective,
+          (objectiveCounts.get(parsed.objective) ?? 0) + 1,
+        );
       }
     }
     const topObjectives = [...objectiveCounts.entries()]
@@ -402,11 +457,17 @@ export class GetExecutorDashboardService {
       )
       .slice()
       .sort((a, b) => {
-        if (a.isLate !== b.isLate) return a.isLate ? -1 : 1;
-        const pw = priorityWeight(b.action.priority) - priorityWeight(a.action.priority);
-        if (pw !== 0) return pw;
+        if (a.isLate !== b.isLate) {
+          return a.isLate ? -1 : 1;
+        }
+        const pw =
+          priorityWeight(b.action.priority) - priorityWeight(a.action.priority);
+        if (pw !== 0) {
+          return pw;
+        }
         return (
-          a.action.estimatedEndDate.getTime() - b.action.estimatedEndDate.getTime()
+          a.action.estimatedEndDate.getTime() -
+          b.action.estimatedEndDate.getTime()
         );
       })
       .slice(0, 5)
@@ -426,7 +487,11 @@ export class GetExecutorDashboardService {
     const blockedActions = normalized
       .filter((a) => a.action.isBlocked)
       .slice()
-      .sort((a, b) => a.action.estimatedEndDate.getTime() - b.action.estimatedEndDate.getTime())
+      .sort(
+        (a, b) =>
+          a.action.estimatedEndDate.getTime() -
+          b.action.estimatedEndDate.getTime(),
+      )
       .slice(0, 5)
       .map((a) => ({
         id: a.action.id,
@@ -445,11 +510,15 @@ export class GetExecutorDashboardService {
 
     if (teamUser) {
       const teamEntity = await this.teamRepository.findById(teamUser.teamId);
-      if (teamEntity && teamEntity.companyId === input.companyId) {
-        const teamUsers = await this.teamUserRepository.findByTeamId(teamEntity.id);
+      if (teamEntity?.companyId === input.companyId) {
+        const teamUsers = await this.teamUserRepository.findByTeamId(
+          teamEntity.id,
+        );
         const memberIds = teamUsers.map((tu) => tu.userId);
 
-        const teamActions = await this.actionRepository.findByTeamId(teamEntity.id);
+        const teamActions = await this.actionRepository.findByTeamId(
+          teamEntity.id,
+        );
         const teamDone = teamActions
           .filter((a) => !a.isDeleted())
           .filter((a) => a.status === ActionStatus.DONE)
@@ -459,14 +528,18 @@ export class GetExecutorDashboardService {
           });
 
         const counts = new Map<string, number>();
-        for (const userId of memberIds) counts.set(userId, 0);
+        for (const userId of memberIds) {
+          counts.set(userId, 0);
+        }
         for (const a of teamDone) {
           counts.set(a.responsibleId, (counts.get(a.responsibleId) ?? 0) + 1);
         }
 
         const ranked = [...counts.entries()].sort((a, b) => {
           const diff = (b[1] ?? 0) - (a[1] ?? 0);
-          if (diff !== 0) return diff;
+          if (diff !== 0) {
+            return diff;
+          }
           return a[0].localeCompare(b[0]);
         });
 
@@ -536,5 +609,3 @@ export class GetExecutorDashboardService {
     };
   }
 }
-
-

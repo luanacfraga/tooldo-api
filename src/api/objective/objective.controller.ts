@@ -137,7 +137,7 @@ export class ObjectiveController {
     const team = await (this.prisma as any).team.findUnique({
       where: { id: dto.teamId },
     });
-    if (!team || team.companyId !== dto.companyId) {
+    if (team?.companyId !== dto.companyId) {
       throw new EntityNotFoundException('Equipe', dto.teamId);
     }
 
@@ -183,7 +183,9 @@ export class ObjectiveController {
     @Param('id') id: string,
     @Body() dto: UpdateObjectiveDto,
   ): Promise<ObjectiveResponseDto> {
-    const existing = await (this.prisma as any).objective.findUnique({ where: { id } });
+    const existing = await (this.prisma as any).objective.findUnique({
+      where: { id },
+    });
     if (!existing) {
       throw new EntityNotFoundException('Objetivo', id);
     }
@@ -227,7 +229,9 @@ export class ObjectiveController {
     description: 'Not Found - Objective not found',
   })
   async delete(@Param('id') id: string): Promise<void> {
-    const existing = await (this.prisma as any).objective.findUnique({ where: { id } });
+    const existing = await (this.prisma as any).objective.findUnique({
+      where: { id },
+    });
     if (!existing) {
       throw new EntityNotFoundException('Objetivo', id);
     }
@@ -235,5 +239,3 @@ export class ObjectiveController {
     await (this.prisma as any).objective.delete({ where: { id } });
   }
 }
-
-

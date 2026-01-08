@@ -131,7 +131,9 @@ export class ListActionsService {
         const objective = this.extractObjectiveFromDescription(
           r.action.description,
         )?.toLowerCase();
-        if (!objective) return false;
+        if (!objective) {
+          return false;
+        }
         return objective.includes(objectiveFilter);
       });
     }
@@ -225,7 +227,9 @@ export class ListActionsService {
    * objectiveDue: <YYYY-MM-DD>
    * [[/tooldo-meta]]
    */
-  private extractObjectiveFromDescription(description?: string): string | undefined {
+  private extractObjectiveFromDescription(
+    description?: string,
+  ): string | undefined {
     const raw = description ?? '';
     const start = raw.indexOf('[[tooldo-meta]]');
     const end = raw.indexOf('[[/tooldo-meta]]');
@@ -234,12 +238,18 @@ export class ListActionsService {
       const lines = inside.split('\n');
       for (const line of lines) {
         const trimmed = line.trim();
-        if (!trimmed) continue;
+        if (!trimmed) {
+          continue;
+        }
         const [k, ...rest] = trimmed.split(':');
         const key = (k ?? '').trim().toLowerCase();
-        if (key !== 'objective') continue;
+        if (key !== 'objective') {
+          continue;
+        }
         const value = rest.join(':').trim();
-        if (!value) return undefined;
+        if (!value) {
+          return undefined;
+        }
         return value.replace(/\s+/g, ' ');
       }
     }
@@ -247,7 +257,9 @@ export class ListActionsService {
     // Legacy format: "Objetivo: <texto>" somewhere in description
     const legacy = raw.match(/(?:^|\n)\s*objetivo\s*:\s*(.+)\s*$/im);
     const legacyObjective = legacy?.[1]?.trim();
-    if (legacyObjective) return legacyObjective.replace(/\s+/g, ' ');
+    if (legacyObjective) {
+      return legacyObjective.replace(/\s+/g, ' ');
+    }
 
     return undefined;
   }

@@ -7,5 +7,3 @@ import { ObjectiveController } from './objective.controller';
   controllers: [ObjectiveController],
 })
 export class ObjectiveModule {}
-
-

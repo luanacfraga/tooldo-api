@@ -11,11 +11,14 @@ import { ListTeamsByManagerService } from '@/application/services/team/list-team
 import { ListTeamsService } from '@/application/services/team/list-teams.service';
 import { RemoveTeamMemberService } from '@/application/services/team/remove-team-member.service';
 import { UpdateTeamService } from '@/application/services/team/update-team.service';
-import { DomainValidationException, EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
+import {
+  DomainValidationException,
+  EntityNotFoundException,
+} from '@/core/domain/shared/exceptions/domain.exception';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
-import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import type { TeamUserRepository } from '@/core/ports/repositories/team-user.repository';
+import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import {
   Body,
   Controller,
@@ -23,6 +26,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   Param,
   Post,
   Put,
@@ -36,7 +40,6 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { Inject } from '@nestjs/common';
 import { AddTeamMemberDto } from './dto/add-team-member.dto';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { TeamMemberResponseDto } from './dto/team-member-response.dto';

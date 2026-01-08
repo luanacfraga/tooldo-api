@@ -13,7 +13,11 @@ import { AddChecklistItemService } from '@/application/services/checklist/add-ch
 import { ReorderChecklistItemsService } from '@/application/services/checklist/reorder-checklist-items.service';
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
 import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
-import { ActionPriority, ActionStatus, UserRole } from '@/core/domain/shared/enums';
+import {
+  ActionPriority,
+  ActionStatus,
+  UserRole,
+} from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import {
   Body,
@@ -76,7 +80,9 @@ export class ActionController {
     actionId: string,
     req: RequestWithUser,
   ): Promise<void> {
-    if (req.user.role !== UserRole.EXECUTOR) return;
+    if (req.user.role !== UserRole.EXECUTOR) {
+      return;
+    }
     const result = await this.getActionService.execute({ actionId });
     if (result.result.action.responsibleId !== req.user.sub) {
       // Hide existence for unauthorized access
