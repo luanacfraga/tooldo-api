@@ -121,20 +121,9 @@ class ImpactCategoriesDto {
   ['nao-informado']!: number;
 }
 
-class ImpactTopObjectiveDto {
-  @ApiProperty({ example: 'Reduzir churn' })
-  objective!: string;
-
-  @ApiProperty({ example: 3 })
-  count!: number;
-}
-
 class ImpactSummaryDto {
   @ApiProperty({ type: ImpactCategoriesDto })
   categories!: Record<ImpactCategory, number>;
-
-  @ApiProperty({ type: [ImpactTopObjectiveDto] })
-  topObjectives!: ImpactTopObjectiveDto[];
 }
 
 class QualitySummaryDto {

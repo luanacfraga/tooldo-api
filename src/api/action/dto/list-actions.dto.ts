@@ -124,16 +124,6 @@ export class ListActionsQueryDto {
 
   @ApiProperty({
     required: false,
-    description:
-      'Filtrar por objetivo vinculado à ação (armazenado na descrição como metadata ToolDo)',
-    example: 'reduzir churn',
-  })
-  @IsString({ message: 'objective deve ser string' })
-  @IsOptional()
-  objective?: string;
-
-  @ApiProperty({
-    required: false,
     description: 'Página',
     example: 1,
     minimum: 1,
