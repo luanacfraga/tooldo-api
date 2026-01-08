@@ -117,24 +117,26 @@ describe('UpdateUserAvatarColorService', () => {
 
     it('should update to each of the predefined colors', async () => {
       userRepository.findById.mockResolvedValue(mockUser);
-      userRepository.update.mockImplementation((_id: string, data: Partial<User>) => {
-        const updatedUser = new User(
-          mockUser.id,
-          mockUser.firstName,
-          mockUser.lastName,
-          mockUser.email,
-          mockUser.phone,
-          mockUser.document,
-          mockUser.documentType,
-          mockUser.password,
-          mockUser.role,
-          mockUser.status,
-          mockUser.profileImageUrl,
-          data.avatarColor ?? mockUser.avatarColor,
-          mockUser.initials,
-        );
-        return Promise.resolve(updatedUser);
-      });
+      userRepository.update.mockImplementation(
+        (_id: string, data: Partial<User>) => {
+          const updatedUser = new User(
+            mockUser.id,
+            mockUser.firstName,
+            mockUser.lastName,
+            mockUser.email,
+            mockUser.phone,
+            mockUser.document,
+            mockUser.documentType,
+            mockUser.password,
+            mockUser.role,
+            mockUser.status,
+            mockUser.profileImageUrl,
+            data.avatarColor ?? mockUser.avatarColor,
+            mockUser.initials,
+          );
+          return Promise.resolve(updatedUser);
+        },
+      );
 
       for (const color of AVATAR_COLORS) {
         const result = await service.execute({
