@@ -10,6 +10,7 @@ import { HealthModule } from './api/health/health.module';
 import { PlanModule } from './api/plan/plan.module';
 import { DomainExceptionFilter } from './api/shared/filters/domain-exception.filter';
 import { TeamModule } from './api/team/team.module';
+import { UserModule } from './api/user/user.module';
 import { ConfigModule } from './infra/config/config.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { ConfigModule } from './infra/config/config.module';
     CompanyModule,
     EmployeeModule,
     TeamModule,
+    UserModule,
     ActionModule,
     HealthModule,
   ],
