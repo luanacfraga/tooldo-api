@@ -108,7 +108,7 @@ cat > ${TASK_DEF_FILE} <<EOF
         },
         {
           "name": "EMAIL_FROM",
-          "value": "onboarding@resend.dev"
+          "value": "luana.cam20@gmail.com"
         },
         {
           "name": "EMAIL_FROM_NAME",

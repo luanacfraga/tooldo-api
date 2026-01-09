@@ -1,4 +1,5 @@
 import { Plan } from '@/core/domain/plan/plan.entity';
+import { UniqueConstraintException } from '@/core/domain/shared/exceptions/domain.exception';
 import { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import type { IdGenerator } from '@/core/ports/services/id-generator.port';
 import { Inject, Injectable } from '@nestjs/common';
@@ -26,6 +27,11 @@ export class CreatePlanService {
   ) {}
 
   async execute(input: CreatePlanInput): Promise<CreatePlanOutput> {
+    const existingPlan = await this.planRepository.findByName(input.name);
+    if (existingPlan) {
+      throw new UniqueConstraintException('Plano', input.name);
+    }
+
     const plan = Plan.create({
       id: this.idGenerator.generate(),
       name: input.name,
