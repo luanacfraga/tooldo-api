@@ -59,3 +59,18 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Git worktrees
 .worktrees/
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/secrets.tfvars
+terraform/.terraform.tfstate.lock.info
+terraform/crash.log
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
