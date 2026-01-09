@@ -130,9 +130,9 @@ export class RegisterAdminService {
   }
 
   private async findDefaultPlan() {
-    const defaultPlan = await this.planRepository.findByName('default');
+    const defaultPlan = await this.planRepository.findByName('gratuito');
     if (!defaultPlan) {
-      throw new EntityNotFoundException('Plano padrão', 'default');
+      throw new EntityNotFoundException('Plano gratuito', 'gratuito');
     }
     return defaultPlan;
   }

@@ -1,5 +1,8 @@
 import { Plan } from '@/core/domain/plan/plan.entity';
-import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
+import {
+  EntityNotFoundException,
+  UniqueConstraintException,
+} from '@/core/domain/shared/exceptions/domain.exception';
 import type { PlanRepository } from '@/core/ports/repositories/plan.repository';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -24,6 +27,11 @@ export class UpdatePlanService {
     const existingPlan = await this.planRepository.findById(input.id);
     if (!existingPlan) {
       throw new EntityNotFoundException('Plano', input.id);
+    }
+
+    const planWithSameName = await this.planRepository.findByName(input.name);
+    if (planWithSameName && planWithSameName.id !== input.id) {
+      throw new UniqueConstraintException('Plano', input.name);
     }
 
     const updatedPlan = Plan.create({
