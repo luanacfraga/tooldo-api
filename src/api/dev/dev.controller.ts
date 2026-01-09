@@ -1,15 +1,7 @@
 import { Roles } from '@/api/auth/decorators/roles.decorator';
 import { DevDatabaseCleanupService } from '@/api/dev/dev-database-cleanup.service';
 import { UserRole } from '@/core/domain/shared/enums';
-import {
-  Controller,
-  ForbiddenException,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import {
   ApiForbiddenResponse,
   ApiOkResponse,
@@ -24,21 +16,7 @@ export class DevController {
 
   constructor(
     private readonly devDatabaseCleanupService: DevDatabaseCleanupService,
-    private readonly configService: ConfigService,
   ) {}
-
-  private ensureDevelopmentEnvironment(): void {
-    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
-
-    if (nodeEnv === 'production') {
-      this.logger.error(
-        'Tentativa de usar endpoint de DEV em ambiente de produção',
-      );
-      throw new ForbiddenException(
-        'Este endpoint só pode ser utilizado em ambiente de desenvolvimento',
-      );
-    }
-  }
 
   @Post('cleanup')
   @Roles(UserRole.MASTER)
@@ -56,8 +34,6 @@ export class DevController {
       'Disponível apenas em ambiente de desenvolvimento ou acesso não autorizado',
   })
   async cleanup() {
-    //this.ensureDevelopmentEnvironment();
-
     await this.devDatabaseCleanupService.cleanDomainData();
 
     const timestamp = new Date().toISOString();
