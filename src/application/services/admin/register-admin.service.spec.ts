@@ -55,7 +55,7 @@ describe('RegisterAdminService', () => {
 
   const mockDefaultPlan = Plan.create({
     id: mockPlanId,
-    name: 'default',
+    name: 'gratuito',
     maxCompanies: 10,
     maxManagers: 50,
     maxExecutors: 100,
@@ -205,7 +205,7 @@ describe('RegisterAdminService', () => {
       expect(userRepository.findByDocument).toHaveBeenCalledWith(
         mockInput.document,
       );
-      expect(planRepository.findByName).toHaveBeenCalledWith('default');
+      expect(planRepository.findByName).toHaveBeenCalledWith('gratuito');
       expect(idGenerator.generate).toHaveBeenCalledTimes(3);
       expect(passwordHasher.hash).toHaveBeenCalledWith(mockInput.password);
       expect(transactionManager.execute).toHaveBeenCalledTimes(1);
@@ -547,7 +547,7 @@ describe('RegisterAdminService', () => {
         EntityNotFoundException,
       );
       await expect(service.execute(mockInput)).rejects.toThrow('Plano padrão');
-      expect(planRepository.findByName).toHaveBeenCalledWith('default');
+      expect(planRepository.findByName).toHaveBeenCalledWith('gratuito');
     });
 
     it('should hash password before creating user', async () => {
