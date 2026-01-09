@@ -101,6 +101,18 @@ cat > ${TASK_DEF_FILE} <<EOF
         {
           "name": "DB_NAME",
           "value": "tooldo-db"
+        },
+        {
+          "name": "RESEND_API_KEY",
+          "value": "re_UbMqLgSQ_FTEiueLoDDfkrHGPCk8sZ51j"
+        },
+        {
+          "name": "EMAIL_FROM",
+          "value": "onboarding@resend.dev"
+        },
+        {
+          "name": "EMAIL_FROM_NAME",
+          "value": "Tooldo"
         }
       ],
       "secrets": [
