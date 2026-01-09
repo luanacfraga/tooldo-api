@@ -546,7 +546,9 @@ describe('RegisterAdminService', () => {
       await expect(service.execute(mockInput)).rejects.toThrow(
         EntityNotFoundException,
       );
-      await expect(service.execute(mockInput)).rejects.toThrow('Plano padrão');
+      await expect(service.execute(mockInput)).rejects.toThrow(
+        'Plano gratuito',
+      );
       expect(planRepository.findByName).toHaveBeenCalledWith('gratuito');
     });
 
