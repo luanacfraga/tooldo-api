@@ -37,7 +37,7 @@ export class ConsoleEmailService implements EmailService {
     const { html } = await renderEmail({ react });
     const text = getEmployeeInvitePlainText(templateParams);
 
-    this.logger.log('📧 [EMAIL] Employee Invite');
+    this.logger.log('📧 [EMAIL] Employee Invite ');
     this.logger.log(`To: ${params.to}`);
     this.logger.log(`Subject: Convite para ${params.companyName} - ToolDo`);
     this.logger.log(`Invite Link: ${templateParams.inviteLink}`);
