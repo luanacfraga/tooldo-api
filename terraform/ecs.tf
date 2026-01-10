@@ -60,7 +60,7 @@ resource "aws_ecs_task_definition" "app" {
         },
         {
           name  = "EMAIL_LOGO_URL"
-          value = "${var.frontend_url}/_next/image?url=/images/logo.png&w=640&q=75"
+          value = "${var.frontend_url}/images/logo.png"
         },
         {
           name  = "DB_HOST"

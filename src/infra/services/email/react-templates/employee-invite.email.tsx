@@ -93,5 +93,3 @@ export function getEmployeeInvitePlainText(
     `Se você não esperava receber este convite ou não conhece ${props.inviterName}, ignore este email com segurança.`,
   ].join('\n');
 }
-
-
