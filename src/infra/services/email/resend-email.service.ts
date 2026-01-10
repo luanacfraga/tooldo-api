@@ -31,15 +31,24 @@ export class ResendEmailService implements EmailService {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       throw new Error(
-        'RESEND_API_KEY is required when using ResendEmailService',
+        'A variável de ambiente RESEND_API_KEY é obrigatória para o envio de e-mails com o Resend (ResendEmailService).',
       );
     }
 
-    const fromEmail = process.env.EMAIL_FROM ?? 'onboarding@resend.dev';
+    const fromEmail = process.env.EMAIL_FROM;
     const fromName = process.env.EMAIL_FROM_NAME ?? 'ToolDo';
-    this.from = `"${fromName}" <${fromEmail}>`;
+
+    if (!fromEmail) {
+      this.logger.warn(
+        'EMAIL_FROM não configurada. Usando remetente padrão "onboarding@resend.dev". Configure EMAIL_FROM para usar um domínio próprio na Resend.',
+      );
+      this.from = `"${fromName}" <onboarding@resend.dev>`;
+    } else {
+      this.from = `"${fromName}" <${fromEmail}>`;
+    }
 
     this.resend = new Resend(apiKey);
+    this.logger.log('✅ Serviço de e-mail (Resend) configurado com sucesso');
   }
 
   async sendEmployeeInvite(params: SendEmployeeInviteParams): Promise<void> {
@@ -112,6 +121,13 @@ export class ResendEmailService implements EmailService {
     text: string;
     logLabel: string;
   }): Promise<void> {
+    if (!input.to) {
+      const message =
+        'Endereço de e-mail de destino não informado ao tentar enviar e-mail.';
+      this.logger.error(`❌ ${message} (${input.logLabel})`);
+      throw new Error(message);
+    }
+
     try {
       const result = await this.resend.emails.send({
         from: this.from,
@@ -122,19 +138,25 @@ export class ResendEmailService implements EmailService {
       });
 
       if (result.error) {
-        this.logger.error(
-          `❌ Resend error (${input.logLabel}): ${result.error.message}`,
-        );
-        throw new Error(result.error.message);
+        const errorMessage = `Erro ao enviar e-mail via Resend (${input.logLabel}): ${result.error.message}`;
+        this.logger.error(`❌ ${errorMessage}`);
+        throw new Error(errorMessage);
       }
 
-      this.logger.log(`✅ Email sent (Resend): ${input.logLabel}`);
-    } catch (error) {
-      this.logger.error(
-        `❌ Failed to send email via Resend (${input.logLabel}):`,
-        error instanceof Error ? error.message : String(error),
+      this.logger.log(
+        `✅ E-mail enviado com sucesso via Resend: ${input.logLabel}`,
       );
-      throw error;
+    } catch (error) {
+      const originalMessage =
+        error instanceof Error ? error.message : String(error);
+
+      this.logger.error(
+        `❌ Falha ao enviar e-mail via Resend (${input.logLabel}): ${originalMessage}`,
+      );
+
+      throw new Error(
+        `Falha ao enviar e-mail. Tente novamente mais tarde. Detalhes: ${originalMessage}`,
+      );
     }
   }
 

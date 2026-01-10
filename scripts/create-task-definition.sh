@@ -88,7 +88,7 @@ cat > ${TASK_DEF_FILE} <<EOF
         },
         {
           "name": "EMAIL_LOGO_URL",
-          "value": "https://www.tooldo.app/_next/image?url=/images/logo.png&w=640&q=75"
+          "value": "https://www.tooldo.app/images/logo.png"
         },
         {
           "name": "DB_HOST",
