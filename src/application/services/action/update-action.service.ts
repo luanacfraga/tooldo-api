@@ -18,6 +18,8 @@ export interface UpdateActionInput {
   estimatedEndDate?: Date;
   responsibleId?: string;
   teamId?: string;
+   actualStartDate?: Date;
+   actualEndDate?: Date;
 }
 
 export interface UpdateActionOutput {
@@ -67,6 +69,8 @@ export class UpdateActionService {
       priority: input.priority,
       estimatedStartDate: input.estimatedStartDate,
       estimatedEndDate: input.estimatedEndDate,
+      actualStartDate: input.actualStartDate,
+      actualEndDate: input.actualEndDate,
       responsibleId: input.responsibleId,
       teamId: input.teamId,
     });

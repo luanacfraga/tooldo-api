@@ -73,4 +73,26 @@ export class UpdateActionDto {
   @IsOptional()
   @IsUUID('4', { message: 'O ID da equipe deve ser um UUID válido' })
   teamId?: string;
+
+  @ApiProperty({
+    description: 'Data real de início (preenchimento manual opcional)',
+    example: '2025-01-02T00:00:00.000Z',
+    type: Date,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'A data real de início deve ser uma data válida' })
+  actualStartDate?: Date;
+
+  @ApiProperty({
+    description: 'Data real de término (preenchimento manual opcional)',
+    example: '2025-01-14T00:00:00.000Z',
+    type: Date,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate({ message: 'A data real de término deve ser uma data válida' })
+  actualEndDate?: Date;
 }
