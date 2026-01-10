@@ -116,7 +116,7 @@ export class CreateActionService {
       );
     }
 
-    if (input.estimatedEndDate <= input.estimatedStartDate) {
+    if (input.estimatedEndDate < input.estimatedStartDate) {
       throw new DomainValidationException(
         ErrorMessages.ACTION.ESTIMATED_END_DATE_BEFORE_START,
       );

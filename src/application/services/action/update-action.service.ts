@@ -18,8 +18,8 @@ export interface UpdateActionInput {
   estimatedEndDate?: Date;
   responsibleId?: string;
   teamId?: string;
-   actualStartDate?: Date;
-   actualEndDate?: Date;
+  actualStartDate?: Date;
+  actualEndDate?: Date;
 }
 
 export interface UpdateActionOutput {
@@ -57,7 +57,7 @@ export class UpdateActionService {
       input.estimatedStartDate ?? action.estimatedStartDate;
     const estimatedEndDate = input.estimatedEndDate ?? action.estimatedEndDate;
 
-    if (estimatedEndDate <= estimatedStartDate) {
+    if (estimatedEndDate < estimatedStartDate) {
       throw new DomainValidationException(
         ErrorMessages.ACTION.ESTIMATED_END_DATE_BEFORE_START,
       );
