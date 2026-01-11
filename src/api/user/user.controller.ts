@@ -5,6 +5,7 @@ import { UserMapper } from '@/application/mappers/user.mapper';
 import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { ListUsersService } from '@/application/services/user/list-users.service';
 import { UpdateUserAvatarColorService } from '@/application/services/user/update-user-avatar-color.service';
+import { UpdateUserProfileService } from '@/application/services/user/update-user-profile.service';
 import { UserRole } from '@/core/domain/shared/enums';
 import {
   Body,
@@ -26,6 +27,7 @@ export class UserController {
   constructor(
     private readonly updateUserAvatarColorService: UpdateUserAvatarColorService,
     private readonly listUsersService: ListUsersService,
+    private readonly updateUserProfileService: UpdateUserProfileService,
   ) {}
 
   @Get()
@@ -124,6 +126,35 @@ export class UserController {
     const user = await this.updateUserAvatarColorService.execute({
       userId: currentUser.sub,
       avatarColor: updateAvatarColorDto.avatarColor,
+    });
+
+    return UserMapper.toResponseDto(user);
+  }
+
+  @Patch('me/profile')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Atualizar dados básicos do perfil',
+    description: 'Atualiza dados básicos do usuário autenticado (ex.: telefone).',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil atualizado com sucesso',
+    type: UserResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - User not authenticated',
+  })
+  async updateProfile(
+    @CurrentUser() currentUser: JwtPayload,
+    @Body() body: { phone?: string; firstName?: string; lastName?: string },
+  ): Promise<UserResponseDto> {
+    const user = await this.updateUserProfileService.execute({
+      userId: currentUser.sub,
+      phone: body.phone,
+      firstName: body.firstName,
+      lastName: body.lastName,
     });
 
     return UserMapper.toResponseDto(user);
