@@ -1,7 +1,8 @@
 import { ActionPriority } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsDate, IsEnum, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import { UpsertChecklistItemDto } from './upsert-checklist-item.dto';
 
 export class UpdateActionDto {
   @ApiProperty({
@@ -95,4 +96,15 @@ export class UpdateActionDto {
   @Type(() => Date)
   @IsDate({ message: 'A data real de término deve ser uma data válida' })
   actualEndDate?: Date;
+
+  @ApiProperty({
+    description:
+      'Checklist completa da ação (opcional). Quando enviada, substitui integralmente a checklist atual.',
+    type: [UpsertChecklistItemDto],
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => UpsertChecklistItemDto)
+  checklistItems?: UpsertChecklistItemDto[];
 }

@@ -8,7 +8,9 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
+import { UpsertChecklistItemDto } from './upsert-checklist-item.dto';
 
 export class CreateActionDto {
   @ApiProperty({
@@ -77,4 +79,15 @@ export class CreateActionDto {
   })
   @IsUUID('4', { message: 'O ID do responsável deve ser um UUID válido' })
   responsibleId!: string;
+
+  @ApiProperty({
+    description:
+      'Itens iniciais da checklist da ação (opcional). A lista enviada substituirá a checklist atual.',
+    type: [UpsertChecklistItemDto],
+    required: false,
+  })
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => UpsertChecklistItemDto)
+  checklistItems?: UpsertChecklistItemDto[];
 }
