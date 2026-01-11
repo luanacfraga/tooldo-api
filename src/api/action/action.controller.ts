@@ -251,11 +251,22 @@ export class ActionController {
     @Request() req: RequestWithUser,
   ): Promise<ActionResponseDto> {
     await this.assertExecutorOwnsAction(id, req);
-    const result = await this.updateActionService.execute({
+
+    // Primeiro, atualiza a ação (incluindo checklist, quando enviada)
+    await this.updateActionService.execute({
       actionId: id,
       ...dto,
     });
-    return ActionResponseDto.fromDomain(result.action);
+
+    // Em seguida, busca a ação completa já atualizada, com checklist, kanbanOrder e responsável
+    const result = await this.getActionService.execute({ actionId: id });
+
+    return ActionResponseDto.fromDomain(
+      result.result.action,
+      result.result.checklistItems,
+      result.result.kanbanOrder,
+      result.result.responsible,
+    );
   }
 
   @Delete(':id')
