@@ -1,4 +1,5 @@
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
+import { CompanyUserStatus } from '@/core/domain/shared/enums';
 import {
   DomainValidationException,
   EntityNotFoundException,
@@ -36,11 +37,16 @@ export class RemoveEmployeeService {
       );
     }
 
-    // Remoção definitiva do vínculo no banco de dados.
-    await this.companyUserRepository.delete(companyUser.id);
+    // Marcação lógica como REMOVED (remoção do vínculo sem apagar histórico).
+    const removedCompanyUser = await this.companyUserRepository.update(
+      companyUser.id,
+      {
+        status: CompanyUserStatus.REMOVED,
+      },
+    );
 
     return {
-      companyUser,
+      companyUser: removedCompanyUser,
     };
   }
 }
