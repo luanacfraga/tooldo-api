@@ -1,6 +1,10 @@
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Entity } from '../shared/entity.base';
-import { ActionPriority, ActionStatus, ActionLateStatus } from '../shared/enums';
+import {
+  ActionLateStatus,
+  ActionPriority,
+  ActionStatus,
+} from '../shared/enums';
 import { DomainValidator } from '../shared/validators/domain.validator';
 
 export class Action extends Entity {
@@ -92,7 +96,9 @@ export class Action extends Entity {
     return this.calculateLateStatus(currentDate) !== null;
   }
 
-  public calculateLateStatus(currentDate: Date = new Date()): ActionLateStatus | null {
+  public calculateLateStatus(
+    currentDate: Date = new Date(),
+  ): ActionLateStatus | null {
     // Normalize dates to compare only date part (ignore time)
     const today = new Date(currentDate);
     today.setHours(0, 0, 0, 0);

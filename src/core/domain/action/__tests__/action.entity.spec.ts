@@ -1,5 +1,9 @@
+import {
+  ActionLateStatus,
+  ActionPriority,
+  ActionStatus,
+} from '../../shared/enums';
 import { Action } from '../action.entity';
-import { ActionPriority, ActionStatus, ActionLateStatus } from '../../shared/enums';
 
 describe('Action Entity - calculateLateStatus', () => {
   const baseActionProps = {

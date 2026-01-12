@@ -1,7 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { UserRole } from '@/core/domain/shared/enums';
-import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { User } from '@/core/domain/user/user.entity';
+import type { UserRepository } from '@/core/ports/repositories/user.repository';
+import { Inject, Injectable } from '@nestjs/common';
 
 export interface ListUsersInput {
   role?: UserRole;
@@ -55,5 +55,3 @@ export class ListUsersService {
     };
   }
 }
-
-

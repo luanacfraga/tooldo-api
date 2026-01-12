@@ -1,7 +1,14 @@
 import { ActionPriority } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsEnum, IsOptional, IsString, IsUUID, ValidateNested } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
 import { UpsertChecklistItemDto } from './upsert-checklist-item.dto';
 
 export class UpdateActionDto {
