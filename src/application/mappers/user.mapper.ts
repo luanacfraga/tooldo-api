@@ -27,6 +27,7 @@ export class UserMapper {
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
+      phone: user.phone,
       initials: user.initials,
       avatarColor: user.avatarColor,
     };

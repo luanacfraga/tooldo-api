@@ -13,6 +13,14 @@ export class LoginUserDto {
   @ApiProperty()
   lastName!: string;
 
+  @ApiProperty({
+    description: 'Telefone do usuário',
+    example: '+5511999999999',
+    required: false,
+    nullable: true,
+  })
+  phone?: string | null;
+
   @ApiProperty()
   role!: string;
 

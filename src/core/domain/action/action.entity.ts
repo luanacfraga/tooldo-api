@@ -1,6 +1,10 @@
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Entity } from '../shared/entity.base';
-import { ActionPriority, ActionStatus } from '../shared/enums';
+import {
+  ActionLateStatus,
+  ActionPriority,
+  ActionStatus,
+} from '../shared/enums';
 import { DomainValidator } from '../shared/validators/domain.validator';
 
 export class Action extends Entity {
@@ -89,22 +93,43 @@ export class Action extends Entity {
   }
 
   public calculateIsLate(currentDate: Date = new Date()): boolean {
-    // If action is already done, it's not late
-    if (this.status === ActionStatus.DONE) {
-      return false;
+    return this.calculateLateStatus(currentDate) !== null;
+  }
+
+  public calculateLateStatus(
+    currentDate: Date = new Date(),
+  ): ActionLateStatus | null {
+    // Normalize dates to compare only date part (ignore time)
+    const today = new Date(currentDate);
+    today.setHours(0, 0, 0, 0);
+
+    const estimatedStart = new Date(this.estimatedStartDate);
+    estimatedStart.setHours(0, 0, 0, 0);
+
+    const estimatedEnd = new Date(this.estimatedEndDate);
+    estimatedEnd.setHours(0, 0, 0, 0);
+
+    // LATE_TO_START: TODO status and start date has passed (not including today)
+    if (this.status === ActionStatus.TODO && today > estimatedStart) {
+      return ActionLateStatus.LATE_TO_START;
     }
 
-    // If we have an actual end date and it's after estimated end date
-    if (this.actualEndDate && this.actualEndDate > this.estimatedEndDate) {
-      return true;
+    // LATE_TO_FINISH: IN_PROGRESS status and end date has passed (not including today)
+    if (this.status === ActionStatus.IN_PROGRESS && today > estimatedEnd) {
+      return ActionLateStatus.LATE_TO_FINISH;
     }
 
-    // If we don't have an actual end date yet, check if current date is past estimated end date
-    if (!this.actualEndDate && currentDate > this.estimatedEndDate) {
-      return true;
+    // COMPLETED_LATE: DONE status and actually finished after estimated end date
+    if (this.status === ActionStatus.DONE && this.actualEndDate) {
+      const actualEnd = new Date(this.actualEndDate);
+      actualEnd.setHours(0, 0, 0, 0);
+
+      if (actualEnd > estimatedEnd) {
+        return ActionLateStatus.COMPLETED_LATE;
+      }
     }
 
-    return false;
+    return null;
   }
 
   public updateStatus(newStatus: ActionStatus): Action {

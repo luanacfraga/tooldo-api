@@ -112,13 +112,16 @@ export class ActionPrismaRepository implements ActionRepository {
       return null;
     }
 
+    const action = this.mapToDomain(result);
+
     return {
-      action: this.mapToDomain(result),
+      action,
       checklistItems: result.checklistItems.map((item) =>
         this.mapChecklistItemToDomain(item),
       ),
       kanbanOrder: result.kanbanOrder ?? null,
       responsible: this.mapResponsibleToDto(result.responsible),
+      lateStatus: action.calculateLateStatus(),
       createdAt: result.createdAt,
     };
   }
@@ -165,15 +168,20 @@ export class ActionPrismaRepository implements ActionRepository {
       orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
-    return results.map((result) => ({
-      action: this.mapToDomain(result),
-      checklistItems: result.checklistItems.map((item) =>
-        this.mapChecklistItemToDomain(item),
-      ),
-      kanbanOrder: result.kanbanOrder ?? null,
-      responsible: this.mapResponsibleToDto(result.responsible),
-      createdAt: result.createdAt,
-    }));
+    return results.map((result) => {
+      const action = this.mapToDomain(result);
+
+      return {
+        action,
+        checklistItems: result.checklistItems.map((item) =>
+          this.mapChecklistItemToDomain(item),
+        ),
+        kanbanOrder: result.kanbanOrder ?? null,
+        responsible: this.mapResponsibleToDto(result.responsible),
+        lateStatus: action.calculateLateStatus(),
+        createdAt: result.createdAt,
+      };
+    });
   }
 
   async findByTeamId(
@@ -218,15 +226,20 @@ export class ActionPrismaRepository implements ActionRepository {
       orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
-    return results.map((result) => ({
-      action: this.mapToDomain(result),
-      checklistItems: result.checklistItems.map((item) =>
-        this.mapChecklistItemToDomain(item),
-      ),
-      kanbanOrder: result.kanbanOrder ?? null,
-      responsible: this.mapResponsibleToDto(result.responsible),
-      createdAt: result.createdAt,
-    }));
+    return results.map((result) => {
+      const action = this.mapToDomain(result);
+
+      return {
+        action,
+        checklistItems: result.checklistItems.map((item) =>
+          this.mapChecklistItemToDomain(item),
+        ),
+        kanbanOrder: result.kanbanOrder ?? null,
+        responsible: this.mapResponsibleToDto(result.responsible),
+        lateStatus: action.calculateLateStatus(),
+        createdAt: result.createdAt,
+      };
+    });
   }
 
   async findByResponsibleId(
@@ -277,15 +290,20 @@ export class ActionPrismaRepository implements ActionRepository {
       orderBy: [{ kanbanOrder: { sortOrder: 'asc' } }, { createdAt: 'desc' }],
     });
 
-    return results.map((result) => ({
-      action: this.mapToDomain(result),
-      checklistItems: result.checklistItems.map((item) =>
-        this.mapChecklistItemToDomain(item),
-      ),
-      kanbanOrder: result.kanbanOrder ?? null,
-      responsible: this.mapResponsibleToDto(result.responsible),
-      createdAt: result.createdAt,
-    }));
+    return results.map((result) => {
+      const action = this.mapToDomain(result);
+
+      return {
+        action,
+        checklistItems: result.checklistItems.map((item) =>
+          this.mapChecklistItemToDomain(item),
+        ),
+        kanbanOrder: result.kanbanOrder ?? null,
+        responsible: this.mapResponsibleToDto(result.responsible),
+        lateStatus: action.calculateLateStatus(),
+        createdAt: result.createdAt,
+      };
+    });
   }
 
   async update(

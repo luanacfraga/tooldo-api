@@ -36,7 +36,7 @@ export class DomainValidator {
     dateToCompare: Date,
     errorMessage: string,
   ): void {
-    if (dateToValidate <= dateToCompare) {
+    if (dateToValidate < dateToCompare) {
       throw new DomainValidationException(errorMessage);
     }
   }

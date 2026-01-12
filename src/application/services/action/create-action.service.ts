@@ -1,13 +1,15 @@
-import { Action } from '@/core/domain/action';
+import { Action, ChecklistItem } from '@/core/domain/action';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import {
   DomainValidationException,
   EntityNotFoundException,
 } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
+import type { ChecklistItemRepository } from '@/core/ports/repositories/checklist-item.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
+import type { TransactionManager } from '@/core/ports/services/transaction-manager.port';
 import { ErrorMessages } from '@/shared/constants/error-messages';
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
@@ -22,6 +24,11 @@ export interface CreateActionInput {
   teamId?: string;
   creatorId: string;
   responsibleId: string;
+  checklistItems?: {
+    description: string;
+    isCompleted?: boolean;
+    order?: number;
+  }[];
 }
 
 export interface CreateActionOutput {
@@ -39,49 +46,78 @@ export class CreateActionService {
     private readonly teamRepository: TeamRepository,
     @Inject('UserRepository')
     private readonly userRepository: UserRepository,
+    @Inject('ChecklistItemRepository')
+    private readonly checklistItemRepository: ChecklistItemRepository,
+    @Inject('TransactionManager')
+    private readonly transactionManager: TransactionManager,
   ) {}
 
   async execute(input: CreateActionInput): Promise<CreateActionOutput> {
     await this.validateInput(input);
 
-    // Get last position in TODO column
-    const lastKanbanOrder =
-      await this.actionRepository.findLastKanbanOrderInColumn(
+    return this.transactionManager.execute(async (tx) => {
+      // Get last position in TODO column
+      const lastKanbanOrder =
+        await this.actionRepository.findLastKanbanOrderInColumn(
+          ActionStatus.TODO,
+          tx,
+        );
+      const nextPosition = (lastKanbanOrder?.position ?? -1) + 1;
+
+      // Create action domain object
+      const action = new Action(
+        randomUUID(),
+        input.title,
+        input.description,
         ActionStatus.TODO,
+        input.priority,
+        input.estimatedStartDate,
+        input.estimatedEndDate,
+        null, // actualStartDate
+        null, // actualEndDate
+        false, // isLate
+        false, // isBlocked
+        null, // blockedReason
+        input.companyId,
+        input.teamId ?? null,
+        input.creatorId,
+        input.responsibleId,
+        null, // deletedAt
       );
-    const nextPosition = (lastKanbanOrder?.position ?? -1) + 1;
 
-    // Create action domain object
-    const action = new Action(
-      randomUUID(),
-      input.title,
-      input.description,
-      ActionStatus.TODO,
-      input.priority,
-      input.estimatedStartDate,
-      input.estimatedEndDate,
-      null, // actualStartDate
-      null, // actualEndDate
-      false, // isLate
-      false, // isBlocked
-      null, // blockedReason
-      input.companyId,
-      input.teamId ?? null,
-      input.creatorId,
-      input.responsibleId,
-      null, // deletedAt
-    );
+      // Create action with kanbanOrder
+      const created = await this.actionRepository.createWithKanbanOrder(
+        action,
+        ActionStatus.TODO,
+        nextPosition,
+        tx,
+      );
 
-    // Create action with kanbanOrder
-    const created = await this.actionRepository.createWithKanbanOrder(
-      action,
-      ActionStatus.TODO,
-      nextPosition,
-    );
+      // Optionally create checklist items in the same transaction
+      if (input.checklistItems?.length) {
+        for (let index = 0; index < input.checklistItems.length; index++) {
+          const itemInput = input.checklistItems[index];
+          const isCompleted = itemInput.isCompleted ?? false;
+          const completedAt = isCompleted ? new Date() : null;
+          const order = itemInput.order ?? index;
 
-    return {
-      action: created,
-    };
+          const checklistItem = new ChecklistItem(
+            randomUUID(),
+            created.id,
+            itemInput.description,
+            isCompleted,
+            completedAt,
+            order,
+          );
+
+          await this.checklistItemRepository.create(checklistItem, tx);
+        }
+      }
+
+      return {
+        action: created,
+      };
+    });
   }
 
   private async validateInput(input: CreateActionInput): Promise<void> {
@@ -116,7 +152,7 @@ export class CreateActionService {
       );
     }
 
-    if (input.estimatedEndDate <= input.estimatedStartDate) {
+    if (input.estimatedEndDate < input.estimatedStartDate) {
       throw new DomainValidationException(
         ErrorMessages.ACTION.ESTIMATED_END_DATE_BEFORE_START,
       );

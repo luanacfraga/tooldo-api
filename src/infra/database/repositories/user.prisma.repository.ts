@@ -3,7 +3,7 @@ import { User } from '@/core/domain/user/user.entity';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { User as PrismaUser } from '@prisma/client';
+import { Prisma, User as PrismaUser } from '@prisma/client';
 
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
@@ -14,7 +14,7 @@ export class UserPrismaRepository implements UserRepository {
    * Our current DB does NOT have the `users.avatar_color` nor `users.initials` columns.
    * So we must ALWAYS use explicit selects to avoid Prisma selecting it by default.
    */
-  private readonly safeUserSelect = {
+  private readonly safeUserSelect: Prisma.UserSelect = {
     id: true,
     firstName: true,
     lastName: true,
@@ -26,7 +26,7 @@ export class UserPrismaRepository implements UserRepository {
     role: true,
     status: true,
     profileImageUrl: true,
-  } as const;
+  };
 
   async findByEmail(email: string, tx?: unknown): Promise<User | null> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
@@ -109,6 +109,34 @@ export class UserPrismaRepository implements UserRepository {
     });
 
     return this.mapToDomain(updated);
+  }
+
+  async findByRolePaginated(
+    role: UserRole,
+    page: number,
+    limit: number,
+    tx?: unknown,
+  ): Promise<{ users: User[]; total: number }> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = { role };
+
+    const [rows, total] = await Promise.all([
+      client.user.findMany({
+        where,
+        select: this.safeUserSelect,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      client.user.count({ where }),
+    ]);
+
+    return {
+      users: rows.map((u) => this.mapToDomain(u as PrismaUser)),
+      total,
+    };
   }
 
   private mapToDomain(

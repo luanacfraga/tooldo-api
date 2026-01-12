@@ -37,3 +37,9 @@ export enum ActionPriority {
   HIGH = 'HIGH',
   URGENT = 'URGENT',
 }
+
+export enum ActionLateStatus {
+  LATE_TO_START = 'LATE_TO_START',
+  LATE_TO_FINISH = 'LATE_TO_FINISH',
+  COMPLETED_LATE = 'COMPLETED_LATE',
+}
