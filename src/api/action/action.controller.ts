@@ -14,6 +14,7 @@ import { ReorderChecklistItemsService } from '@/application/services/checklist/r
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
 import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
 import {
+  ActionLateStatus,
   ActionPriority,
   ActionStatus,
   UserRole,
@@ -134,6 +135,14 @@ export class ActionController {
   @ApiQuery({ name: 'isLate', required: false, type: Boolean })
   @ApiQuery({ name: 'isBlocked', required: false, type: Boolean })
   @ApiQuery({
+    name: 'lateStatus',
+    required: false,
+    enum: ActionLateStatus,
+    isArray: true,
+    description:
+      'Filtrar por tipo de atraso (ex: lateStatus=LATE_TO_START&lateStatus=LATE_TO_FINISH)',
+  })
+  @ApiQuery({
     name: 'dateFrom',
     required: false,
     type: String,
@@ -180,6 +189,7 @@ export class ActionController {
       priority: query.priority,
       isLate: query.isLate,
       isBlocked: query.isBlocked,
+      lateStatus: query.lateStatus,
       dateFrom: query.dateFrom,
       dateTo: query.dateTo,
       dateFilterType: query.dateFilterType,
@@ -194,6 +204,7 @@ export class ActionController {
           r.checklistItems,
           r.kanbanOrder,
           r.responsible,
+          r.lateStatus,
         ),
       ),
       meta: {
@@ -230,6 +241,7 @@ export class ActionController {
       result.result.checklistItems,
       result.result.kanbanOrder,
       result.result.responsible,
+      result.result.lateStatus,
     );
   }
 
@@ -266,6 +278,7 @@ export class ActionController {
       result.result.checklistItems,
       result.result.kanbanOrder,
       result.result.responsible,
+      result.result.lateStatus,
     );
   }
 
@@ -286,7 +299,13 @@ export class ActionController {
   ): Promise<ActionResponseDto> {
     await this.assertExecutorOwnsAction(id, req);
     const result = await this.deleteActionService.execute({ actionId: id });
-    return ActionResponseDto.fromDomain(result.action);
+    return ActionResponseDto.fromDomain(
+      result.action,
+      undefined,
+      undefined,
+      undefined,
+      result.action.calculateLateStatus(),
+    );
   }
 
   @Patch(':id/move')
@@ -319,6 +338,8 @@ export class ActionController {
       result.action,
       undefined,
       result.kanbanOrder,
+      undefined,
+      result.action.calculateLateStatus(),
     );
   }
 
@@ -344,7 +365,13 @@ export class ActionController {
       actionId: id,
       reason: dto.reason,
     });
-    return ActionResponseDto.fromDomain(result.action);
+    return ActionResponseDto.fromDomain(
+      result.action,
+      undefined,
+      undefined,
+      undefined,
+      result.action.calculateLateStatus(),
+    );
   }
 
   @Patch(':id/unblock')
@@ -364,7 +391,13 @@ export class ActionController {
   ): Promise<ActionResponseDto> {
     await this.assertExecutorOwnsAction(id, req);
     const result = await this.unblockActionService.execute({ actionId: id });
-    return ActionResponseDto.fromDomain(result.action);
+    return ActionResponseDto.fromDomain(
+      result.action,
+      undefined,
+      undefined,
+      undefined,
+      result.action.calculateLateStatus(),
+    );
   }
 
   @Post('generate')

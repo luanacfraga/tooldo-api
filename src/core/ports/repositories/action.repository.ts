@@ -1,11 +1,16 @@
 import { Action, ChecklistItem } from '@/core/domain/action';
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import {
+  ActionLateStatus,
+  ActionPriority,
+  ActionStatus,
+} from '@/core/domain/shared/enums';
 
 export interface ActionFilters {
   status?: ActionStatus;
   priority?: ActionPriority;
   responsibleId?: string;
   teamId?: string;
+  lateStatus?: ActionLateStatus | ActionLateStatus[];
   isLate?: boolean;
   isBlocked?: boolean;
   includeDeleted?: boolean;
@@ -40,6 +45,7 @@ export interface ActionWithChecklistItems {
   checklistItems: ChecklistItem[];
   kanbanOrder: PrismaKanbanOrder | null;
   responsible?: ActionResponsibleUser;
+  lateStatus: ActionLateStatus | null;
   createdAt: Date;
 }
 

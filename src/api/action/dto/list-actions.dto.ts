@@ -1,4 +1,8 @@
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import {
+  ActionLateStatus,
+  ActionPriority,
+  ActionStatus,
+} from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
@@ -71,6 +75,22 @@ export class ListActionsQueryDto {
   @IsBoolean({ message: 'isLate deve ser boolean' })
   @IsOptional()
   isLate?: boolean;
+
+  @ApiProperty({
+    required: false,
+    description: 'Filtrar por tipo de atraso específico',
+    enum: ActionLateStatus,
+    isArray: true,
+  })
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') {
+      return undefined;
+    }
+    return Array.isArray(value) ? value : [value];
+  })
+  @IsEnum(ActionLateStatus, { each: true, message: 'Late status inválido' })
+  @IsOptional()
+  lateStatus?: ActionLateStatus[];
 
   @ApiProperty({
     required: false,

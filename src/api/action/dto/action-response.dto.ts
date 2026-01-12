@@ -1,5 +1,9 @@
 import { Action, ChecklistItem } from '@/core/domain/action';
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import {
+  ActionLateStatus,
+  ActionPriority,
+  ActionStatus,
+} from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { KanbanOrder as PrismaKanbanOrder } from '@prisma/client';
 import { ChecklistItemResponseDto } from './checklist-item-response.dto';
@@ -137,6 +141,14 @@ export class ActionResponseDto {
   })
   kanbanOrder!: KanbanOrderResponseDto | null;
 
+  @ApiProperty({
+    description: 'Tipo de atraso da ação (calculado)',
+    enum: ActionLateStatus,
+    nullable: true,
+    example: ActionLateStatus.LATE_TO_FINISH,
+  })
+  lateStatus!: ActionLateStatus | null;
+
   static fromDomain(
     action: Action,
     checklistItems?: ChecklistItem[],
@@ -146,6 +158,7 @@ export class ActionResponseDto {
       firstName: string;
       lastName: string;
     },
+    lateStatus?: ActionLateStatus | null,
   ): ActionResponseDto {
     const response = new ActionResponseDto();
     response.id = action.id;
@@ -171,6 +184,7 @@ export class ActionResponseDto {
     response.kanbanOrder = kanbanOrder
       ? KanbanOrderResponseDto.fromEntity(kanbanOrder)
       : null;
+    response.lateStatus = lateStatus ?? action.calculateLateStatus();
     return response;
   }
 }

@@ -1,5 +1,9 @@
 import { Action } from '@/core/domain/action';
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import {
+  ActionLateStatus,
+  ActionPriority,
+  ActionStatus,
+} from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type {
   ActionRepository,
@@ -17,6 +21,8 @@ export interface ListActionsInput {
   status?: ActionStatus;
   statuses?: ActionStatus[];
   priority?: ActionPriority;
+  // Aceita um ou múltiplos valores via DTO, mas aqui normalizamos para array
+  lateStatus?: ActionLateStatus[];
   isLate?: boolean;
   isBlocked?: boolean;
   dateFrom?: string;
@@ -51,6 +57,10 @@ export class ListActionsService {
   async execute(input: ListActionsInput): Promise<ListActionsOutput> {
     let results: ActionWithChecklistItems[];
 
+    const wantsLate = input.isLate === true;
+    const wantsBlocked = input.isBlocked === true;
+    const wantsLateOrBlocked = wantsLate && wantsBlocked;
+
     if (input.companyId) {
       const company = await this.companyRepository.findById(input.companyId);
       if (!company) {
@@ -64,7 +74,8 @@ export class ListActionsService {
           priority: input.priority,
           teamId: input.teamId,
           responsibleId: input.responsibleId,
-          isBlocked: input.isBlocked,
+          // Em caso de filtro combinado (bloqueadas + atrasadas), tratamos em memória.
+          isBlocked: wantsLateOrBlocked ? undefined : input.isBlocked,
         },
       );
     } else if (input.teamId) {
@@ -79,7 +90,7 @@ export class ListActionsService {
           status: input.statuses?.length ? undefined : input.status,
           priority: input.priority,
           responsibleId: input.responsibleId,
-          isBlocked: input.isBlocked,
+          isBlocked: wantsLateOrBlocked ? undefined : input.isBlocked,
         },
       );
     } else if (input.responsibleId) {
@@ -89,7 +100,7 @@ export class ListActionsService {
           {
             status: input.statuses?.length ? undefined : input.status,
             priority: input.priority,
-            isBlocked: input.isBlocked,
+            isBlocked: wantsLateOrBlocked ? undefined : input.isBlocked,
           },
         );
     } else {
@@ -102,13 +113,49 @@ export class ListActionsService {
     // Inspirado no weedu-api: calcula isLate dinamicamente (não depende do valor persistido)
     // e só então aplica o filtro isLate.
     const now = new Date();
-    let mapped = results.map((r) => ({
-      ...r,
-      action: this.withDynamicIsLate(r.action, now),
-    }));
+    let mapped = results.map((r) => {
+      const actionWithDynamicIsLate = this.withDynamicIsLate(r.action, now);
+      const lateStatus = actionWithDynamicIsLate.calculateLateStatus(now);
 
-    if (input.isLate !== undefined) {
-      mapped = mapped.filter((r) => r.action.isLate === input.isLate);
+      return {
+        ...r,
+        action: actionWithDynamicIsLate,
+        lateStatus,
+      };
+    });
+
+    const hasLateStatusFilter =
+      input.lateStatus !== undefined &&
+      (Array.isArray(input.lateStatus) ? input.lateStatus.length > 0 : true);
+
+    if (hasLateStatusFilter) {
+      const lateStatuses = Array.isArray(input.lateStatus)
+        ? input.lateStatus
+        : [input.lateStatus];
+      const allowedLateStatuses = new Set(lateStatuses);
+
+      mapped = mapped.filter((r) => {
+        if (!r.lateStatus) {
+          return false;
+        }
+        return allowedLateStatuses.has(r.lateStatus);
+      });
+
+      if (wantsBlocked) {
+        mapped = mapped.filter((r) => r.action.isBlocked);
+      }
+    } else {
+      // Filtros combinados de bloqueadas / atrasadas usando isLate
+      if (wantsLateOrBlocked) {
+        mapped = mapped.filter((r) => r.action.isBlocked || r.action.isLate);
+      } else {
+        if (wantsBlocked) {
+          mapped = mapped.filter((r) => r.action.isBlocked);
+        }
+        if (wantsLate) {
+          mapped = mapped.filter((r) => r.action.isLate);
+        }
+      }
     }
 
     if (input.creatorId) {
