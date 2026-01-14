@@ -9,6 +9,7 @@ import { ListExecutorsService } from '@/application/services/employee/list-execu
 import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
 import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
+import { UpdateEmployeeService } from '@/application/services/employee/update-employee.service';
 import { UserRole } from '@/core/domain/shared/enums';
 import {
   Body,
@@ -35,9 +36,10 @@ import {
 } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AcceptInviteByTokenDto } from './dto/accept-invite-by-token.dto';
-import { EmployeeResponseDto } from './dto/employee-response.dto';
+import { EmployeeResponseDto, type CompanyUserWithUser } from './dto/employee-response.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
 import { ListEmployeesQueryDto } from './dto/list-employees.dto';
+import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
@@ -55,6 +57,7 @@ export class EmployeeController {
     private readonly activateEmployeeService: ActivateEmployeeService,
     private readonly removeEmployeeService: RemoveEmployeeService,
     private readonly resendInviteService: ResendInviteService,
+    private readonly updateEmployeeService: UpdateEmployeeService,
   ) {}
 
   @Post('invite')
@@ -331,5 +334,62 @@ export class EmployeeController {
     });
 
     return EmployeeResponseDto.fromDomain(result.companyUser);
+  }
+
+  @Put(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Update employee data',
+    description:
+      'Atualiza dados do funcionário (nome, telefone, documento, posição, notas). Permite edição mesmo quando está em fase de convite. Apenas admins e managers.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do vínculo do funcionário (CompanyUser ID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Employee successfully updated',
+    type: EmployeeResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Invalid input or employee cannot be updated',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Employee not found',
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() updateEmployeeDto: UpdateEmployeeDto,
+  ): Promise<EmployeeResponseDto> {
+    const result = await this.updateEmployeeService.execute({
+      companyUserId: id,
+      firstName: updateEmployeeDto.firstName,
+      lastName: updateEmployeeDto.lastName,
+      phone: updateEmployeeDto.phone,
+      document: updateEmployeeDto.document,
+      position: updateEmployeeDto.position,
+      notes: updateEmployeeDto.notes,
+      role: updateEmployeeDto.role,
+    });
+
+    // Inclui os dados do usuário atualizado na resposta
+    // Criamos um objeto compatível com CompanyUserWithUser
+    const companyUserWithUser = {
+      ...result.companyUser,
+      user: {
+        id: result.user.id,
+        firstName: result.user.firstName,
+        lastName: result.user.lastName,
+        email: result.user.email,
+        phone: result.user.phone || '',
+        document: result.user.document || '',
+        role: result.user.role,
+        initials: result.user.initials,
+      },
+    } as CompanyUserWithUser;
+
+    return EmployeeResponseDto.fromDomain(companyUserWithUser);
   }
 }
