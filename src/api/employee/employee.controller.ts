@@ -36,7 +36,10 @@ import {
 } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AcceptInviteByTokenDto } from './dto/accept-invite-by-token.dto';
-import { EmployeeResponseDto, type CompanyUserWithUser } from './dto/employee-response.dto';
+import {
+  EmployeeResponseDto,
+  type CompanyUserWithUser,
+} from './dto/employee-response.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
 import { ListEmployeesQueryDto } from './dto/list-employees.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';

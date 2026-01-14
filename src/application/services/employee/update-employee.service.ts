@@ -1,5 +1,8 @@
-import { EntityNotFoundException, DomainValidationException } from '@/core/domain/shared/exceptions/domain.exception';
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
+import {
+  DomainValidationException,
+  EntityNotFoundException,
+} from '@/core/domain/shared/exceptions/domain.exception';
 import { User } from '@/core/domain/user/user.entity';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
@@ -65,7 +68,11 @@ export class UpdateEmployeeService {
     }
     if (input.phone !== undefined) {
       // Remove valores temporários (temp_${userId}) ou strings vazias
-      if (!input.phone || input.phone.trim() === '' || input.phone.startsWith('temp_')) {
+      if (
+        !input.phone ||
+        input.phone.trim() === '' ||
+        input.phone.startsWith('temp_')
+      ) {
         userUpdateData.phone = null;
       } else {
         userUpdateData.phone = input.phone.trim();
@@ -73,7 +80,11 @@ export class UpdateEmployeeService {
     }
     if (input.document !== undefined) {
       // Remove valores temporários (temp_${userId}) ou strings vazias
-      if (!input.document || input.document.trim() === '' || input.document.startsWith('temp_')) {
+      if (
+        !input.document ||
+        input.document.trim() === '' ||
+        input.document.startsWith('temp_')
+      ) {
         userUpdateData.document = null;
       } else {
         userUpdateData.document = input.document.trim();
@@ -109,4 +120,3 @@ export class UpdateEmployeeService {
     };
   }
 }
-

@@ -1,6 +1,6 @@
+import { UserRole } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { UserRole } from '@/core/domain/shared/enums';
 
 export class UpdateEmployeeDto {
   @ApiProperty({
@@ -69,4 +69,3 @@ export class UpdateEmployeeDto {
   @IsOptional()
   role?: UserRole;
 }
-
