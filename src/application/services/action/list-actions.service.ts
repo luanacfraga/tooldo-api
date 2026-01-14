@@ -27,7 +27,12 @@ export interface ListActionsInput {
   isBlocked?: boolean;
   dateFrom?: string;
   dateTo?: string;
-  dateFilterType?: 'estimatedStartDate' | 'actualStartDate' | 'estimatedEndDate' | 'actualEndDate' | 'createdAt';
+  dateFilterType?:
+    | 'estimatedStartDate'
+    | 'actualStartDate'
+    | 'estimatedEndDate'
+    | 'actualEndDate'
+    | 'createdAt';
   q?: string;
   page?: number;
   limit?: number;

@@ -124,14 +124,35 @@ export class ListActionsQueryDto {
     required: false,
     description:
       'Tipo de filtro de data: estimatedStartDate (início previsto), actualStartDate (início real), estimatedEndDate (término previsto), actualEndDate (término real) ou createdAt (data de criação)',
-    enum: ['estimatedStartDate', 'actualStartDate', 'estimatedEndDate', 'actualEndDate', 'createdAt'],
+    enum: [
+      'estimatedStartDate',
+      'actualStartDate',
+      'estimatedEndDate',
+      'actualEndDate',
+      'createdAt',
+    ],
     example: 'estimatedStartDate',
   })
-  @IsEnum(['estimatedStartDate', 'actualStartDate', 'estimatedEndDate', 'actualEndDate', 'createdAt'], {
-    message: 'dateFilterType deve ser estimatedStartDate, actualStartDate, estimatedEndDate, actualEndDate ou createdAt',
-  })
+  @IsEnum(
+    [
+      'estimatedStartDate',
+      'actualStartDate',
+      'estimatedEndDate',
+      'actualEndDate',
+      'createdAt',
+    ],
+    {
+      message:
+        'dateFilterType deve ser estimatedStartDate, actualStartDate, estimatedEndDate, actualEndDate ou createdAt',
+    },
+  )
   @IsOptional()
-  dateFilterType?: 'estimatedStartDate' | 'actualStartDate' | 'estimatedEndDate' | 'actualEndDate' | 'createdAt';
+  dateFilterType?:
+    | 'estimatedStartDate'
+    | 'actualStartDate'
+    | 'estimatedEndDate'
+    | 'actualEndDate'
+    | 'createdAt';
 
   @ApiProperty({
     required: false,
