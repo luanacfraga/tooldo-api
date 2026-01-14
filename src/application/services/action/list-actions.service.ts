@@ -27,7 +27,7 @@ export interface ListActionsInput {
   isBlocked?: boolean;
   dateFrom?: string;
   dateTo?: string;
-  dateFilterType?: 'estimatedStartDate' | 'actualStartDate' | 'estimatedEndDate' | 'createdAt';
+  dateFilterType?: 'estimatedStartDate' | 'actualStartDate' | 'estimatedEndDate' | 'actualEndDate' | 'createdAt';
   q?: string;
   page?: number;
   limit?: number;
@@ -194,12 +194,15 @@ export class ListActionsService {
           case 'estimatedEndDate':
             compareDate = r.action.estimatedEndDate;
             break;
+          case 'actualEndDate':
+            compareDate = r.action.actualEndDate;
+            break;
           case 'createdAt':
             compareDate = r.createdAt;
             break;
         }
 
-        // Skip if comparing actualStartDate and it's null
+        // Skip if comparing actualStartDate/actualEndDate and it's null
         if (compareDate === null) {
           return false;
         }
