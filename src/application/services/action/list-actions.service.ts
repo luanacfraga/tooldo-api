@@ -27,7 +27,7 @@ export interface ListActionsInput {
   isBlocked?: boolean;
   dateFrom?: string;
   dateTo?: string;
-  dateFilterType?: 'createdAt' | 'startDate';
+  dateFilterType?: 'estimatedStartDate' | 'actualStartDate' | 'estimatedEndDate' | 'createdAt';
   q?: string;
   page?: number;
   limit?: number;
@@ -178,14 +178,31 @@ export class ListActionsService {
 
     // Date range filtering
     if (input.dateFrom || input.dateTo) {
-      const dateFilterType = input.dateFilterType ?? 'createdAt';
+      const dateFilterType = input.dateFilterType ?? 'estimatedStartDate';
 
       mapped = mapped.filter((r) => {
         // Get the date to compare based on filter type
-        const compareDate =
-          dateFilterType === 'createdAt'
-            ? r.createdAt
-            : r.action.estimatedStartDate;
+        let compareDate: Date | null = null;
+
+        switch (dateFilterType) {
+          case 'estimatedStartDate':
+            compareDate = r.action.estimatedStartDate;
+            break;
+          case 'actualStartDate':
+            compareDate = r.action.actualStartDate;
+            break;
+          case 'estimatedEndDate':
+            compareDate = r.action.estimatedEndDate;
+            break;
+          case 'createdAt':
+            compareDate = r.createdAt;
+            break;
+        }
+
+        // Skip if comparing actualStartDate and it's null
+        if (compareDate === null) {
+          return false;
+        }
 
         // Apply from date filter
         if (input.dateFrom) {
