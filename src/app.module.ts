@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ActionModule } from './api/action/action.module';
 import { AuthModule } from './api/auth/auth.module';
-import { DevModule } from './api/dev/dev.module';
+// import { DevModule } from './api/dev/dev.module'; // DESABILITADO EM PRODUÇÃO
 import { JwtAuthGuard } from './api/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './api/auth/guards/roles.guard';
 import { CompanyModule } from './api/company/company.module';
@@ -19,7 +19,7 @@ import { ConfigModule } from './infra/config/config.module';
     ConfigModule,
     PlanModule,
     AuthModule,
-    DevModule,
+    // DevModule, // DESABILITADO EM PRODUÇÃO - endpoint /api/dev/cleanup não está mais acessível
     CompanyModule,
     EmployeeModule,
     TeamModule,
