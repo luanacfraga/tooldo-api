@@ -4,10 +4,12 @@ import {
   DomainValidationException,
   EntityNotFoundException,
 } from '@/core/domain/shared/exceptions/domain.exception';
+import { User } from '@/core/domain/user/user.entity';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { TeamUserRepository } from '@/core/ports/repositories/team-user.repository';
 import type { TeamRepository } from '@/core/ports/repositories/team.repository';
+import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import { Inject, Injectable } from '@nestjs/common';
 
 export interface ChangeEmployeeRoleInput {
@@ -31,6 +33,8 @@ export class ChangeEmployeeRoleService {
     private readonly teamRepository: TeamRepository,
     @Inject('TeamUserRepository')
     private readonly teamUserRepository: TeamUserRepository,
+    @Inject('UserRepository')
+    private readonly userRepository: UserRepository,
   ) {}
 
   async execute(
@@ -115,13 +119,21 @@ export class ChangeEmployeeRoleService {
       }
     }
 
-    // 7. Atualizar o cargo
+    // 7. Atualizar o cargo no CompanyUser
     const updatedCompanyUser = await this.companyUserRepository.update(
       companyUser.id,
       {
         role: input.newRole,
       } as Partial<CompanyUser>,
     );
+
+    // 8. Atualizar também o User.role (exceto para admin e master que são roles globais)
+    const user = await this.userRepository.findById(companyUser.userId);
+    if (user && user.role !== UserRole.ADMIN && user.role !== UserRole.MASTER) {
+      await this.userRepository.update(companyUser.userId, {
+        role: input.newRole,
+      } as Partial<User>);
+    }
 
     return {
       companyUser: updatedCompanyUser,
