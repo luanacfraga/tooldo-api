@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
-import { CompanyUserStatus, DocumentType, UserRole, UserStatus } from '@/core/domain/shared/enums';
+import {
+  CompanyUserStatus,
+  DocumentType,
+  UserRole,
+  UserStatus,
+} from '@/core/domain/shared/enums';
 import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
 import { User } from '@/core/domain/user/user.entity';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
@@ -218,7 +223,9 @@ describe('AuthService', () => {
       const result = await service.login(loginInput);
 
       expect(result.access_token).toBe(expectedToken);
-      expect(companyUserRepository.findByUserId).toHaveBeenCalledWith('executor-id');
+      expect(companyUserRepository.findByUserId).toHaveBeenCalledWith(
+        'executor-id',
+      );
     });
 
     it('should throw AuthenticationException for non-admin user suspended in all companies', async () => {
@@ -246,7 +253,9 @@ describe('AuthService', () => {
 
       userRepository.findByEmail.mockResolvedValue(executorUser);
       passwordHasher.compare.mockResolvedValue(true);
-      companyUserRepository.findByUserId.mockResolvedValue([suspendedCompanyUser]);
+      companyUserRepository.findByUserId.mockResolvedValue([
+        suspendedCompanyUser,
+      ]);
 
       await expect(service.login(loginInput)).rejects.toThrow(
         AuthenticationException,
@@ -254,7 +263,9 @@ describe('AuthService', () => {
       await expect(service.login(loginInput)).rejects.toThrow(
         'Sua conta está suspensa. Entre em contato com o administrador.',
       );
-      expect(companyUserRepository.findByUserId).toHaveBeenCalledWith('executor-id');
+      expect(companyUserRepository.findByUserId).toHaveBeenCalledWith(
+        'executor-id',
+      );
       expect(jwtService.signAsync).not.toHaveBeenCalled();
     });
 
@@ -282,7 +293,9 @@ describe('AuthService', () => {
       const result = await service.login(loginInput);
 
       expect(result.access_token).toBe(expectedToken);
-      expect(companyUserRepository.findByUserId).toHaveBeenCalledWith('executor-id');
+      expect(companyUserRepository.findByUserId).toHaveBeenCalledWith(
+        'executor-id',
+      );
     });
   });
 });
