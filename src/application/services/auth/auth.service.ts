@@ -1,5 +1,6 @@
-import { UserRole } from '@/core/domain/shared/enums';
+import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
+import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
 import { ErrorMessages } from '@/shared/constants/error-messages';
@@ -33,6 +34,8 @@ export class AuthService {
   constructor(
     @Inject('UserRepository')
     private readonly userRepository: UserRepository,
+    @Inject('CompanyUserRepository')
+    private readonly companyUserRepository: CompanyUserRepository,
     @Inject('PasswordHasher')
     private readonly passwordHasher: PasswordHasher,
     private readonly jwtService: JwtService,
@@ -52,6 +55,26 @@ export class AuthService {
 
     if (!isPasswordValid) {
       throw new AuthenticationException(ErrorMessages.AUTH.INVALID_CREDENTIALS);
+    }
+
+    // Verifica se o usuário está suspenso (apenas para não-admins)
+    // Admins não são suspensos via CompanyUser, então podem sempre fazer login
+    if (user.role !== UserRole.ADMIN && user.role !== UserRole.MASTER) {
+      const companyUsers = await this.companyUserRepository.findByUserId(
+        user.id,
+      );
+
+      // Se o usuário não tem nenhuma empresa vinculada, permite login
+      // Mas se tem empresas e todas estão suspensas, bloqueia
+      if (companyUsers.length > 0) {
+        const hasActiveCompany = companyUsers.some(
+          (cu) => cu.status === CompanyUserStatus.ACTIVE,
+        );
+
+        if (!hasActiveCompany) {
+          throw new AuthenticationException(ErrorMessages.AUTH.USER_SUSPENDED);
+        }
+      }
     }
 
     const payload: JwtPayload = {
