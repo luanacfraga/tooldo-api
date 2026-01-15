@@ -1,6 +1,7 @@
 import { EmployeeInviteAcceptedListener } from '@/application/events/listeners/employee-invite-accepted.listener';
 import { AcceptInviteService } from '@/application/services/employee/accept-invite.service';
 import { ActivateEmployeeService } from '@/application/services/employee/activate-employee.service';
+import { ChangeEmployeeRoleService } from '@/application/services/employee/change-employee-role.service';
 import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
 import { ListExecutorsService } from '@/application/services/employee/list-executors.service';
@@ -26,6 +27,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ActivateEmployeeService,
     RemoveEmployeeService,
     ResendInviteService,
+    ChangeEmployeeRoleService,
     UpdateEmployeeService,
     EmployeeInviteAcceptedListener,
   ],
@@ -39,6 +41,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ActivateEmployeeService,
     RemoveEmployeeService,
     ResendInviteService,
+    ChangeEmployeeRoleService,
     UpdateEmployeeService,
   ],
 })

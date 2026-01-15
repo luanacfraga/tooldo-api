@@ -3,6 +3,7 @@ import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
 import type { JwtPayload } from '@/application/services/auth/auth.service';
 import { AcceptInviteService } from '@/application/services/employee/accept-invite.service';
 import { ActivateEmployeeService } from '@/application/services/employee/activate-employee.service';
+import { ChangeEmployeeRoleService } from '@/application/services/employee/change-employee-role.service';
 import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
 import { ListExecutorsService } from '@/application/services/employee/list-executors.service';
@@ -19,6 +20,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -36,6 +38,7 @@ import {
 } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { AcceptInviteByTokenDto } from './dto/accept-invite-by-token.dto';
+import { ChangeEmployeeRoleDto } from './dto/change-employee-role.dto';
 import {
   EmployeeResponseDto,
   type CompanyUserWithUser,
@@ -60,6 +63,7 @@ export class EmployeeController {
     private readonly activateEmployeeService: ActivateEmployeeService,
     private readonly removeEmployeeService: RemoveEmployeeService,
     private readonly resendInviteService: ResendInviteService,
+    private readonly changeEmployeeRoleService: ChangeEmployeeRoleService,
     private readonly updateEmployeeService: UpdateEmployeeService,
   ) {}
 
@@ -271,13 +275,13 @@ export class EmployeeController {
     return EmployeeResponseDto.fromDomain(result.companyUser);
   }
 
-  @Delete(':id')
+  @Patch(':id/role')
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Remove an employee',
+    summary: 'Change employee role',
     description:
-      'Remove um funcionário da empresa (soft delete). Apenas admins e managers.',
+      'Altera o cargo de um funcionário. Valida que o funcionário está ativo, não possui ações pendentes e não é gestor de equipes. Apenas admins e managers podem alterar cargos.',
   })
   @ApiParam({
     name: 'id',
@@ -285,18 +289,27 @@ export class EmployeeController {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @ApiOkResponse({
-    description: 'Employee successfully removed',
+    description: 'Employee role successfully changed',
     type: EmployeeResponseDto,
   })
   @ApiBadRequestResponse({
-    description: 'Bad Request - Employee cannot be removed',
+    description:
+      'Bad Request - Employee is not active, has pending actions, or is a manager of teams',
   })
   @ApiNotFoundResponse({
     description: 'Not Found - Employee not found',
   })
-  async remove(@Param('id') id: string): Promise<EmployeeResponseDto> {
-    const result = await this.removeEmployeeService.execute({
+  async changeRole(
+    @Param('id') id: string,
+    @Body() changeRoleDto: ChangeEmployeeRoleDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<EmployeeResponseDto> {
+    const requestingUserId = req.user?.sub ?? 'temp-admin-id';
+
+    const result = await this.changeEmployeeRoleService.execute({
       companyUserId: id,
+      newRole: changeRoleDto.newRole,
+      requestingUserId,
     });
 
     return EmployeeResponseDto.fromDomain(result.companyUser);
@@ -394,5 +407,36 @@ export class EmployeeController {
     } as CompanyUserWithUser;
 
     return EmployeeResponseDto.fromDomain(companyUserWithUser);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Remove an employee',
+    description:
+      'Remove um funcionário da empresa (soft delete). Apenas admins e managers.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do vínculo do funcionário (CompanyUser ID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Employee successfully removed',
+    type: EmployeeResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Employee cannot be removed',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Employee not found',
+  })
+  async remove(@Param('id') id: string): Promise<EmployeeResponseDto> {
+    const result = await this.removeEmployeeService.execute({
+      companyUserId: id,
+    });
+
+    return EmployeeResponseDto.fromDomain(result.companyUser);
   }
 }
