@@ -8,6 +8,7 @@ import { ListExecutorsService } from '@/application/services/employee/list-execu
 import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
 import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
+import { UpdateEmployeeService } from '@/application/services/employee/update-employee.service';
 import { ValidatePlanLimitsService } from '@/application/services/employee/validate-plan-limits.service';
 import { DatabaseModule } from '@/infra/database/database.module';
 import { SharedServicesModule } from '@/infra/services/shared-services.module';
@@ -27,6 +28,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     RemoveEmployeeService,
     ResendInviteService,
     ChangeEmployeeRoleService,
+    UpdateEmployeeService,
     EmployeeInviteAcceptedListener,
   ],
   exports: [
@@ -40,6 +42,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     RemoveEmployeeService,
     ResendInviteService,
     ChangeEmployeeRoleService,
+    UpdateEmployeeService,
   ],
 })
 export class EmployeeApplicationModule {}
