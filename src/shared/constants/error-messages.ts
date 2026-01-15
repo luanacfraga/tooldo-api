@@ -100,6 +100,8 @@ export const ErrorMessages = {
     INVALID_OR_EXPIRED_RESET_TOKEN: 'Token de recuperação inválido ou expirado',
     LEGACY_INVITE_TOKEN:
       'Token de convite inválido. Este token foi gerado antes da atualização do sistema. Por favor, solicite um novo convite.',
+    USER_SUSPENDED:
+      'Sua conta está suspensa. Entre em contato com o administrador.',
   },
 
   ACTION: {
