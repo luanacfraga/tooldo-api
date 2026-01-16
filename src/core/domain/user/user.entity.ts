@@ -44,6 +44,7 @@ export class User extends Entity {
       this.phone,
       ErrorMessages.USER.PHONE_REQUIRED,
     );
+    // Documento é obrigatório, mas pode ser temporário (temp_*) quando não fornecido
     DomainValidator.validateRequiredString(
       this.document,
       ErrorMessages.USER.DOCUMENT_REQUIRED,

@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -73,17 +74,21 @@ export class RegisterAdminDto {
   @ApiProperty({
     description: 'Documento do administrador (CPF ou CNPJ)',
     example: '12345678900',
+    required: false,
   })
+  @IsOptional()
   @IsString({ message: 'O documento deve ser uma string' })
-  document!: string;
+  document?: string;
 
   @ApiProperty({
     description: 'Tipo de documento',
     enum: DocumentType,
     example: DocumentType.CPF,
+    required: false,
   })
+  @ValidateIf((o) => o.document !== undefined && o.document !== null)
   @IsEnum(DocumentType, { message: 'O tipo de documento deve ser CPF ou CNPJ' })
-  documentType!: DocumentType;
+  documentType?: DocumentType;
 
   @ApiProperty({
     description: 'Dados da empresa',

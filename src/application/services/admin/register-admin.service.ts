@@ -23,8 +23,8 @@ export interface RegisterAdminInput {
   email: string;
   password: string;
   phone: string;
-  document: string;
-  documentType: DocumentType;
+  document?: string;
+  documentType?: DocumentType;
   company: {
     name: string;
     description?: string;
@@ -68,6 +68,10 @@ export class RegisterAdminService {
 
     const hashedPassword = await this.passwordHasher.hash(input.password);
 
+    // Se documento não fornecido, gera um temporário único
+    const document = input.document || `temp_${userId}`;
+    const documentType = input.documentType || DocumentType.CPF;
+
     return await this.transactionManager.execute(async (tx) => {
       const user = this.userFactory.createAdmin({
         id: userId,
@@ -75,8 +79,8 @@ export class RegisterAdminService {
         lastName: input.lastName,
         email: input.email,
         phone: input.phone,
-        document: input.document,
-        documentType: input.documentType,
+        document,
+        documentType,
         hashedPassword,
         profileImageUrl: null,
       });
@@ -121,11 +125,14 @@ export class RegisterAdminService {
       throw new UniqueConstraintException('Telefone', input.phone);
     }
 
+    // Valida documento único apenas se fornecido
+    if (input.document) {
     const existingDocument = await this.userRepository.findByDocument(
       input.document,
     );
     if (existingDocument) {
       throw new UniqueConstraintException('Documento', input.document);
+      }
     }
   }
 
