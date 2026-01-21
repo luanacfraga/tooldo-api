@@ -258,6 +258,7 @@ export class ListActionsService {
     }
     return new Action(
       action.id,
+      action.rootCause,
       action.title,
       action.description,
       action.status,

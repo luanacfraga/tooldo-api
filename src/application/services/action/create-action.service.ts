@@ -15,6 +15,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
 export interface CreateActionInput {
+  rootCause: string;
   title: string;
   description: string;
   priority: ActionPriority;
@@ -67,6 +68,7 @@ export class CreateActionService {
       // Create action domain object
       const action = new Action(
         randomUUID(),
+        input.rootCause,
         input.title,
         input.description,
         ActionStatus.TODO,

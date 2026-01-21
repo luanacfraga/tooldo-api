@@ -14,6 +14,14 @@ import { UpsertChecklistItemDto } from './upsert-checklist-item.dto';
 
 export class CreateActionDto {
   @ApiProperty({
+    description: 'Causa fundamental que originou a ação',
+    example: 'Falta de controle de qualidade no processo de desenvolvimento',
+  })
+  @IsString({ message: 'A causa fundamental deve ser uma string' })
+  @IsNotEmpty({ message: 'A causa fundamental é obrigatória' })
+  rootCause!: string;
+
+  @ApiProperty({
     description: 'Título da ação',
     example: 'Implementar módulo de relatórios',
   })

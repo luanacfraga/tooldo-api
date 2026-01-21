@@ -211,6 +211,7 @@ enum ActionPriority {
 
 model Action {
   id          String         @id @default(uuid())
+  rootCause   String         @map("root_cause") @db.Text
   title       String
   description String         @db.Text
   status      ActionStatus   @default(TODO)

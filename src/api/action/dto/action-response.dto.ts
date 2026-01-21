@@ -17,6 +17,12 @@ export class ActionResponseDto {
   id!: string;
 
   @ApiProperty({
+    description: 'Causa fundamental que originou a ação',
+    example: 'Falta de controle de qualidade no processo de desenvolvimento',
+  })
+  rootCause!: string;
+
+  @ApiProperty({
     description: 'Título da ação',
     example: 'Implementar módulo de relatórios',
   })
@@ -162,6 +168,7 @@ export class ActionResponseDto {
   ): ActionResponseDto {
     const response = new ActionResponseDto();
     response.id = action.id;
+    response.rootCause = action.rootCause;
     response.title = action.title;
     response.description = action.description;
     response.status = action.status;
