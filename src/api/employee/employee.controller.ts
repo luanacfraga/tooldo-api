@@ -1,3 +1,4 @@
+import { Public } from '@/api/auth/decorators/public.decorator';
 import { Roles } from '@/api/auth/decorators/roles.decorator';
 import { PaginatedResponseDto } from '@/api/shared/dto/paginated-response.dto';
 import type { JwtPayload } from '@/application/services/auth/auth.service';
@@ -99,6 +100,7 @@ export class EmployeeController {
     return EmployeeResponseDto.fromDomain(result.companyUser);
   }
 
+  @Public()
   @Post('accept-invite-by-token')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
