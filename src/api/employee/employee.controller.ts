@@ -385,6 +385,7 @@ export class EmployeeController {
       companyUserId: id,
       firstName: updateEmployeeDto.firstName,
       lastName: updateEmployeeDto.lastName,
+      email: updateEmployeeDto.email,
       phone: updateEmployeeDto.phone,
       document: updateEmployeeDto.document,
       position: updateEmployeeDto.position,
