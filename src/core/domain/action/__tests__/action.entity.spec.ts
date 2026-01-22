@@ -8,8 +8,10 @@ import { Action } from '../action.entity';
 describe('Action Entity - calculateLateStatus', () => {
   const baseActionProps = {
     id: '123e4567-e89b-12d3-a456-426614174000',
+    rootCause: 'Test Root Cause',
     title: 'Test Action',
     description: 'Test Description',
+    status: ActionStatus.TODO,
     priority: ActionPriority.MEDIUM,
     estimatedStartDate: new Date('2024-01-01'),
     estimatedEndDate: new Date('2024-01-31'),
@@ -29,6 +31,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return LATE_TO_START when status is TODO and current date is after estimated start date', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.TODO,
@@ -56,6 +59,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return null when status is TODO and current date equals estimated start date', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.TODO,
@@ -83,6 +87,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return null when status is TODO and current date is before estimated start date', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.TODO,
@@ -112,6 +117,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return LATE_TO_FINISH when status is IN_PROGRESS and current date is after estimated end date', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.IN_PROGRESS,
@@ -139,6 +145,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return null when status is IN_PROGRESS and current date equals estimated end date', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.IN_PROGRESS,
@@ -168,6 +175,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return COMPLETED_LATE when status is DONE and actual end date is after estimated end date', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.DONE,
@@ -194,6 +202,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return null when status is DONE and actual end date equals estimated end date', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.DONE,
@@ -220,6 +229,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should return null when status is DONE but no actual end date is set', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.DONE,
@@ -248,6 +258,7 @@ describe('Action Entity - calculateLateStatus', () => {
     it('should ignore time component when comparing dates', () => {
       const action = new Action(
         baseActionProps.id,
+        baseActionProps.rootCause,
         baseActionProps.title,
         baseActionProps.description,
         ActionStatus.TODO,
