@@ -6,12 +6,20 @@ import { RegisterMasterService } from '@/application/services/admin/register-mas
 import { AuthService } from '@/application/services/auth/auth.service';
 import { ForgotPasswordService } from '@/application/services/auth/forgot-password.service';
 import { ResetPasswordService } from '@/application/services/auth/reset-password.service';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from './decorators/public.decorator';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterAdminResponseDto } from './dto/register-admin-response.dto';
 import { RegisterAdminDto } from './dto/register-admin.dto';
 import { RegisterMasterResponseDto } from './dto/register-master-response.dto';
@@ -153,5 +161,46 @@ export class AuthController {
       token: resetPasswordDto.token,
       newPassword: resetPasswordDto.newPassword,
     });
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Refresh access token',
+    description:
+      'Renova o access token usando um refresh token válido. Retorna um novo par de access_token e refresh_token.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token successfully refreshed',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid or expired refresh token',
+  })
+  async refreshToken(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<LoginResponseDto> {
+    return await this.authService.refreshAccessToken(
+      refreshTokenDto.refresh_token,
+    );
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Logout user',
+    description:
+      'Remove o refresh token do usuário, invalidando futuras tentativas de renovação.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logout successful',
+  })
+  async logout(@Request() req: any): Promise<{ message: string }> {
+    await this.authService.logout(req.user.sub);
+    return { message: 'Logout realizado com sucesso' };
   }
 }

@@ -26,6 +26,8 @@ export class UserPrismaRepository implements UserRepository {
     role: true,
     status: true,
     profileImageUrl: true,
+    refreshToken: true,
+    refreshTokenExpiresAt: true,
   };
 
   async findByEmail(email: string, tx?: unknown): Promise<User | null> {
@@ -62,6 +64,24 @@ export class UserPrismaRepository implements UserRepository {
     const client = (tx as typeof this.prisma) ?? this.prisma;
     const user = await client.user.findUnique({
       where: { id },
+      select: this.safeUserSelect,
+    });
+
+    return user ? this.mapToDomain(user) : null;
+  }
+
+  async findByRefreshToken(
+    refreshToken: string,
+    tx?: unknown,
+  ): Promise<User | null> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const user = await client.user.findFirst({
+      where: {
+        refreshToken,
+        refreshTokenExpiresAt: {
+          gt: new Date(),
+        },
+      },
       select: this.safeUserSelect,
     });
 
@@ -112,6 +132,22 @@ export class UserPrismaRepository implements UserRepository {
     return this.mapToDomain(updated);
   }
 
+  async updateRefreshToken(
+    userId: string,
+    refreshToken: string | null,
+    expiresAt: Date | null,
+    tx?: unknown,
+  ): Promise<void> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    await client.user.update({
+      where: { id: userId },
+      data: {
+        refreshToken,
+        refreshTokenExpiresAt: expiresAt,
+      },
+    });
+  }
+
   async findByRolePaginated(
     role: UserRole,
     page: number,
@@ -154,6 +190,8 @@ export class UserPrismaRepository implements UserRepository {
       | 'role'
       | 'status'
       | 'profileImageUrl'
+      | 'refreshToken'
+      | 'refreshTokenExpiresAt'
     >,
   ): User {
     return new User(
@@ -170,6 +208,8 @@ export class UserPrismaRepository implements UserRepository {
       prismaUser.profileImageUrl,
       null,
       null,
+      prismaUser.refreshToken,
+      prismaUser.refreshTokenExpiresAt,
     );
   }
 }
