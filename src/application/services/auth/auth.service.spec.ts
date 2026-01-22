@@ -22,7 +22,6 @@ describe('AuthService', () => {
   let companyUserRepository: jest.Mocked<CompanyUserRepository>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
   let jwtService: jest.Mocked<JwtService>;
-  let configService: jest.Mocked<ConfigService>;
 
   const mockUser = new User(
     '123e4567-e89b-12d3-a456-426614174000',
@@ -74,7 +73,7 @@ describe('AuthService', () => {
       verifyAsync: jest.fn(),
     };
 
-    const mockConfigService = {
+    let mockConfigService = {
       get: jest.fn((key: string) => {
         const config: Record<string, string> = {
           JWT_SECRET: 'test-secret',
@@ -116,7 +115,7 @@ describe('AuthService', () => {
     companyUserRepository = module.get('CompanyUserRepository');
     passwordHasher = module.get('PasswordHasher');
     jwtService = module.get(JwtService);
-    configService = module.get(ConfigService);
+    mockConfigService = module.get(ConfigService);
   });
 
   it('should be defined', () => {
