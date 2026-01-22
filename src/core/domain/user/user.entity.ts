@@ -18,6 +18,8 @@ export class User extends Entity {
     public readonly profileImageUrl: string | null = null,
     public readonly avatarColor: string | null = null,
     public readonly initials: string | null = null,
+    public readonly refreshToken: string | null = null,
+    public readonly refreshTokenExpiresAt: Date | null = null,
   ) {
     super(id);
     this.validate();
