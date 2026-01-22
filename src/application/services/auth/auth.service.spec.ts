@@ -11,6 +11,7 @@ import { User } from '@/core/domain/user/user.entity';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService, type LoginInput } from './auth.service';
@@ -21,6 +22,7 @@ describe('AuthService', () => {
   let companyUserRepository: jest.Mocked<CompanyUserRepository>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
   let jwtService: jest.Mocked<JwtService>;
+  let configService: jest.Mocked<ConfigService>;
 
   const mockUser = new User(
     '123e4567-e89b-12d3-a456-426614174000',
@@ -40,8 +42,10 @@ describe('AuthService', () => {
     const mockUserRepository = {
       findByEmail: jest.fn(),
       findById: jest.fn(),
+      findByRefreshToken: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      updateRefreshToken: jest.fn(),
       delete: jest.fn(),
       findAll: jest.fn(),
     };
@@ -70,6 +74,17 @@ describe('AuthService', () => {
       verifyAsync: jest.fn(),
     };
 
+    const mockConfigService = {
+      get: jest.fn((key: string) => {
+        const config: Record<string, string> = {
+          JWT_SECRET: 'test-secret',
+          JWT_REFRESH_SECRET: 'test-refresh-secret',
+          JWT_REFRESH_EXPIRATION: '30d',
+        };
+        return config[key];
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -89,6 +104,10 @@ describe('AuthService', () => {
           provide: JwtService,
           useValue: mockJwtService,
         },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
       ],
     }).compile();
 
@@ -97,6 +116,7 @@ describe('AuthService', () => {
     companyUserRepository = module.get('CompanyUserRepository');
     passwordHasher = module.get('PasswordHasher');
     jwtService = module.get(JwtService);
+    configService = module.get(ConfigService);
   });
 
   it('should be defined', () => {
@@ -111,15 +131,20 @@ describe('AuthService', () => {
 
     it('should successfully login with valid credentials', async () => {
       const expectedToken = 'jwt_token_123';
+      const expectedRefreshToken = 'refresh_token_123';
       userRepository.findByEmail.mockResolvedValue(mockUser);
       passwordHasher.compare.mockResolvedValue(true);
+      userRepository.updateRefreshToken.mockResolvedValue(undefined);
       // Admin não precisa verificar CompanyUser
-      jwtService.signAsync.mockResolvedValue(expectedToken);
+      jwtService.signAsync
+        .mockResolvedValueOnce(expectedToken)
+        .mockResolvedValueOnce(expectedRefreshToken);
 
       const result = await service.login(loginInput);
 
       expect(result).toEqual({
         access_token: expectedToken,
+        refresh_token: expectedRefreshToken,
         user: {
           id: mockUser.id,
           email: mockUser.email,
@@ -138,6 +163,11 @@ describe('AuthService', () => {
         email: mockUser.email,
         role: mockUser.role,
       });
+      expect(userRepository.updateRefreshToken).toHaveBeenCalledWith(
+        mockUser.id,
+        expectedRefreshToken,
+        expect.any(Date),
+      );
       // Admin não verifica CompanyUser
       expect(companyUserRepository.findByUserId).not.toHaveBeenCalled();
     });
@@ -215,14 +245,19 @@ describe('AuthService', () => {
       );
 
       const expectedToken = 'jwt_token_executor';
+      const expectedRefreshToken = 'refresh_token_executor';
       userRepository.findByEmail.mockResolvedValue(executorUser);
       passwordHasher.compare.mockResolvedValue(true);
+      userRepository.updateRefreshToken.mockResolvedValue(undefined);
       companyUserRepository.findByUserId.mockResolvedValue([activeCompanyUser]);
-      jwtService.signAsync.mockResolvedValue(expectedToken);
+      jwtService.signAsync
+        .mockResolvedValueOnce(expectedToken)
+        .mockResolvedValueOnce(expectedRefreshToken);
 
       const result = await service.login(loginInput);
 
       expect(result.access_token).toBe(expectedToken);
+      expect(result.refresh_token).toBe(expectedRefreshToken);
       expect(companyUserRepository.findByUserId).toHaveBeenCalledWith(
         'executor-id',
       );
@@ -285,14 +320,19 @@ describe('AuthService', () => {
       );
 
       const expectedToken = 'jwt_token_executor';
+      const expectedRefreshToken = 'refresh_token_executor';
       userRepository.findByEmail.mockResolvedValue(executorUser);
       passwordHasher.compare.mockResolvedValue(true);
+      userRepository.updateRefreshToken.mockResolvedValue(undefined);
       companyUserRepository.findByUserId.mockResolvedValue([]);
-      jwtService.signAsync.mockResolvedValue(expectedToken);
+      jwtService.signAsync
+        .mockResolvedValueOnce(expectedToken)
+        .mockResolvedValueOnce(expectedRefreshToken);
 
       const result = await service.login(loginInput);
 
       expect(result.access_token).toBe(expectedToken);
+      expect(result.refresh_token).toBe(expectedRefreshToken);
       expect(companyUserRepository.findByUserId).toHaveBeenCalledWith(
         'executor-id',
       );
