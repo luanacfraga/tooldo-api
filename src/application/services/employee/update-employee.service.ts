@@ -85,7 +85,8 @@ export class UpdateEmployeeService {
 
       // Valida se o novo email não está sendo usado por outro usuário
       if (trimmedEmail !== user.email.toLowerCase()) {
-        const existingUser = await this.userRepository.findByEmail(trimmedEmail);
+        const existingUser =
+          await this.userRepository.findByEmail(trimmedEmail);
         if (existingUser && existingUser.id !== user.id) {
           throw new UniqueConstraintException('Email', trimmedEmail);
         }
