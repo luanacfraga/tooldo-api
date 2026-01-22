@@ -1,6 +1,6 @@
 import { UserRole } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class UpdateEmployeeDto {
   @ApiProperty({
@@ -20,6 +20,15 @@ export class UpdateEmployeeDto {
   @IsString({ message: 'O sobrenome deve ser uma string' })
   @IsOptional()
   lastName?: string;
+
+  @ApiProperty({
+    description: 'Email do funcionário (apenas para convidados)',
+    example: 'funcionario@empresa.com',
+    required: false,
+  })
+  @IsEmail({}, { message: 'Email inválido' })
+  @IsOptional()
+  email?: string;
 
   @ApiProperty({
     description: 'Telefone do funcionário',

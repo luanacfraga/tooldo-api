@@ -17,6 +17,7 @@ export interface ActionFilters {
 }
 
 export interface UpdateActionData {
+  rootCause?: string;
   title?: string;
   description?: string;
   status?: ActionStatus;

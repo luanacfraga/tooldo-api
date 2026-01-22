@@ -10,6 +10,7 @@ import { DomainValidator } from '../shared/validators/domain.validator';
 export class Action extends Entity {
   constructor(
     public readonly id: string,
+    public readonly rootCause: string,
     public readonly title: string,
     public readonly description: string,
     public readonly status: ActionStatus,
@@ -36,6 +37,10 @@ export class Action extends Entity {
   }
 
   protected validate(): void {
+    DomainValidator.validateRequiredString(
+      this.rootCause,
+      ErrorMessages.ACTION.TITLE_REQUIRED, // Usando mensagem genérica por enquanto
+    );
     DomainValidator.validateRequiredString(
       this.title,
       ErrorMessages.ACTION.TITLE_REQUIRED,
@@ -147,6 +152,7 @@ export class Action extends Entity {
 
     return new Action(
       this.id,
+      this.rootCause,
       this.title,
       this.description,
       newStatus,
@@ -169,6 +175,7 @@ export class Action extends Entity {
   public block(reason: string): Action {
     return new Action(
       this.id,
+      this.rootCause,
       this.title,
       this.description,
       this.status,
@@ -191,6 +198,7 @@ export class Action extends Entity {
   public unblock(): Action {
     return new Action(
       this.id,
+      this.rootCause,
       this.title,
       this.description,
       this.status,
@@ -213,6 +221,7 @@ export class Action extends Entity {
   public delete(): Action {
     return new Action(
       this.id,
+      this.rootCause,
       this.title,
       this.description,
       this.status,

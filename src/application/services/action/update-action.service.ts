@@ -14,6 +14,7 @@ import { randomUUID } from 'crypto';
 
 export interface UpdateActionInput {
   actionId: string;
+  rootCause?: string;
   title?: string;
   description?: string;
   priority?: ActionPriority;
@@ -79,6 +80,7 @@ export class UpdateActionService {
       const updatedAction = await this.actionRepository.update(
         input.actionId,
         {
+          rootCause: input.rootCause,
           title: input.title,
           description: input.description,
           priority: input.priority,

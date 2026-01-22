@@ -97,6 +97,7 @@ export class UserPrismaRepository implements UserRepository {
       data: {
         firstName: data.firstName,
         lastName: data.lastName,
+        email: data.email,
         phone: data.phone,
         document: data.document,
         documentType: data.documentType,

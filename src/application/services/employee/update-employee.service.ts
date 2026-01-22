@@ -2,6 +2,7 @@ import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import {
   DomainValidationException,
   EntityNotFoundException,
+  UniqueConstraintException,
 } from '@/core/domain/shared/exceptions/domain.exception';
 import { User } from '@/core/domain/user/user.entity';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
@@ -14,6 +15,7 @@ export interface UpdateEmployeeInput {
   companyUserId: string;
   firstName?: string;
   lastName?: string;
+  email?: string;
   phone?: string;
   document?: string;
   position?: string;
@@ -65,6 +67,31 @@ export class UpdateEmployeeService {
     }
     if (input.lastName !== undefined) {
       userUpdateData.lastName = input.lastName;
+    }
+    if (input.email !== undefined) {
+      // Email só pode ser alterado para usuários convidados (não ativos)
+      if (!companyUser.isInvited()) {
+        throw new DomainValidationException(
+          'O email não pode ser alterado para funcionários ativos',
+        );
+      }
+
+      // Valida se o email não está vazio
+      if (!input.email || input.email.trim() === '') {
+        throw new DomainValidationException('O email não pode ser vazio');
+      }
+
+      const trimmedEmail = input.email.trim().toLowerCase();
+
+      // Valida se o novo email não está sendo usado por outro usuário
+      if (trimmedEmail !== user.email.toLowerCase()) {
+        const existingUser =
+          await this.userRepository.findByEmail(trimmedEmail);
+        if (existingUser && existingUser.id !== user.id) {
+          throw new UniqueConstraintException('Email', trimmedEmail);
+        }
+        userUpdateData.email = trimmedEmail;
+      }
     }
     if (input.phone !== undefined) {
       // Remove valores temporários (temp_${userId}) ou strings vazias

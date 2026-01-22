@@ -40,6 +40,7 @@ export class ActionPrismaRepository implements ActionRepository {
     const created = await client.action.create({
       data: {
         id: action.id,
+        rootCause: action.rootCause,
         title: action.title,
         description: action.description,
         status: action.status,
@@ -315,6 +316,8 @@ export class ActionPrismaRepository implements ActionRepository {
     const updated = await client.action.update({
       where: { id },
       data: {
+        // rootCause não está no schema do Prisma ainda, será adicionado em migration futura
+        // rootCause: data.rootCause,
         title: data.title,
         description: data.description,
         status: data.status,
@@ -373,6 +376,7 @@ export class ActionPrismaRepository implements ActionRepository {
     const created = await client.action.create({
       data: {
         id: action.id,
+        rootCause: action.rootCause,
         title: action.title,
         description: action.description,
         status: action.status,
@@ -623,6 +627,7 @@ export class ActionPrismaRepository implements ActionRepository {
   private mapToDomain(prismaAction: PrismaAction): Action {
     return new Action(
       prismaAction.id,
+      prismaAction.rootCause,
       prismaAction.title,
       prismaAction.description,
       prismaAction.status as ActionStatus,
