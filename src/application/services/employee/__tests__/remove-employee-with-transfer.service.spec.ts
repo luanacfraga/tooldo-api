@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Action } from '@/core/domain/action';
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import { User } from '@/core/domain/user/user.entity';

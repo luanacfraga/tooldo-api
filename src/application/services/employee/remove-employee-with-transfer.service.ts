@@ -12,6 +12,23 @@ import type { TransactionManager } from '@/core/ports/services/transaction-manag
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
+interface PrismaTransactionClient {
+  team: {
+    findMany: (args: {
+      where: { companyId: string };
+      select: { id: true };
+    }) => Promise<Array<{ id: string }>>;
+  };
+  teamUser: {
+    deleteMany: (args: {
+      where: {
+        userId: string;
+        teamId: { in: string[] };
+      };
+    }) => Promise<{ count: number }>;
+  };
+}
+
 export interface RemoveEmployeeWithTransferInput {
   companyUserId: string;
   newResponsibleId: string;
@@ -108,9 +125,7 @@ export class RemoveEmployeeWithTransferService {
     }
 
     // Buscar usuários para os nomes
-    const employeeUser = await this.userRepository.findById(
-      companyUser.userId,
-    );
+    const employeeUser = await this.userRepository.findById(companyUser.userId);
     const newResponsibleUser = await this.userRepository.findById(
       input.newResponsibleId,
     );
@@ -167,17 +182,18 @@ export class RemoveEmployeeWithTransferService {
 
       // 3. Remover usuário de todos os times da empresa
       // Primeiro, buscar todos os times da empresa
-      const companyTeams = await (tx as any).team.findMany({
+      const prismaTx = tx as PrismaTransactionClient;
+      const companyTeams = await prismaTx.team.findMany({
         where: {
           companyId: companyUser.companyId,
         },
         select: { id: true },
       });
 
-      const companyTeamIds = companyTeams.map((team: any) => team.id);
+      const companyTeamIds = companyTeams.map((team) => team.id);
 
       // Deletar todas as memberships do usuário nesses times
-      const deleteResult = await (tx as any).teamUser.deleteMany({
+      const deleteResult = await prismaTx.teamUser.deleteMany({
         where: {
           userId: companyUser.userId,
           teamId: {
