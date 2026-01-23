@@ -6,7 +6,7 @@ import {
 } from '@/core/domain/shared/enums';
 
 export interface ActionFilters {
-  status?: ActionStatus;
+  status?: ActionStatus | ActionStatus[];
   priority?: ActionPriority;
   responsibleId?: string;
   teamId?: string;

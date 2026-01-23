@@ -125,7 +125,7 @@ export class RemoveEmployeeWithTransferService {
       const pendingActions = await this.actionRepository.findByResponsibleId(
         companyUser.userId,
         {
-          status: [ActionStatus.TODO, ActionStatus.IN_PROGRESS] as any,
+          status: [ActionStatus.TODO, ActionStatus.IN_PROGRESS],
           includeDeleted: false,
         },
         tx,

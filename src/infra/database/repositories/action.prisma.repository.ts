@@ -594,7 +594,9 @@ export class ActionPrismaRepository implements ActionRepository {
     }
 
     if (filters.status) {
-      where.status = filters.status;
+      where.status = Array.isArray(filters.status)
+        ? { in: filters.status }
+        : filters.status;
     }
 
     if (filters.priority) {
