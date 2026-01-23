@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CompanyMapper } from '@/application/mappers/company.mapper';
 import { SubscriptionMapper } from '@/application/mappers/subscription.mapper';
 import { UserMapper } from '@/application/mappers/user.mapper';
