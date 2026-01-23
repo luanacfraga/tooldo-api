@@ -9,6 +9,7 @@ import { InviteEmployeeService } from '@/application/services/employee/invite-em
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
 import { ListExecutorsService } from '@/application/services/employee/list-executors.service';
 import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
+import { RemoveEmployeeWithTransferService } from '@/application/services/employee/remove-employee-with-transfer.service';
 import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
 import { UpdateEmployeeService } from '@/application/services/employee/update-employee.service';
@@ -46,6 +47,8 @@ import {
 } from './dto/employee-response.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
 import { ListEmployeesQueryDto } from './dto/list-employees.dto';
+import { RemoveEmployeeWithTransferDto } from './dto/remove-employee-with-transfer.dto';
+import { RemoveEmployeeWithTransferResponseDto } from './dto/remove-employee-with-transfer-response.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 interface AuthenticatedRequest extends Request {
@@ -63,6 +66,7 @@ export class EmployeeController {
     private readonly suspendEmployeeService: SuspendEmployeeService,
     private readonly activateEmployeeService: ActivateEmployeeService,
     private readonly removeEmployeeService: RemoveEmployeeService,
+    private readonly removeEmployeeWithTransferService: RemoveEmployeeWithTransferService,
     private readonly resendInviteService: ResendInviteService,
     private readonly changeEmployeeRoleService: ChangeEmployeeRoleService,
     private readonly updateEmployeeService: UpdateEmployeeService,
@@ -410,6 +414,46 @@ export class EmployeeController {
     } as CompanyUserWithUser;
 
     return EmployeeResponseDto.fromDomain(companyUserWithUser);
+  }
+
+  @Delete(':id/transfer')
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Remove employee with action transfer',
+    description:
+      'Remove um funcionário da empresa e transfere automaticamente suas ações pendentes (TODO e IN_PROGRESS) para outro responsável. Apenas admins e managers.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID do vínculo do funcionário (CompanyUser ID)',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Employee removed and actions transferred successfully',
+    type: RemoveEmployeeWithTransferResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Bad Request - Employee cannot be removed or new responsible is invalid',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Employee or new responsible not found',
+  })
+  async removeWithTransfer(
+    @Param('id') id: string,
+    @Body() dto: RemoveEmployeeWithTransferDto,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<RemoveEmployeeWithTransferResponseDto> {
+    const currentUserId = req.user?.sub ?? '';
+
+    const result = await this.removeEmployeeWithTransferService.execute({
+      companyUserId: id,
+      newResponsibleId: dto.newResponsibleId,
+      currentUserId,
+    });
+
+    return result;
   }
 
   @Delete(':id')

@@ -6,6 +6,7 @@ import { InviteEmployeeService } from '@/application/services/employee/invite-em
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
 import { ListExecutorsService } from '@/application/services/employee/list-executors.service';
 import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
+import { RemoveEmployeeWithTransferService } from '@/application/services/employee/remove-employee-with-transfer.service';
 import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
 import { UpdateEmployeeService } from '@/application/services/employee/update-employee.service';
@@ -26,6 +27,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     SuspendEmployeeService,
     ActivateEmployeeService,
     RemoveEmployeeService,
+    RemoveEmployeeWithTransferService,
     ResendInviteService,
     ChangeEmployeeRoleService,
     UpdateEmployeeService,
@@ -40,6 +42,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     SuspendEmployeeService,
     ActivateEmployeeService,
     RemoveEmployeeService,
+    RemoveEmployeeWithTransferService,
     ResendInviteService,
     ChangeEmployeeRoleService,
     UpdateEmployeeService,
