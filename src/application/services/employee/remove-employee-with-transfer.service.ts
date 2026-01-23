@@ -4,8 +4,8 @@ import {
   DomainValidationException,
   EntityNotFoundException,
 } from '@/core/domain/shared/exceptions/domain.exception';
-import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { ActionMovementRepository } from '@/core/ports/repositories/action-movement.repository';
+import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { TransactionManager } from '@/core/ports/services/transaction-manager.port';
@@ -134,9 +134,7 @@ export class RemoveEmployeeWithTransferService {
       throw new EntityNotFoundException('Usuário', 'não encontrado');
     }
 
-    // Executar operação em transação
     const result = await this.transactionManager.execute(async (tx) => {
-      // 1. Buscar ações pendentes do colaborador
       const pendingActions = await this.actionRepository.findByResponsibleId(
         companyUser.userId,
         {
@@ -148,9 +146,7 @@ export class RemoveEmployeeWithTransferService {
 
       const actionDetails: ActionTransferred[] = [];
 
-      // 2. Transferir cada ação e criar movimento de auditoria
       for (const action of pendingActions) {
-        // Atualizar responsável da ação
         await this.actionRepository.update(
           action.id,
           {
@@ -159,7 +155,6 @@ export class RemoveEmployeeWithTransferService {
           tx,
         );
 
-        // Criar movimento de auditoria
         const movement = new ActionMovement(
           randomUUID(),
           action.id,
@@ -180,8 +175,6 @@ export class RemoveEmployeeWithTransferService {
         });
       }
 
-      // 3. Remover usuário de todos os times da empresa
-      // Primeiro, buscar todos os times da empresa
       const prismaTx = tx as PrismaTransactionClient;
       const companyTeams = await prismaTx.team.findMany({
         where: {
@@ -192,7 +185,6 @@ export class RemoveEmployeeWithTransferService {
 
       const companyTeamIds = companyTeams.map((team) => team.id);
 
-      // Deletar todas as memberships do usuário nesses times
       const deleteResult = await prismaTx.teamUser.deleteMany({
         where: {
           userId: companyUser.userId,
@@ -204,7 +196,6 @@ export class RemoveEmployeeWithTransferService {
 
       const teamsRemovedFrom = deleteResult.count;
 
-      // 5. Atualizar status do colaborador
       await this.companyUserRepository.update(
         companyUser.id,
         {
