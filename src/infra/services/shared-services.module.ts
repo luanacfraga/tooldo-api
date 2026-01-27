@@ -1,3 +1,4 @@
+import { OpenAIService } from '@/infra/services/ai/openai.service';
 import { StubAIService } from '@/infra/services/ai/stub-ai.service';
 import { ConsoleEmailService } from '@/infra/services/email/console-email.service';
 import { ResendEmailService } from '@/infra/services/email/resend-email.service';
@@ -39,7 +40,9 @@ const passwordResetTokenServiceProvider: ClassProvider = {
 
 const aiServiceProvider: ClassProvider = {
   provide: 'AIService',
-  useClass: StubAIService,
+  // Usa OpenAIService quando OPENAI_API_KEY estiver configurada.
+  // Caso contrário, cai para StubAIService para ambientes locais/dev.
+  useClass: process.env.OPENAI_API_KEY ? OpenAIService : StubAIService,
 };
 
 @Module({

@@ -1,12 +1,17 @@
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
+import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';
 import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import type {
   ActionSuggestion,
   AIService,
 } from '@/core/ports/services/ai-service.port';
 import { Inject, Injectable } from '@nestjs/common';
+import {
+  IAUsageService,
+  type UsageStats,
+} from '@/application/services/ia-usage/ia-usage.service';
 
 export interface GenerateActionPlanInput {
   companyId: string;
