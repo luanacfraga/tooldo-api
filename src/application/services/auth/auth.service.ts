@@ -88,15 +88,11 @@ export class AuthService {
       throw new AuthenticationException(ErrorMessages.AUTH.INVALID_CREDENTIALS);
     }
 
-    // Verifica se o usuário está suspenso (apenas para não-admins)
-    // Admins não são suspensos via CompanyUser, então podem sempre fazer login
     if (user.role !== UserRole.ADMIN && user.role !== UserRole.MASTER) {
       const companyUsers = await this.companyUserRepository.findByUserId(
         user.id,
       );
 
-      // Se o usuário não tem nenhuma empresa vinculada, permite login
-      // Mas se tem empresas e todas estão suspensas, bloqueia
       if (companyUsers.length > 0) {
         const hasActiveCompany = companyUsers.some(
           (cu) => cu.status === CompanyUserStatus.ACTIVE,
@@ -118,7 +114,6 @@ export class AuthService {
     const refresh_token = await this.generateRefreshToken(user.id);
     const refreshTokenExpiresAt = this.getRefreshTokenExpirationDate();
 
-    // Armazena o refresh token no banco de dados
     await this.userRepository.updateRefreshToken(
       user.id,
       refresh_token,
@@ -139,14 +134,12 @@ export class AuthService {
   }
 
   async refreshAccessToken(refreshToken: string): Promise<LoginOutput> {
-    // Busca o usuário pelo refresh token
     const user = await this.userRepository.findByRefreshToken(refreshToken);
 
     if (!user) {
       throw new AuthenticationException(ErrorMessages.AUTH.INVALID_CREDENTIALS);
     }
 
-    // Gera um novo access token
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -155,7 +148,6 @@ export class AuthService {
 
     const access_token = await this.jwtService.signAsync(payload);
 
-    // Opcionalmente, gera um novo refresh token (rotação de tokens)
     const new_refresh_token = await this.generateRefreshToken(user.id);
     const refreshTokenExpiresAt = this.getRefreshTokenExpirationDate();
 
@@ -179,7 +171,6 @@ export class AuthService {
   }
 
   async logout(userId: string): Promise<void> {
-    // Remove o refresh token do banco de dados
     await this.userRepository.updateRefreshToken(userId, null, null);
   }
 }

@@ -46,8 +46,6 @@ export class UpdateEmployeeService {
       throw new EntityNotFoundException('Funcionário', input.companyUserId);
     }
 
-    // Permite edição mesmo quando está em fase de convite
-    // Apenas valida se não foi removido
     if (companyUser.isRemoved()) {
       throw new DomainValidationException(
         'Não é possível editar um funcionário removido',
@@ -59,8 +57,6 @@ export class UpdateEmployeeService {
       throw new EntityNotFoundException('Usuário', companyUser.userId);
     }
 
-    // Atualiza dados do usuário
-    // Usamos um objeto solto para não violar os campos readonly da entidade de domínio
     const userUpdateData: Record<string, unknown> = {};
     if (input.firstName !== undefined) {
       userUpdateData.firstName = input.firstName;
@@ -69,21 +65,18 @@ export class UpdateEmployeeService {
       userUpdateData.lastName = input.lastName;
     }
     if (input.email !== undefined) {
-      // Email só pode ser alterado para usuários convidados (não ativos)
       if (!companyUser.isInvited()) {
         throw new DomainValidationException(
           'O email não pode ser alterado para funcionários ativos',
         );
       }
 
-      // Valida se o email não está vazio
       if (!input.email || input.email.trim() === '') {
         throw new DomainValidationException('O email não pode ser vazio');
       }
 
       const trimmedEmail = input.email.trim().toLowerCase();
 
-      // Valida se o novo email não está sendo usado por outro usuário
       if (trimmedEmail !== user.email.toLowerCase()) {
         const existingUser =
           await this.userRepository.findByEmail(trimmedEmail);
@@ -94,7 +87,6 @@ export class UpdateEmployeeService {
       }
     }
     if (input.phone !== undefined) {
-      // Remove valores temporários (temp_${userId}) ou strings vazias
       if (
         !input.phone ||
         input.phone.trim() === '' ||
@@ -106,7 +98,6 @@ export class UpdateEmployeeService {
       }
     }
     if (input.document !== undefined) {
-      // Remove valores temporários (temp_${userId}) ou strings vazias
       if (
         !input.document ||
         input.document.trim() === '' ||
@@ -123,8 +114,6 @@ export class UpdateEmployeeService {
       userUpdateData as Partial<User>,
     );
 
-    // Atualiza dados do vínculo empresa-usuário
-    // Usamos um objeto solto para não violar os campos readonly da entidade de domínio
     const companyUserUpdateData: Record<string, unknown> = {};
     if (input.position !== undefined) {
       companyUserUpdateData.position = input.position || null;

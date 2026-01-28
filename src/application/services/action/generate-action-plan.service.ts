@@ -1,6 +1,11 @@
+import {
+  IAUsageService,
+  type UsageStats,
+} from '@/application/services/ia-usage/ia-usage.service';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
+import type { SubscriptionRepository } from '@/core/ports/repositories/subscription.repository';
 import type { TeamRepository } from '@/core/ports/repositories/team.repository';
 import type {
   ActionSuggestion,
@@ -12,10 +17,12 @@ export interface GenerateActionPlanInput {
   companyId: string;
   teamId?: string;
   goal: string;
+  userId: string;
 }
 
 export interface GenerateActionPlanOutput {
   suggestions: ActionSuggestion[];
+  usage: UsageStats;
 }
 
 @Injectable()
@@ -29,6 +36,9 @@ export class GenerateActionPlanService {
     private readonly teamRepository: TeamRepository,
     @Inject('ActionRepository')
     private readonly actionRepository: ActionRepository,
+    @Inject('SubscriptionRepository')
+    private readonly subscriptionRepository: SubscriptionRepository,
+    private readonly iaUsageService: IAUsageService,
   ) {}
 
   async execute(
@@ -38,6 +48,17 @@ export class GenerateActionPlanService {
     if (!company) {
       throw new EntityNotFoundException('Empresa', input.companyId);
     }
+
+    const subscription = await this.subscriptionRepository.findActiveByAdminId(
+      company.adminId,
+    );
+    if (!subscription) {
+      throw new EntityNotFoundException('Assinatura ativa', company.adminId);
+    }
+
+    await this.iaUsageService.validateLimit({
+      subscriptionId: subscription.id,
+    });
 
     let teamName: string | undefined;
     let teamContext: string | undefined;
@@ -70,8 +91,18 @@ export class GenerateActionPlanService {
       })),
     });
 
+    await this.iaUsageService.registerUsage({
+      subscriptionId: subscription.id,
+      userId: input.userId,
+      companyId: input.companyId,
+      callsUsed: 1,
+    });
+
+    const usage = await this.iaUsageService.getUsageStats(subscription.id);
+
     return {
       suggestions,
+      usage,
     };
   }
 
@@ -83,7 +114,6 @@ export class GenerateActionPlanService {
       ? await this.actionRepository.findByTeamId(teamId)
       : await this.actionRepository.findByCompanyId(companyId);
 
-    // Return up to 5 most recent actions
     return actions.slice(0, 5).map((action) => ({
       title: action.title,
       description: action.description,

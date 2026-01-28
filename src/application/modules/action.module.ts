@@ -10,6 +10,7 @@ import { UpdateActionService } from '@/application/services/action/update-action
 import { AddChecklistItemService } from '@/application/services/checklist/add-checklist-item.service';
 import { ToggleChecklistItemService } from '@/application/services/checklist/toggle-checklist-item.service';
 import { ReorderChecklistItemsService } from '@/application/services/checklist/reorder-checklist-items.service';
+import { IAUsageService } from '@/application/services/ia-usage/ia-usage.service';
 import { DatabaseModule } from '@/infra/database/database.module';
 import { SharedServicesModule } from '@/infra/services/shared-services.module';
 import { Module } from '@nestjs/common';
@@ -29,6 +30,7 @@ import { Module } from '@nestjs/common';
     AddChecklistItemService,
     ToggleChecklistItemService,
     ReorderChecklistItemsService,
+    IAUsageService,
   ],
   exports: [
     CreateActionService,
@@ -43,6 +45,7 @@ import { Module } from '@nestjs/common';
     AddChecklistItemService,
     ToggleChecklistItemService,
     ReorderChecklistItemsService,
+    IAUsageService,
   ],
 })
 export class ActionApplicationModule {}

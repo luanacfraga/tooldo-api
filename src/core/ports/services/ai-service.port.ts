@@ -1,9 +1,11 @@
 import { ActionPriority } from '@/core/domain/shared/enums';
 
 export interface ActionSuggestion {
+  rootCause: string;
   title: string;
   description: string;
   priority: ActionPriority;
+  estimatedStartDays: number;
   estimatedDurationDays: number;
   checklistItems: string[];
 }

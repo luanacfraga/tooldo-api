@@ -94,12 +94,9 @@ export class UpdateActionService {
         tx,
       );
 
-      // If checklistItems were provided, replace the entire checklist in a single operation
       if (input.checklistItems) {
-        // Remove existing items
         await this.checklistItemRepository.deleteByActionId(input.actionId, tx);
 
-        // Recreate all items based on the payload, preserving the array order
         for (let index = 0; index < input.checklistItems.length; index++) {
           const itemInput = input.checklistItems[index];
           const isCompleted = itemInput.isCompleted ?? false;

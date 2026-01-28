@@ -14,8 +14,6 @@ export class KanbanOrderResponseDto {
     enum: ActionStatus,
     example: ActionStatus.IN_PROGRESS,
   })
-  // Note: Uses ActionStatus enum as Kanban columns map directly to action statuses
-  // (TODO, IN_PROGRESS, DONE) as defined in the database schema
   column!: ActionStatus;
 
   @ApiProperty({

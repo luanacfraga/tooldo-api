@@ -40,7 +40,6 @@ export class ChangeEmployeeRoleService {
   async execute(
     input: ChangeEmployeeRoleInput,
   ): Promise<ChangeEmployeeRoleOutput> {
-    // 1. Buscar o funcionário (companyUser)
     const companyUser = await this.companyUserRepository.findById(
       input.companyUserId,
     );
@@ -49,19 +48,16 @@ export class ChangeEmployeeRoleService {
       throw new EntityNotFoundException('Funcionário', input.companyUserId);
     }
 
-    // 2. Validar que o funcionário está ACTIVE
     if (!companyUser.isActive()) {
       throw new DomainValidationException('Funcionário não está ativo');
     }
 
-    // 3. Validar que o novo cargo é diferente do atual
     if (companyUser.role === input.newRole) {
       throw new DomainValidationException(
         'O novo cargo deve ser diferente do cargo atual',
       );
     }
 
-    // 4. Se está deixando de ser gestor, garantir que não é gestor de nenhuma equipe desta empresa
     if (
       companyUser.role === UserRole.MANAGER &&
       input.newRole !== UserRole.MANAGER
@@ -81,7 +77,6 @@ export class ChangeEmployeeRoleService {
       }
     }
 
-    // 5. Validar que o funcionário não tem ações pendentes (TODO) ou em andamento (IN_PROGRESS)
     const pendingTodo = await this.actionRepository.findByResponsibleId(
       companyUser.userId,
       { status: ActionStatus.TODO },
@@ -104,8 +99,6 @@ export class ChangeEmployeeRoleService {
       );
     }
 
-    // 6. Atualizar vínculos de equipe conforme o novo cargo
-    // - Se virar manager ou consultant, não deve mais ser executor em nenhuma equipe
     if (
       input.newRole === UserRole.MANAGER ||
       input.newRole === UserRole.CONSULTANT
@@ -119,7 +112,6 @@ export class ChangeEmployeeRoleService {
       }
     }
 
-    // 7. Atualizar o cargo no CompanyUser
     const updatedCompanyUser = await this.companyUserRepository.update(
       companyUser.id,
       {
@@ -127,7 +119,6 @@ export class ChangeEmployeeRoleService {
       } as Partial<CompanyUser>,
     );
 
-    // 8. Atualizar também o User.role (exceto para admin e master que são roles globais)
     const user = await this.userRepository.findById(companyUser.userId);
     if (user && user.role !== UserRole.ADMIN && user.role !== UserRole.MASTER) {
       await this.userRepository.update(companyUser.userId, {

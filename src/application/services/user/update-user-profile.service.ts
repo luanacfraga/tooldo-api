@@ -17,9 +17,6 @@ export class UpdateUserProfileService {
   ) {}
 
   async execute(input: UpdateUserProfileInput): Promise<User> {
-    // Usamos um objeto solto para não violar os campos readonly da entidade de domínio.
-    // Usa um objeto solto para não violar os campos readonly da entidade de domínio
-    // e faz o cast somente na chamada ao repositório.
     const updateData: Record<string, unknown> = {};
 
     if (typeof input.phone === 'string') {

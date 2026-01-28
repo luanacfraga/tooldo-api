@@ -46,10 +46,10 @@ import {
 } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
 import { ActionResponseDto } from './dto/action-response.dto';
-import { ActionSuggestionResponseDto } from './dto/action-suggestion-response.dto';
 import { AddChecklistItemDto } from './dto/add-checklist-item.dto';
 import { BlockActionDto } from './dto/block-action.dto';
 import { CreateActionDto } from './dto/create-action.dto';
+import { GenerateActionPlanResponseDto } from './dto/generate-action-plan-response.dto';
 import { GenerateActionPlanDto } from './dto/generate-action-plan.dto';
 import { ListActionsQueryDto } from './dto/list-actions.dto';
 import { MoveActionDto } from './dto/move-action.dto';
@@ -86,7 +86,6 @@ export class ActionController {
     }
     const result = await this.getActionService.execute({ actionId });
     if (result.result.action.responsibleId !== req.user.sub) {
-      // Hide existence for unauthorized access
       throw new EntityNotFoundException('Ação', actionId);
     }
   }
@@ -264,13 +263,11 @@ export class ActionController {
   ): Promise<ActionResponseDto> {
     await this.assertExecutorOwnsAction(id, req);
 
-    // Primeiro, atualiza a ação (incluindo checklist, quando enviada)
     await this.updateActionService.execute({
       actionId: id,
       ...dto,
     });
 
-    // Em seguida, busca a ação completa já atualizada, com checklist, kanbanOrder e responsável
     const result = await this.getActionService.execute({ actionId: id });
 
     return ActionResponseDto.fromDomain(
@@ -409,16 +406,18 @@ export class ActionController {
   })
   @ApiOkResponse({
     description: 'Plano de ação gerado com sucesso',
-    type: [ActionSuggestionResponseDto],
+    type: GenerateActionPlanResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
   async generate(
     @Body() dto: GenerateActionPlanDto,
-  ): Promise<ActionSuggestionResponseDto[]> {
-    const result = await this.generateActionPlanService.execute(dto);
-    return result.suggestions.map((suggestion) =>
-      ActionSuggestionResponseDto.fromDomain(suggestion),
-    );
+    @Request() req: RequestWithUser,
+  ): Promise<GenerateActionPlanResponseDto> {
+    const result = await this.generateActionPlanService.execute({
+      ...dto,
+      userId: req.user.sub,
+    });
+    return GenerateActionPlanResponseDto.fromDomain(result);
   }
 
   @Post(':id/checklist')

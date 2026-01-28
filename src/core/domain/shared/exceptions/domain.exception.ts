@@ -35,3 +35,16 @@ export class AuthenticationException extends DomainException {
     super(message);
   }
 }
+
+export class IALimitExceededException extends DomainException {
+  constructor(
+    public readonly used: number,
+    public readonly limit: number,
+    public readonly planName?: string,
+  ) {
+    const message = planName
+      ? `Limite de chamadas de IA excedido para o plano ${planName}. Usado: ${used}/${limit}`
+      : `Limite de chamadas de IA excedido. Usado: ${used}/${limit}`;
+    super(message);
+  }
+}

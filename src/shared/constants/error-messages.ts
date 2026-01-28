@@ -139,6 +139,15 @@ export const ErrorMessages = {
     MOVED_BY_ID_REQUIRED: 'O movedById do movimento é obrigatório',
     MOVED_AT_INVALID: 'A data do movimento deve ser uma data válida',
   },
+
+  IA_USAGE: {
+    ID_REQUIRED: 'O id do uso de IA é obrigatório',
+    SUBSCRIPTION_ID_REQUIRED: 'O subscriptionId do uso de IA é obrigatório',
+    TOKENS_USED_INVALID:
+      'A quantidade de tokens usados deve ser maior ou igual a 0',
+    CREATED_AT_INVALID: 'A data de criação deve ser uma data válida',
+  },
+
   VALIDATION: {
     STRING_REQUIRED: 'Este campo deve ser uma string',
     NOT_EMPTY: 'Este campo é obrigatório',

@@ -89,7 +89,6 @@ export class TeamController {
     @Body() createTeamDto: CreateTeamDto,
     @CurrentUser() user: JwtPayload,
   ): Promise<TeamResponseDto> {
-    // Se for MANAGER, só pode criar equipes onde ele é o gestor
     if (
       user.role === UserRole.MANAGER &&
       createTeamDto.managerId !== user.sub
@@ -185,7 +184,6 @@ export class TeamController {
     @Param('companyId') companyId: string,
     @CurrentUser() user: JwtPayload,
   ): Promise<TeamResponseDto[]> {
-    // Se for MANAGER, retorna apenas suas equipes
     if (user.role === UserRole.MANAGER) {
       const result = await this.listTeamsByManagerService.execute({
         managerId: user.sub,
@@ -194,7 +192,6 @@ export class TeamController {
       return result.teams.map((team) => TeamResponseDto.fromDomain(team));
     }
 
-    // Se for ADMIN, retorna todas as equipes da empresa
     const result = await this.listTeamsService.execute({ companyId });
     return result.teams.map((team) => TeamResponseDto.fromDomain(team));
   }
@@ -321,31 +318,22 @@ export class TeamController {
       throw new EntityNotFoundException('Equipe', teamId);
     }
 
-    // Todos funcionários ativos da empresa com dados de usuário
     const companyUsers =
       await this.companyUserRepository.findByCompanyIdAndStatus(
         team.companyId,
         CompanyUserStatus.ACTIVE,
       );
 
-    // Membros executores da equipe
     const teamUsers = await this.teamUserRepository.findByTeamId(teamId);
     const executorUserIds = new Set(teamUsers.map((m) => m.userId));
 
-    // Regras por papel:
-    // - ADMIN: pode ver gestor + executores da equipe (como antes)
-    // - MANAGER: apenas se for gestor da equipe; vê gestor + executores da equipe
-    // - EXECUTOR: pode criar ações apenas para si; retorna somente o próprio registro
-
     if (user.role === UserRole.MANAGER) {
       if (team.managerId !== user.sub) {
-        // Oculta existência de equipes onde não é gestor
         throw new EntityNotFoundException('Equipe', teamId);
       }
     }
 
     if (user.role === UserRole.EXECUTOR) {
-      // Executor só pode ser responsável por ações dele mesmo
       const selfCompanyUser = companyUsers.find(
         (cu) => cu.userId === user.sub && cu.role === UserRole.EXECUTOR,
       );
@@ -356,7 +344,6 @@ export class TeamController {
 
       const isMemberOfTeam = executorUserIds.has(user.sub);
       if (!isMemberOfTeam) {
-        // Executor não pertence a esta equipe
         throw new EntityNotFoundException('Membro da equipe', user.sub);
       }
 
@@ -364,12 +351,10 @@ export class TeamController {
     }
 
     const responsibles = companyUsers.filter((cu) => {
-      // Gestor da equipe sempre pode ser responsável
       if (cu.userId === team.managerId) {
         return true;
       }
 
-      // Executores que fazem parte da equipe
       if (cu.role === UserRole.EXECUTOR && executorUserIds.has(cu.userId)) {
         return true;
       }

@@ -4,6 +4,12 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ActionSuggestionResponseDto {
   @ApiProperty({
+    description: 'Causa raiz identificada para a ação',
+    example: 'Baixa produtividade na equipe de desenvolvimento',
+  })
+  rootCause!: string;
+
+  @ApiProperty({
     description: 'Título sugerido para a ação',
     example: 'Planejar: Aumentar produtividade da equipe',
   })
@@ -23,6 +29,12 @@ export class ActionSuggestionResponseDto {
   priority!: ActionPriority;
 
   @ApiProperty({
+    description: 'Dias após hoje para iniciar a ação',
+    example: 0,
+  })
+  estimatedStartDays!: number;
+
+  @ApiProperty({
     description: 'Duração estimada em dias',
     example: 5,
   })
@@ -37,9 +49,11 @@ export class ActionSuggestionResponseDto {
 
   static fromDomain(suggestion: ActionSuggestion): ActionSuggestionResponseDto {
     const response = new ActionSuggestionResponseDto();
+    response.rootCause = suggestion.rootCause;
     response.title = suggestion.title;
     response.description = suggestion.description;
     response.priority = suggestion.priority;
+    response.estimatedStartDays = suggestion.estimatedStartDays;
     response.estimatedDurationDays = suggestion.estimatedDurationDays;
     response.checklistItems = suggestion.checklistItems;
     return response;

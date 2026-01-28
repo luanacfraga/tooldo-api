@@ -57,7 +57,6 @@ export class CreateActionService {
     await this.validateInput(input);
 
     return this.transactionManager.execute(async (tx) => {
-      // Get last position in TODO column
       const lastKanbanOrder =
         await this.actionRepository.findLastKanbanOrderInColumn(
           ActionStatus.TODO,
@@ -65,7 +64,6 @@ export class CreateActionService {
         );
       const nextPosition = (lastKanbanOrder?.position ?? -1) + 1;
 
-      // Create action domain object
       const action = new Action(
         randomUUID(),
         input.rootCause,
@@ -86,8 +84,6 @@ export class CreateActionService {
         input.responsibleId,
         null, // deletedAt
       );
-
-      // Create action with kanbanOrder
       const created = await this.actionRepository.createWithKanbanOrder(
         action,
         ActionStatus.TODO,
@@ -95,7 +91,6 @@ export class CreateActionService {
         tx,
       );
 
-      // Optionally create checklist items in the same transaction
       if (input.checklistItems?.length) {
         for (let index = 0; index < input.checklistItems.length; index++) {
           const itemInput = input.checklistItems[index];

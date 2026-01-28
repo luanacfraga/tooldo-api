@@ -217,9 +217,6 @@ export class CompanyController {
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
   ): Promise<CompanyDashboardSummaryResponseDto> {
-    // Basic access check:
-    // - Admin can access only their own companies
-    // - Other roles must be active members of the company
     const company = await this.companyRepository.findById(id);
     if (!company) {
       throw new EntityNotFoundException('Empresa', id);
@@ -227,7 +224,6 @@ export class CompanyController {
 
     if (user.role === UserRole.ADMIN) {
       if (company.adminId !== user.sub) {
-        // Hide existence of the company for non-owner admins
         throw new EntityNotFoundException('Empresa', id);
       }
     } else {
@@ -280,7 +276,6 @@ export class CompanyController {
     @CurrentUser() user: JwtPayload,
     @Query() query: ExecutorDashboardQueryDto,
   ): Promise<ExecutorDashboardResponseDto> {
-    // Access check: same logic as dashboard-summary
     const company = await this.companyRepository.findById(id);
     if (!company) {
       throw new EntityNotFoundException('Empresa', id);
@@ -353,9 +348,6 @@ export class CompanyController {
       throw new EntityNotFoundException('Empresa', id);
     }
 
-    // Mesmo modelo de acesso do dashboard:
-    // - Admin só acessa as próprias empresas
-    // - Outros papéis precisam ser membros ativos da empresa
     if (user.role === UserRole.ADMIN) {
       if (company.adminId !== user.sub) {
         throw new EntityNotFoundException('Empresa', id);
@@ -424,9 +416,6 @@ export class CompanyController {
       throw new EntityNotFoundException('Empresa', id);
     }
 
-    // Acesso:
-    // - Admin: apenas para as próprias empresas
-    // - Outros papéis: precisam ser membros ativos da empresa
     if (user.role === UserRole.ADMIN) {
       if (company.adminId !== user.sub) {
         throw new EntityNotFoundException('Empresa', id);
@@ -447,12 +436,10 @@ export class CompanyController {
         CompanyUserStatus.ACTIVE,
       );
 
-    // ADMIN: pode escolher qualquer funcionário ativo da empresa
     if (user.role === UserRole.ADMIN) {
       return companyUsers.map((cu) => EmployeeResponseDto.fromDomain(cu));
     }
 
-    // EXECUTOR: pode ser responsável apenas por si mesmo (desde que ativo na empresa)
     if (user.role === UserRole.EXECUTOR) {
       const selfCompanyUser = companyUsers.find((cu) => cu.userId === user.sub);
       if (!selfCompanyUser) {
@@ -461,7 +448,6 @@ export class CompanyController {
       return [EmployeeResponseDto.fromDomain(selfCompanyUser)];
     }
 
-    // MANAGER: responsáveis são gestor + executores das equipes onde ele é gestor nesta empresa
     if (user.role === UserRole.MANAGER) {
       const teamsOfManager = await this.teamRepository.findByManagerId(
         user.sub,
@@ -474,7 +460,6 @@ export class CompanyController {
         return [];
       }
 
-      // Constrói conjunto de userIds executores membros das equipes do gestor
       const executorUserIds = new Set<string>();
 
       for (const team of teamsInCompany) {
@@ -485,12 +470,10 @@ export class CompanyController {
       }
 
       const responsibles = companyUsers.filter((cu) => {
-        // O próprio gestor sempre pode ser responsável
         if (cu.userId === user.sub && cu.role === UserRole.MANAGER) {
           return true;
         }
 
-        // Executores que fazem parte de pelo menos uma das equipes dele
         if (cu.role === UserRole.EXECUTOR && executorUserIds.has(cu.userId)) {
           return true;
         }
@@ -501,7 +484,6 @@ export class CompanyController {
       return responsibles.map((cu) => EmployeeResponseDto.fromDomain(cu));
     }
 
-    // Outros papéis (consultant, etc.): por enquanto não retornam responsáveis
     return [];
   }
 
