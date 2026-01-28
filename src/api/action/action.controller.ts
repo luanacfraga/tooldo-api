@@ -49,8 +49,8 @@ import { ActionResponseDto } from './dto/action-response.dto';
 import { AddChecklistItemDto } from './dto/add-checklist-item.dto';
 import { BlockActionDto } from './dto/block-action.dto';
 import { CreateActionDto } from './dto/create-action.dto';
-import { GenerateActionPlanDto } from './dto/generate-action-plan.dto';
 import { GenerateActionPlanResponseDto } from './dto/generate-action-plan-response.dto';
+import { GenerateActionPlanDto } from './dto/generate-action-plan.dto';
 import { ListActionsQueryDto } from './dto/list-actions.dto';
 import { MoveActionDto } from './dto/move-action.dto';
 import { ReorderChecklistItemsDto } from './dto/reorder-checklist-items.dto';
@@ -86,7 +86,6 @@ export class ActionController {
     }
     const result = await this.getActionService.execute({ actionId });
     if (result.result.action.responsibleId !== req.user.sub) {
-      // Hide existence for unauthorized access
       throw new EntityNotFoundException('Ação', actionId);
     }
   }
@@ -264,13 +263,11 @@ export class ActionController {
   ): Promise<ActionResponseDto> {
     await this.assertExecutorOwnsAction(id, req);
 
-    // Primeiro, atualiza a ação (incluindo checklist, quando enviada)
     await this.updateActionService.execute({
       actionId: id,
       ...dto,
     });
 
-    // Em seguida, busca a ação completa já atualizada, com checklist, kanbanOrder e responsável
     const result = await this.getActionService.execute({ actionId: id });
 
     return ActionResponseDto.fromDomain(

@@ -8,8 +8,8 @@ import { ChangeEmployeeRoleService } from '@/application/services/employee/chang
 import { InviteEmployeeService } from '@/application/services/employee/invite-employee.service';
 import { ListEmployeesService } from '@/application/services/employee/list-employees.service';
 import { ListExecutorsService } from '@/application/services/employee/list-executors.service';
-import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
 import { RemoveEmployeeWithTransferService } from '@/application/services/employee/remove-employee-with-transfer.service';
+import { RemoveEmployeeService } from '@/application/services/employee/remove-employee.service';
 import { ResendInviteService } from '@/application/services/employee/resend-invite.service';
 import { SuspendEmployeeService } from '@/application/services/employee/suspend-employee.service';
 import { UpdateEmployeeService } from '@/application/services/employee/update-employee.service';
@@ -47,8 +47,8 @@ import {
 } from './dto/employee-response.dto';
 import { InviteEmployeeDto } from './dto/invite-employee.dto';
 import { ListEmployeesQueryDto } from './dto/list-employees.dto';
-import { RemoveEmployeeWithTransferDto } from './dto/remove-employee-with-transfer.dto';
 import { RemoveEmployeeWithTransferResponseDto } from './dto/remove-employee-with-transfer-response.dto';
+import { RemoveEmployeeWithTransferDto } from './dto/remove-employee-with-transfer.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 interface AuthenticatedRequest extends Request {
@@ -397,8 +397,6 @@ export class EmployeeController {
       role: updateEmployeeDto.role,
     });
 
-    // Inclui os dados do usuário atualizado na resposta
-    // Criamos um objeto compatível com CompanyUserWithUser
     const companyUserWithUser = {
       ...result.companyUser,
       user: {

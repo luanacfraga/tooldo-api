@@ -25,13 +25,11 @@ export class ReorderChecklistItemsService {
   async execute(
     input: ReorderChecklistItemsInput,
   ): Promise<ReorderChecklistItemsOutput> {
-    // Verify action exists
     const action = await this.actionRepository.findById(input.actionId);
     if (!action) {
       throw new EntityNotFoundException('Ação', input.actionId);
     }
 
-    // Update order for each item
     const updatedItems: ChecklistItem[] = [];
     for (let i = 0; i < input.itemIds.length; i++) {
       const itemId = input.itemIds[i];

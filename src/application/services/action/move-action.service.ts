@@ -10,7 +10,7 @@ import { randomUUID } from 'crypto';
 export interface MoveActionInput {
   actionId: string;
   toStatus: ActionStatus;
-  position?: number; // Optional: if not provided, will be placed at the end
+  position?: number;
   movedById: string;
   notes?: string;
 }
@@ -42,45 +42,35 @@ export class MoveActionService {
   ) {}
 
   async execute(input: MoveActionInput): Promise<MoveActionOutput> {
-    // 1. Find the action
     const action = await this.actionRepository.findById(input.actionId);
     if (!action) {
       throw new EntityNotFoundException('Ação', input.actionId);
     }
 
-    // 2. Get current kanban order
     const currentKanbanOrder =
       await this.actionRepository.findKanbanOrderByActionId(input.actionId);
 
     const fromStatus = action.status;
     const toStatus = input.toStatus;
 
-    // 3. Calculate time spent in previous column (in seconds)
     let timeSpent: number | null = null;
     if (currentKanbanOrder) {
       const timeSpentMs = Date.now() - currentKanbanOrder.lastMovedAt.getTime();
       timeSpent = Math.floor(timeSpentMs / 1000);
     }
 
-    // 4. Update action status with domain logic
     const updatedAction = action.updateStatus(toStatus);
 
-    // 5. Execute all database operations in a transaction
     return this.transactionManager.execute(async (tx) => {
-      // 6. Determine new position
       let newPosition = input.position;
       if (newPosition === undefined) {
-        // Place at the end of the destination column
         const lastInColumn =
           await this.actionRepository.findLastKanbanOrderInColumn(toStatus, tx);
         newPosition = lastInColumn ? lastInColumn.position + 1 : 0;
       }
 
       const oldPosition = currentKanbanOrder?.position;
-
-      // 7. Perform reordering based on move type
       if (fromStatus !== toStatus) {
-        // Cross-column move
         await this.handleCrossColumnMove(
           fromStatus,
           toStatus,
@@ -89,7 +79,6 @@ export class MoveActionService {
           tx,
         );
       } else if (oldPosition !== undefined && oldPosition !== newPosition) {
-        // Same-column move
         await this.handleSameColumnMove(
           fromStatus,
           oldPosition,
@@ -98,7 +87,6 @@ export class MoveActionService {
         );
       }
 
-      // 8. Create movement record
       const movement = new ActionMovement(
         randomUUID(),
         action.id,
@@ -110,7 +98,6 @@ export class MoveActionService {
         timeSpent,
       );
 
-      // 9. Update action with new status, timestamps, and kanban order
       const [savedAction, savedMovement] = await Promise.all([
         this.actionRepository.updateWithKanbanOrder(
           action.id,
@@ -129,7 +116,6 @@ export class MoveActionService {
         this.actionMovementRepository.create(movement, tx),
       ]);
 
-      // 10. Fetch the full kanban order
       const kanbanOrder =
         await this.actionRepository.findFullKanbanOrderByActionId(
           action.id,
@@ -155,7 +141,6 @@ export class MoveActionService {
     newPosition: number,
     tx: unknown,
   ): Promise<void> {
-    // 1. Make space in destination column at newPosition (increment positions >= newPosition)
     await this.actionRepository.updateActionsPositionInColumn(
       toStatus,
       newPosition,
@@ -163,7 +148,6 @@ export class MoveActionService {
       tx,
     );
 
-    // 2. Clean up source column (decrement positions > oldPosition)
     if (oldPosition !== undefined) {
       await this.actionRepository.updateActionsPositionInColumn(
         fromStatus,
@@ -181,7 +165,6 @@ export class MoveActionService {
     tx: unknown,
   ): Promise<void> {
     if (newPosition < oldPosition) {
-      // Moving up: shift items at positions [newPosition..oldPosition) down by 1
       await this.actionRepository.updateActionsPositionInRange(
         column,
         newPosition,
@@ -190,7 +173,6 @@ export class MoveActionService {
         tx,
       );
     } else {
-      // Moving down: shift items at positions (oldPosition..newPosition] up by 1
       await this.actionRepository.updateActionsPositionInRange(
         column,
         oldPosition + 1,

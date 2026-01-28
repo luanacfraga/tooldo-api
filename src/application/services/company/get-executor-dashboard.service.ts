@@ -79,7 +79,6 @@ function parseImpact(description: string | null | undefined): {
     return {};
   }
 
-  // Legacy free-text format used in movement notes / older descriptions
   const impactMatch = text.match(/(?:^|\n)\s*impacto\s*:\s*(.+)\s*$/im);
 
   const impact = impactMatch?.[1]?.trim();
@@ -218,7 +217,6 @@ export class GetExecutorDashboardService {
       );
     }
 
-    // Normalize to UTC day boundaries for trends/comparisons (emails/dashboard-like behavior).
     const fromDay = startOfDayUtc(from);
     const toDay = startOfDayUtc(to);
 
@@ -448,7 +446,6 @@ export class GetExecutorDashboardService {
         estimatedEndDate: a.action.estimatedEndDate,
       }));
 
-    // Team context (optional)
     const teamUser = await this.teamUserRepository.findByUserId(input.userId);
     let team: ExecutorDashboardTeamContext | null = null;
 

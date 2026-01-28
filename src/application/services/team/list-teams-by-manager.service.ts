@@ -23,7 +23,6 @@ export class ListTeamsByManagerService {
   ): Promise<ListTeamsByManagerOutput> {
     const teams = await this.teamRepository.findByManagerId(input.managerId);
 
-    // Se companyId foi fornecido, filtrar por empresa também
     const filteredTeams = input.companyId
       ? teams.filter((team) => team.companyId === input.companyId)
       : teams;

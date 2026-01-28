@@ -44,7 +44,7 @@ export class ChecklistItemResponseDto {
     response.id = item.id;
     response.description = item.description;
     response.isCompleted = item.isCompleted;
-    response.checked = item.isCompleted; // checked é o mesmo que isCompleted
+    response.checked = item.isCompleted;
     response.completedAt = item.completedAt
       ? item.completedAt.toISOString()
       : null;

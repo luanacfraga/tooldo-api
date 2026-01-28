@@ -134,7 +134,6 @@ describe('AuthService', () => {
       userRepository.findByEmail.mockResolvedValue(mockUser);
       passwordHasher.compare.mockResolvedValue(true);
       userRepository.updateRefreshToken.mockResolvedValue(undefined);
-      // Admin não precisa verificar CompanyUser
       jwtService.signAsync
         .mockResolvedValueOnce(expectedToken)
         .mockResolvedValueOnce(expectedRefreshToken);
@@ -167,7 +166,6 @@ describe('AuthService', () => {
         expectedRefreshToken,
         expect.any(Date),
       );
-      // Admin não verifica CompanyUser
       expect(companyUserRepository.findByUserId).not.toHaveBeenCalled();
     });
 

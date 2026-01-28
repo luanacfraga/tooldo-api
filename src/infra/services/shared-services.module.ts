@@ -21,8 +21,6 @@ const idGeneratorProvider: ClassProvider = {
 
 const emailServiceProvider: ClassProvider = {
   provide: 'EmailService',
-  // Usa sempre o fluxo de envio via Resend quando a RESEND_API_KEY estiver configurada.
-  // Caso contrário, cai para o ConsoleEmailService para ambientes locais/dev.
   useClass: process.env.RESEND_API_KEY
     ? ResendEmailService
     : ConsoleEmailService,

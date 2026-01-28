@@ -39,7 +39,7 @@ export class Action extends Entity {
   protected validate(): void {
     DomainValidator.validateRequiredString(
       this.rootCause,
-      ErrorMessages.ACTION.TITLE_REQUIRED, // Usando mensagem genérica por enquanto
+      ErrorMessages.ACTION.TITLE_REQUIRED,
     );
     DomainValidator.validateRequiredString(
       this.title,
@@ -62,7 +62,6 @@ export class Action extends Entity {
       ErrorMessages.ACTION.RESPONSIBLE_ID_REQUIRED,
     );
 
-    // Validate estimated dates
     DomainValidator.validateDate(
       this.estimatedStartDate,
       ErrorMessages.ACTION.ESTIMATED_START_DATE_INVALID,
@@ -77,7 +76,6 @@ export class Action extends Entity {
       ErrorMessages.ACTION.ESTIMATED_END_DATE_BEFORE_START,
     );
 
-    // Validate actual dates if present
     if (this.actualStartDate) {
       DomainValidator.validateDate(
         this.actualStartDate,
@@ -91,7 +89,6 @@ export class Action extends Entity {
       );
     }
 
-    // Validate blocked reason
     if (this.isBlocked && !this.blockedReason?.trim()) {
       throw new Error(ErrorMessages.ACTION.BLOCKED_REASON_REQUIRED);
     }
@@ -104,7 +101,6 @@ export class Action extends Entity {
   public calculateLateStatus(
     currentDate: Date = new Date(),
   ): ActionLateStatus | null {
-    // Normalize dates to compare only date part (ignore time)
     const today = new Date(currentDate);
     today.setHours(0, 0, 0, 0);
 
@@ -114,17 +110,14 @@ export class Action extends Entity {
     const estimatedEnd = new Date(this.estimatedEndDate);
     estimatedEnd.setHours(0, 0, 0, 0);
 
-    // LATE_TO_START: TODO status and start date has passed (not including today)
     if (this.status === ActionStatus.TODO && today > estimatedStart) {
       return ActionLateStatus.LATE_TO_START;
     }
 
-    // LATE_TO_FINISH: IN_PROGRESS status and end date has passed (not including today)
     if (this.status === ActionStatus.IN_PROGRESS && today > estimatedEnd) {
       return ActionLateStatus.LATE_TO_FINISH;
     }
 
-    // COMPLETED_LATE: DONE status and actually finished after estimated end date
     if (this.status === ActionStatus.DONE && this.actualEndDate) {
       const actualEnd = new Date(this.actualEndDate);
       actualEnd.setHours(0, 0, 0, 0);

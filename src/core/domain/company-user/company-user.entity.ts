@@ -79,8 +79,6 @@ export class CompanyUser extends Entity {
   }
 
   canBeRemoved(): boolean {
-    // Pode remover qualquer vínculo que ainda não foi marcado como REMOVED.
-    // Isso inclui: INVITED, ACTIVE, SUSPENDED e REJECTED.
     return !this.isRemoved();
   }
 }

@@ -15,13 +15,11 @@ export class JwtExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const exceptionResponse: any = exception.getResponse();
 
-    // Detecta se é um erro de token expirado
     const isTokenExpired =
       exceptionResponse?.message === 'jwt expired' ||
       (typeof exceptionResponse === 'string' &&
         exceptionResponse.includes('jwt expired'));
 
-    // Detecta se é um erro de token inválido
     const isInvalidToken =
       exceptionResponse?.message === 'invalid token' ||
       exceptionResponse?.message === 'jwt malformed' ||

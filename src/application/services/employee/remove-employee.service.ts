@@ -31,7 +31,6 @@ export class RemoveEmployeeService {
       throw new EntityNotFoundException('Funcionário', input.companyUserId);
     }
 
-    // Funcionários apenas convidados não podem ser removidos (apenas cancelar convite em outro fluxo).
     if (companyUser.isInvited()) {
       throw new DomainValidationException(
         'Este funcionário não pode ser removido',
@@ -44,7 +43,6 @@ export class RemoveEmployeeService {
       );
     }
 
-    // Marcação lógica como REMOVED (remoção do vínculo sem apagar histórico).
     const removedCompanyUser = await this.companyUserRepository.update(
       companyUser.id,
       {

@@ -32,7 +32,7 @@ interface PrismaTransactionClient {
 export interface RemoveEmployeeWithTransferInput {
   companyUserId: string;
   newResponsibleId: string;
-  currentUserId: string; // Quem está executando a operação
+  currentUserId: string;
 }
 
 export interface ActionTransferred {
@@ -76,7 +76,6 @@ export class RemoveEmployeeWithTransferService {
   async execute(
     input: RemoveEmployeeWithTransferInput,
   ): Promise<RemoveEmployeeWithTransferOutput> {
-    // Validações iniciais fora da transação
     const companyUser = await this.companyUserRepository.findById(
       input.companyUserId,
     );
@@ -85,7 +84,6 @@ export class RemoveEmployeeWithTransferService {
       throw new EntityNotFoundException('Funcionário', input.companyUserId);
     }
 
-    // Funcionários apenas convidados não podem ser removidos com transferência
     if (companyUser.isInvited()) {
       throw new DomainValidationException(
         'Funcionários convidados não podem ter ações transferidas. Cancele o convite.',
@@ -98,7 +96,6 @@ export class RemoveEmployeeWithTransferService {
       );
     }
 
-    // Validar novo responsável
     const newResponsibleCompanyUser =
       await this.companyUserRepository.findByCompanyAndUser(
         companyUser.companyId,
@@ -124,7 +121,6 @@ export class RemoveEmployeeWithTransferService {
       );
     }
 
-    // Buscar usuários para os nomes
     const employeeUser = await this.userRepository.findById(companyUser.userId);
     const newResponsibleUser = await this.userRepository.findById(
       input.newResponsibleId,
@@ -159,7 +155,7 @@ export class RemoveEmployeeWithTransferService {
           randomUUID(),
           action.id,
           action.status,
-          action.status, // Status não muda
+          action.status,
           input.currentUserId,
           new Date(),
           `Ação transferida automaticamente devido à saída do colaborador ${employeeUser.firstName} ${employeeUser.lastName}`,

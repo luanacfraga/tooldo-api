@@ -106,14 +106,12 @@ Considere o contexto da empresa, equipe e ações recentes para gerar sugestões
   private buildPrompt(input: GenerateActionPlanInput): string {
     const parts: string[] = [];
 
-    // Company context
     parts.push(`**EMPRESA:**`);
     parts.push(`Nome: ${input.companyName}`);
     if (input.companyDescription) {
       parts.push(`Descrição: ${input.companyDescription}`);
     }
 
-    // Team context
     if (input.teamName) {
       parts.push(`\n**EQUIPE:**`);
       parts.push(`Nome: ${input.teamName}`);
@@ -122,7 +120,6 @@ Considere o contexto da empresa, equipe e ações recentes para gerar sugestões
       }
     }
 
-    // Recent actions for context
     if (input.recentActions && input.recentActions.length > 0) {
       parts.push(`\n**AÇÕES RECENTES (para contexto):**`);
       input.recentActions.forEach((action, index) => {
@@ -132,11 +129,9 @@ Considere o contexto da empresa, equipe e ações recentes para gerar sugestões
       });
     }
 
-    // Main goal
     parts.push(`\n**OBJETIVO:**`);
     parts.push(input.goal);
 
-    // Instructions
     parts.push(`\n**TAREFA:**`);
     parts.push(
       `Gere um plano de ação com 3 sugestões complementares para alcançar este objetivo, considerando o contexto da empresa e equipe.`,

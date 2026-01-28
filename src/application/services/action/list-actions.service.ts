@@ -21,7 +21,6 @@ export interface ListActionsInput {
   status?: ActionStatus;
   statuses?: ActionStatus[];
   priority?: ActionPriority;
-  // Aceita um ou múltiplos valores via DTO, mas aqui normalizamos para array
   lateStatus?: ActionLateStatus[];
   isLate?: boolean;
   isBlocked?: boolean;
@@ -79,7 +78,6 @@ export class ListActionsService {
           priority: input.priority,
           teamId: input.teamId,
           responsibleId: input.responsibleId,
-          // Em caso de filtro combinado (bloqueadas + atrasadas), tratamos em memória.
           isBlocked: wantsLateOrBlocked ? undefined : input.isBlocked,
         },
       );
@@ -115,8 +113,6 @@ export class ListActionsService {
     const page = input.page ?? 1;
     const limit = input.limit ?? 20;
 
-    // Inspirado no weedu-api: calcula isLate dinamicamente (não depende do valor persistido)
-    // e só então aplica o filtro isLate.
     const now = new Date();
     let mapped = results.map((r) => {
       const actionWithDynamicIsLate = this.withDynamicIsLate(r.action, now);
@@ -150,7 +146,6 @@ export class ListActionsService {
         mapped = mapped.filter((r) => r.action.isBlocked);
       }
     } else {
-      // Filtros combinados de bloqueadas / atrasadas usando isLate
       if (wantsLateOrBlocked) {
         mapped = mapped.filter((r) => r.action.isBlocked || r.action.isLate);
       } else {
@@ -181,12 +176,10 @@ export class ListActionsService {
       mapped = mapped.filter((r) => set.has(r.action.status));
     }
 
-    // Date range filtering
     if (input.dateFrom || input.dateTo) {
       const dateFilterType = input.dateFilterType ?? 'estimatedStartDate';
 
       mapped = mapped.filter((r) => {
-        // Get the date to compare based on filter type
         let compareDate: Date | null = null;
 
         switch (dateFilterType) {
@@ -207,12 +200,10 @@ export class ListActionsService {
             break;
         }
 
-        // Skip if comparing actualStartDate/actualEndDate and it's null
         if (compareDate === null) {
           return false;
         }
 
-        // Apply from date filter
         if (input.dateFrom) {
           const fromDate = new Date(input.dateFrom);
           if (compareDate < fromDate) {
@@ -220,7 +211,6 @@ export class ListActionsService {
           }
         }
 
-        // Apply to date filter
         if (input.dateTo) {
           const toDate = new Date(input.dateTo);
           if (compareDate > toDate) {

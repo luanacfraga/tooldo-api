@@ -1,3 +1,7 @@
+import {
+  IAUsageService,
+  type UsageStats,
+} from '@/application/services/ia-usage/ia-usage.service';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
@@ -8,10 +12,6 @@ import type {
   AIService,
 } from '@/core/ports/services/ai-service.port';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  IAUsageService,
-  type UsageStats,
-} from '@/application/services/ia-usage/ia-usage.service';
 
 export interface GenerateActionPlanInput {
   companyId: string;
@@ -44,13 +44,11 @@ export class GenerateActionPlanService {
   async execute(
     input: GenerateActionPlanInput,
   ): Promise<GenerateActionPlanOutput> {
-    // 1. Buscar empresa
     const company = await this.companyRepository.findById(input.companyId);
     if (!company) {
       throw new EntityNotFoundException('Empresa', input.companyId);
     }
 
-    // 2. Buscar subscription ativa do admin da empresa
     const subscription = await this.subscriptionRepository.findActiveByAdminId(
       company.adminId,
     );
@@ -58,12 +56,10 @@ export class GenerateActionPlanService {
       throw new EntityNotFoundException('Assinatura ativa', company.adminId);
     }
 
-    // 3. Validar limite de chamadas de IA
     await this.iaUsageService.validateLimit({
       subscriptionId: subscription.id,
     });
 
-    // 4. Buscar contexto da equipe (se fornecido)
     let teamName: string | undefined;
     let teamContext: string | undefined;
 
@@ -77,13 +73,11 @@ export class GenerateActionPlanService {
       teamContext = team.iaContext ?? undefined;
     }
 
-    // 5. Buscar ações recentes para contexto
     const recentActions = await this.getRecentActions(
       input.companyId,
       input.teamId,
     );
 
-    // 6. Gerar plano de ação com IA
     const suggestions = await this.aiService.generateActionPlan({
       companyName: company.name,
       companyDescription: company.description ?? undefined,
@@ -97,7 +91,6 @@ export class GenerateActionPlanService {
       })),
     });
 
-    // 7. Registrar uso de IA
     await this.iaUsageService.registerUsage({
       subscriptionId: subscription.id,
       userId: input.userId,
@@ -105,7 +98,6 @@ export class GenerateActionPlanService {
       callsUsed: 1,
     });
 
-    // 8. Buscar estatísticas de uso atualizadas
     const usage = await this.iaUsageService.getUsageStats(subscription.id);
 
     return {
@@ -122,7 +114,6 @@ export class GenerateActionPlanService {
       ? await this.actionRepository.findByTeamId(teamId)
       : await this.actionRepository.findByCompanyId(companyId);
 
-    // Return up to 5 most recent actions
     return actions.slice(0, 5).map((action) => ({
       title: action.title,
       description: action.description,
