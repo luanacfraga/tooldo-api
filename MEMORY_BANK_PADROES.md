@@ -38,7 +38,10 @@ Este documento define os padrões que devem ser seguidos em **TODAS** as impleme
 - ❌ Comentários inline (`// comentário`)
 - ❌ Comentários de bloco (`/* comentário */`)
 - ❌ JSDoc (`/** comentário */`)
+- ❌ TODO comments no código
 - ✅ O código deve ser auto-explicativo através de nomes claros
+- ✅ Use nomes descritivos de variáveis, funções e classes
+- ✅ Crie issues no GitHub para TODOs em vez de comentários
 
 ### 3. NÃO USAR console.log/console.error EM PRODUÇÃO
 
@@ -349,6 +352,7 @@ export interface CompanyRepository {
 
 ```typescript
 import { Injectable } from '@nestjs/common';
+import type { Company as PrismaCompany } from '@prisma/client';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
 import { Company } from '@/core/domain/company/company.entity';
 import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
@@ -610,7 +614,11 @@ array.filter((item) => item.active);
 
 // ✅ CORRETO
 array.map((item: User) => item.email);
-array.filter((item: User): item is User => item.active === true);
+array.filter((item: User): boolean => item.active === true);
+
+// ✅ CORRETO - Simplificado
+array.map((item: User) => item.email);
+array.filter((item: User) => item.active);
 ```
 
 #### 11. Evitar `unknown` sem Validação
@@ -685,7 +693,7 @@ void service.execute();
 Se for absolutamente necessário desabilitar uma regra:
 
 1. Criar uma issue no repositório explicando o motivo
-2. Adicionar comentário explicativo (mesmo que comentários sejam desencorajados, exceções para documentação técnica são aceitas)
+2. Adicionar a justificativa no PR e na descrição do commit
 3. Revisar periodicamente se ainda é necessário
 
 #### 5. Regras Críticas que NUNCA Devem Ser Desabilitadas
@@ -724,16 +732,20 @@ Apenas em casos extremos onde:
 
 **Sempre que usar `any`:**
 
-1. Adicionar comentário explicando o motivo (única exceção à regra de comentários)
-2. Criar issue para refatorar e remover o `any`
-3. Documentar no PR o motivo e plano de remoção
+1. Criar issue no GitHub explicando o motivo e plano de remoção
+2. Documentar no PR o motivo, contexto e plano de refatoração
+3. Adicionar a issue como referência no commit message
 
 ```typescript
-// Exceção: Prisma event types não são exportados
-// TODO: Criar interface quando Prisma exportar tipos
-// Issue: #123
-this.$on('query' as never, (e: any) => {
-  this.logger.debug(e.query);
+interface PrismaQueryEvent {
+  query: string;
+  params: string;
+  duration: number;
+  timestamp: Date;
+}
+
+this.$on('query' as never, (e: PrismaQueryEvent) => {
+  this.logger.debug(`Query executed: ${e.query}`);
 });
 ```
 
@@ -898,6 +910,6 @@ export class RolesGuard implements CanActivate {
 
 ---
 
-**Documento criado em**: 2025-11-09  
-**Última atualização**: 2025-12-11  
-**Versão**: 1.0.0
+**Documento criado em**: 2025-11-09
+**Última atualização**: 2026-01-28
+**Versão**: 1.1.0

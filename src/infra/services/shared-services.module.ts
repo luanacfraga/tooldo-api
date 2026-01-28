@@ -38,8 +38,6 @@ const passwordResetTokenServiceProvider: ClassProvider = {
 
 const aiServiceProvider: ClassProvider = {
   provide: 'AIService',
-  // Usa OpenAIService quando OPENAI_API_KEY estiver configurada.
-  // Caso contrário, cai para StubAIService para ambientes locais/dev.
   useClass: process.env.OPENAI_API_KEY ? OpenAIService : StubAIService,
 };
 

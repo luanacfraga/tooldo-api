@@ -1,3 +1,4 @@
+import { User } from '@/core/domain/user/user.entity';
 import { UserRole, UserStatus } from '@/core/domain/shared/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -79,4 +80,21 @@ export class UserResponseDto {
     required: false,
   })
   initials!: string | null;
+
+  static fromDomain(user: User): UserResponseDto {
+    const dto = new UserResponseDto();
+    dto.id = user.id;
+    dto.firstName = user.firstName;
+    dto.lastName = user.lastName;
+    dto.email = user.email;
+    dto.phone = user.phone;
+    dto.document = user.document;
+    dto.documentType = user.documentType;
+    dto.role = user.role;
+    dto.status = user.status;
+    dto.profileImageUrl = user.profileImageUrl;
+    dto.avatarColor = user.avatarColor;
+    dto.initials = user.initials;
+    return dto;
+  }
 }

@@ -6,18 +6,11 @@ import type {
 } from '@/core/ports/services/ai-service.port';
 import { Injectable } from '@nestjs/common';
 
-/**
- * Stub implementation of AI service for development.
- * Replace with OpenAI implementation when ready.
- */
 @Injectable()
 export class StubAIService implements AIService {
   async generateActionPlan(
     input: GenerateActionPlanInput,
   ): Promise<ActionSuggestion[]> {
-    // TODO: Replace with actual OpenAI implementation
-    // For now, return mock suggestions based on the goal
-
     await Promise.resolve(); // Simulate async operation
 
     const suggestions: ActionSuggestion[] = [
@@ -68,42 +61,3 @@ export class StubAIService implements AIService {
     return suggestions;
   }
 }
-
-/**
- * Future OpenAI implementation example:
- *
- * import OpenAI from 'openai';
- *
- * @Injectable()
- * export class OpenAIService implements AIService {
- *   private openai: OpenAI;
- *
- *   constructor(private configService: ConfigService) {
- *     this.openai = new OpenAI({
- *       apiKey: configService.get('OPENAI_API_KEY'),
- *     });
- *   }
- *
- *   async generateActionPlan(input: GenerateActionPlanInput): Promise<ActionSuggestion[]> {
- *     const prompt = this.buildPrompt(input);
- *
- *     const completion = await this.openai.chat.completions.create({
- *       model: "gpt-4",
- *       messages: [
- *         { role: "system", content: "Você é um assistente especializado..." },
- *         { role: "user", content: prompt }
- *       ],
- *       response_format: { type: "json_object" }
- *     });
- *
- *     return JSON.parse(completion.choices[0].message.content);
- *   }
- *
- *   private buildPrompt(input: GenerateActionPlanInput): string {
- *     return `Gere um plano de ação para: ${input.goal}
- *       Empresa: ${input.companyName}
- *       ${input.teamName ? `Equipe: ${input.teamName}` : ''}
- *       ...`;
- *   }
- * }
- */

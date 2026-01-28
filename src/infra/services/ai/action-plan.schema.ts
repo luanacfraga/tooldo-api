@@ -2,9 +2,6 @@ import { ActionPriority } from '@/core/domain/shared/enums';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 
-/**
- * Zod schema for action suggestion structured output
- */
 const ActionSuggestionSchema = z.object({
   rootCause: z
     .string()
@@ -53,9 +50,6 @@ const ActionSuggestionSchema = z.object({
     .describe('List of specific tasks or steps to complete this action'),
 });
 
-/**
- * Zod schema for the complete action plan response
- */
 const ActionPlanResponseSchema = z.object({
   suggestions: z
     .array(ActionSuggestionSchema)
@@ -63,15 +57,9 @@ const ActionPlanResponseSchema = z.object({
     .describe('Array of 3 action suggestions'),
 });
 
-/**
- * Export the response format for OpenAI Structured Outputs
- */
 export const actionPlanResponseFormat = zodResponseFormat(
   ActionPlanResponseSchema,
   'action_plan',
 );
 
-/**
- * TypeScript type inferred from the schema
- */
 export type ActionPlanResponse = z.infer<typeof ActionPlanResponseSchema>;

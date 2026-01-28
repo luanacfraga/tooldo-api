@@ -1,4 +1,4 @@
-import { Action } from '@/core/domain/action';
+import { Action } from '@/core/domain/action/action.entity';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import { Inject, Injectable } from '@nestjs/common';

@@ -11,10 +11,6 @@ import {
   type ActionPlanResponse,
 } from './action-plan.schema';
 
-/**
- * OpenAI implementation of AI service for action plan generation.
- * Uses GPT-4o-mini with Structured Outputs for reliable JSON responses.
- */
 @Injectable()
 export class OpenAIService implements AIService {
   private readonly logger = new Logger(OpenAIService.name);

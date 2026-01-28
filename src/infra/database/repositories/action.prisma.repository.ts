@@ -1,4 +1,5 @@
-import { Action, ChecklistItem } from '@/core/domain/action';
+import { Action } from '@/core/domain/action/action.entity';
+import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
 import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import type {
   ActionFilters,
@@ -316,8 +317,7 @@ export class ActionPrismaRepository implements ActionRepository {
     const updated = await client.action.update({
       where: { id },
       data: {
-        // rootCause não está no schema do Prisma ainda, será adicionado em migration futura
-        // rootCause: data.rootCause,
+        rootCause: data.rootCause,
         title: data.title,
         description: data.description,
         status: data.status,
