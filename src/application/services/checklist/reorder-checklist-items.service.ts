@@ -1,4 +1,4 @@
-import { ChecklistItem } from '@/core/domain/action';
+import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionRepository } from '@/core/ports/repositories/action.repository';
 import type { ChecklistItemRepository } from '@/core/ports/repositories/checklist-item.repository';

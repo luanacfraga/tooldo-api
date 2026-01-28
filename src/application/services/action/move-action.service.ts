@@ -1,4 +1,5 @@
-import { Action, ActionMovement } from '@/core/domain/action';
+import { Action } from '@/core/domain/action/action.entity';
+import { ActionMovement } from '@/core/domain/action/action-movement.entity';
 import { ActionStatus } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { ActionMovementRepository } from '@/core/ports/repositories/action-movement.repository';

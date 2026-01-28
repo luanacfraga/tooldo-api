@@ -1,4 +1,4 @@
-import { ChecklistItem } from '@/core/domain/action';
+import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
 
 export interface UpdateChecklistItemData {
   description?: string;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CompanyMapper } from '@/application/mappers/company.mapper';
 import { SubscriptionMapper } from '@/application/mappers/subscription.mapper';
 import { UserMapper } from '@/application/mappers/user.mapper';
@@ -26,6 +25,13 @@ import { RegisterAdminDto } from './dto/register-admin.dto';
 import { RegisterMasterResponseDto } from './dto/register-master-response.dto';
 import { RegisterMasterDto } from './dto/register-master.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+
+interface AuthenticatedRequest {
+  user: {
+    sub: string;
+    email: string;
+  };
+}
 
 @ApiTags('auth')
 @Controller('auth')
@@ -200,7 +206,9 @@ export class AuthController {
     status: 200,
     description: 'Logout successful',
   })
-  async logout(@Request() req: any): Promise<{ message: string }> {
+  async logout(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<{ message: string }> {
     await this.authService.logout(req.user.sub);
     return { message: 'Logout realizado com sucesso' };
   }

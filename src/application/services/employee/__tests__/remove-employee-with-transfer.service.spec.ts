@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Action } from '@/core/domain/action';
+import { Action } from '@/core/domain/action/action.entity';
 import { CompanyUser } from '@/core/domain/company-user/company-user.entity';
 import { User } from '@/core/domain/user/user.entity';
 import {

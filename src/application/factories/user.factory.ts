@@ -99,10 +99,8 @@ export class UserFactory {
       hash = seed.charCodeAt(i) + ((hash << 5) - hash);
     }
 
-    // Convert to hex
     const c = (hash & 0x00ffffff).toString(16).toUpperCase();
 
-    // Pad with zeros and prepend #
     return '#' + '00000'.substring(0, 6 - c.length) + c;
   }
 }

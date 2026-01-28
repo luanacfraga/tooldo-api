@@ -45,9 +45,6 @@ export class GetCompanyDashboardSummaryService {
       throw new EntityNotFoundException('Empresa', input.companyId);
     }
 
-    // NOTE:
-    // We intentionally compute `isLate` dynamically (same approach as ListActionsService),
-    // so the dashboard remains correct even if the persisted column gets stale.
     const now = new Date();
     const actions = await this.actionRepository.findByCompanyId(
       input.companyId,
@@ -75,9 +72,6 @@ export class GetCompanyDashboardSummaryService {
     const total = normalized.length;
     const completionRate = total > 0 ? (done.length / total) * 100 : 0;
 
-    // "Motivational" lists: keep it simple and deterministic.
-    // - focusNow: IN_PROGRESS, sorted by closest deadline first
-    // - nextSteps: TODO, sorted by closest deadline first
     const focusNow = inProgress
       .slice()
       .sort(

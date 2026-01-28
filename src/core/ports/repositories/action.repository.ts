@@ -1,4 +1,5 @@
-import { Action, ChecklistItem } from '@/core/domain/action';
+import { Action } from '@/core/domain/action/action.entity';
+import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
 import {
   ActionLateStatus,
   ActionPriority,

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
@@ -51,16 +50,25 @@ export class AuthService {
       this.configService.get<string>('JWT_SECRET') ??
       'your-secret-key-change-me';
 
-    const expiresIn =
+    const expiresInConfig =
       this.configService.get<string>('JWT_REFRESH_EXPIRATION') ?? '30d';
 
-    return this.jwtService.signAsync(
-      { sub: userId, type: 'refresh' },
-      {
-        secret,
-        expiresIn,
-      } as any, // Type assertion para evitar erro de tipo
-    );
+    const expiresInSeconds = this.parseExpiresIn(expiresInConfig);
+
+    const payload: Record<string, string> = {
+      sub: userId,
+      type: 'refresh',
+    };
+
+    return this.jwtService.signAsync(payload, {
+      secret,
+      expiresIn: expiresInSeconds,
+    });
+  }
+
+  private parseExpiresIn(expiresIn: string): number {
+    const days = parseInt(expiresIn.replace('d', ''), 10);
+    return days * 24 * 60 * 60;
   }
 
   private getRefreshTokenExpirationDate(): Date {

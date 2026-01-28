@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ArgumentsHost,
   Catch,
@@ -8,24 +7,36 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+type UnauthorizedExceptionResponse =
+  | string
+  | { message?: string; error?: string; statusCode?: number };
+
 @Catch(UnauthorizedException)
 export class JwtExceptionFilter implements ExceptionFilter {
-  catch(exception: UnauthorizedException, host: ArgumentsHost) {
+  catch(exception: UnauthorizedException, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const exceptionResponse: any = exception.getResponse();
+    const exceptionResponse: UnauthorizedExceptionResponse =
+      exception.getResponse();
+
+    const messageFromObject =
+      typeof exceptionResponse === 'object'
+        ? exceptionResponse.message
+        : undefined;
+    const messageString =
+      typeof exceptionResponse === 'string'
+        ? exceptionResponse
+        : messageFromObject;
 
     const isTokenExpired =
-      exceptionResponse?.message === 'jwt expired' ||
-      (typeof exceptionResponse === 'string' &&
-        exceptionResponse.includes('jwt expired'));
+      messageFromObject === 'jwt expired' ||
+      messageString?.includes('jwt expired') === true;
 
     const isInvalidToken =
-      exceptionResponse?.message === 'invalid token' ||
-      exceptionResponse?.message === 'jwt malformed' ||
-      (typeof exceptionResponse === 'string' &&
-        (exceptionResponse.includes('invalid token') ||
-          exceptionResponse.includes('jwt malformed')));
+      messageFromObject === 'invalid token' ||
+      messageFromObject === 'jwt malformed' ||
+      messageString?.includes('invalid token') === true ||
+      messageString?.includes('jwt malformed') === true;
 
     let errorMessage = 'Token de autenticação inválido';
     let errorCode = 'INVALID_TOKEN';

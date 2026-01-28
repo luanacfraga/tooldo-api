@@ -1,4 +1,4 @@
-import { ActionMovement } from '@/core/domain/action';
+import { ActionMovement } from '@/core/domain/action/action-movement.entity';
 import { ActionStatus, CompanyUserStatus } from '@/core/domain/shared/enums';
 import {
   DomainValidationException,

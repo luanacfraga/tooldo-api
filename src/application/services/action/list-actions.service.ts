@@ -1,4 +1,4 @@
-import { Action } from '@/core/domain/action';
+import { Action } from '@/core/domain/action/action.entity';
 import {
   ActionLateStatus,
   ActionPriority,

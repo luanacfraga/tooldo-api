@@ -1,4 +1,4 @@
-import { ActionMovement } from '@/core/domain/action';
+import { ActionMovement } from '@/core/domain/action/action-movement.entity';
 import { ActionStatus } from '@/core/domain/shared/enums';
 import type { ActionMovementRepository } from '@/core/ports/repositories/action-movement.repository';
 import { PrismaService } from '@/infra/database/prisma/prisma.service';
