@@ -38,10 +38,6 @@ export class IAUsageService {
     private readonly idGenerator: IdGenerator,
   ) {}
 
-  /**
-   * Validates if the subscription has available AI calls limit
-   * @throws IALimitExceededException if limit is exceeded
-   */
   async validateLimit(input: ValidateLimitInput): Promise<void> {
     const stats = await this.getUsageStats(input.subscriptionId);
 
@@ -66,9 +62,6 @@ export class IAUsageService {
     );
   }
 
-  /**
-   * Registers AI usage after successful generation
-   */
   async registerUsage(input: RegisterUsageInput): Promise<void> {
     const iaUsage = new IAUsage(
       this.idGenerator.generate(),
@@ -86,9 +79,6 @@ export class IAUsageService {
     );
   }
 
-  /**
-   * Gets current usage statistics for a subscription
-   */
   async getUsageStats(subscriptionId: string): Promise<UsageStats> {
     const subscription =
       await this.subscriptionRepository.findActiveByAdminId(subscriptionId);

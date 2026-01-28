@@ -1,5 +1,5 @@
-import { User } from '@/core/domain/user/user.entity';
 import { UserRole } from '@/core/domain/shared/enums';
+import { User } from '@/core/domain/user/user.entity';
 
 export interface UserRepository {
   findByEmail(email: string, tx?: unknown): Promise<User | null>;
@@ -16,10 +16,6 @@ export interface UserRepository {
     tx?: unknown,
   ): Promise<void>;
 
-  /**
-   * Lista usuários por papel com paginação.
-   * Mantém a lógica de seleção segura (sem avatarColor/initials no select).
-   */
   findByRolePaginated(
     role: UserRole,
     page: number,

@@ -9,11 +9,6 @@ import { Prisma, User as PrismaUser } from '@prisma/client';
 export class UserPrismaRepository implements UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * IMPORTANT:
-   * Our current DB does NOT have the `users.avatar_color` nor `users.initials` columns.
-   * So we must ALWAYS use explicit selects to avoid Prisma selecting it by default.
-   */
   private readonly safeUserSelect: Prisma.UserSelect = {
     id: true,
     firstName: true,
