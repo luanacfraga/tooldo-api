@@ -46,11 +46,11 @@ import {
 } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
 import { ActionResponseDto } from './dto/action-response.dto';
-import { ActionSuggestionResponseDto } from './dto/action-suggestion-response.dto';
 import { AddChecklistItemDto } from './dto/add-checklist-item.dto';
 import { BlockActionDto } from './dto/block-action.dto';
 import { CreateActionDto } from './dto/create-action.dto';
 import { GenerateActionPlanDto } from './dto/generate-action-plan.dto';
+import { GenerateActionPlanResponseDto } from './dto/generate-action-plan-response.dto';
 import { ListActionsQueryDto } from './dto/list-actions.dto';
 import { MoveActionDto } from './dto/move-action.dto';
 import { ReorderChecklistItemsDto } from './dto/reorder-checklist-items.dto';
@@ -409,16 +409,18 @@ export class ActionController {
   })
   @ApiOkResponse({
     description: 'Plano de ação gerado com sucesso',
-    type: [ActionSuggestionResponseDto],
+    type: GenerateActionPlanResponseDto,
   })
   @ApiBadRequestResponse({ description: 'Dados inválidos' })
   async generate(
     @Body() dto: GenerateActionPlanDto,
-  ): Promise<ActionSuggestionResponseDto[]> {
-    const result = await this.generateActionPlanService.execute(dto);
-    return result.suggestions.map((suggestion) =>
-      ActionSuggestionResponseDto.fromDomain(suggestion),
-    );
+    @Request() req: RequestWithUser,
+  ): Promise<GenerateActionPlanResponseDto> {
+    const result = await this.generateActionPlanService.execute({
+      ...dto,
+      userId: req.user.sub,
+    });
+    return GenerateActionPlanResponseDto.fromDomain(result);
   }
 
   @Post(':id/checklist')

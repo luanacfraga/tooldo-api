@@ -17,10 +17,12 @@ export interface GenerateActionPlanInput {
   companyId: string;
   teamId?: string;
   goal: string;
+  userId: string;
 }
 
 export interface GenerateActionPlanOutput {
   suggestions: ActionSuggestion[];
+  usage: UsageStats;
 }
 
 @Injectable()
@@ -34,16 +36,34 @@ export class GenerateActionPlanService {
     private readonly teamRepository: TeamRepository,
     @Inject('ActionRepository')
     private readonly actionRepository: ActionRepository,
+    @Inject('SubscriptionRepository')
+    private readonly subscriptionRepository: SubscriptionRepository,
+    private readonly iaUsageService: IAUsageService,
   ) {}
 
   async execute(
     input: GenerateActionPlanInput,
   ): Promise<GenerateActionPlanOutput> {
+    // 1. Buscar empresa
     const company = await this.companyRepository.findById(input.companyId);
     if (!company) {
       throw new EntityNotFoundException('Empresa', input.companyId);
     }
 
+    // 2. Buscar subscription ativa do admin da empresa
+    const subscription = await this.subscriptionRepository.findActiveByAdminId(
+      company.adminId,
+    );
+    if (!subscription) {
+      throw new EntityNotFoundException('Assinatura ativa', company.adminId);
+    }
+
+    // 3. Validar limite de chamadas de IA
+    await this.iaUsageService.validateLimit({
+      subscriptionId: subscription.id,
+    });
+
+    // 4. Buscar contexto da equipe (se fornecido)
     let teamName: string | undefined;
     let teamContext: string | undefined;
 
@@ -57,11 +77,13 @@ export class GenerateActionPlanService {
       teamContext = team.iaContext ?? undefined;
     }
 
+    // 5. Buscar ações recentes para contexto
     const recentActions = await this.getRecentActions(
       input.companyId,
       input.teamId,
     );
 
+    // 6. Gerar plano de ação com IA
     const suggestions = await this.aiService.generateActionPlan({
       companyName: company.name,
       companyDescription: company.description ?? undefined,
@@ -75,8 +97,20 @@ export class GenerateActionPlanService {
       })),
     });
 
+    // 7. Registrar uso de IA
+    await this.iaUsageService.registerUsage({
+      subscriptionId: subscription.id,
+      userId: input.userId,
+      companyId: input.companyId,
+      callsUsed: 1,
+    });
+
+    // 8. Buscar estatísticas de uso atualizadas
+    const usage = await this.iaUsageService.getUsageStats(subscription.id);
+
     return {
       suggestions,
+      usage,
     };
   }
 
