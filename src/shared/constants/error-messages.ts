@@ -143,7 +143,8 @@ export const ErrorMessages = {
   IA_USAGE: {
     ID_REQUIRED: 'O id do uso de IA é obrigatório',
     SUBSCRIPTION_ID_REQUIRED: 'O subscriptionId do uso de IA é obrigatório',
-    TOKENS_USED_INVALID: 'A quantidade de tokens usados deve ser maior ou igual a 0',
+    TOKENS_USED_INVALID:
+      'A quantidade de tokens usados deve ser maior ou igual a 0',
     CREATED_AT_INVALID: 'A data de criação deve ser uma data válida',
   },
 

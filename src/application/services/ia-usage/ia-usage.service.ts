@@ -103,9 +103,8 @@ export class IAUsageService {
       throw new Error('Plan not found');
     }
 
-    const used = await this.iaUsageRepository.countBySubscriptionId(
-      subscriptionId,
-    );
+    const used =
+      await this.iaUsageRepository.countBySubscriptionId(subscriptionId);
 
     return {
       used,
