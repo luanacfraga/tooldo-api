@@ -42,10 +42,9 @@ export class IAUsageService {
     const stats = await this.getUsageStats(input.subscriptionId);
 
     if (stats.remaining <= 0) {
-      const subscription =
-        await this.subscriptionRepository.findActiveByAdminId(
-          input.subscriptionId,
-        );
+      const subscription = await this.subscriptionRepository.findById(
+        input.subscriptionId,
+      );
       const plan = subscription
         ? await this.planRepository.findById(subscription.planId)
         : null;
@@ -81,10 +80,10 @@ export class IAUsageService {
 
   async getUsageStats(subscriptionId: string): Promise<UsageStats> {
     const subscription =
-      await this.subscriptionRepository.findActiveByAdminId(subscriptionId);
+      await this.subscriptionRepository.findById(subscriptionId);
 
     if (!subscription) {
-      throw new Error('Active subscription not found');
+      throw new Error('Subscription not found');
     }
 
     const plan = await this.planRepository.findById(subscription.planId);

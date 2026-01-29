@@ -26,6 +26,16 @@ export class SubscriptionPrismaRepository implements SubscriptionRepository {
     return this.mapToDomain(created);
   }
 
+  async findById(id: string): Promise<Subscription | null> {
+    const subscription = await this.prisma.subscription.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return subscription ? this.mapToDomain(subscription) : null;
+  }
+
   async findActiveByAdminId(adminId: string): Promise<Subscription | null> {
     const subscription = await this.prisma.subscription.findFirst({
       where: {
