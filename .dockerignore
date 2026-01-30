@@ -9,5 +9,3 @@ README.md
 .vscode
 .idea
 *.log
-
-scripts/docker-entrypoint.sh
