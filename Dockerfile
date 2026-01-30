@@ -49,6 +49,8 @@ COPY --from=builder --chown=nestjs:nodejs /app/node_modules/.prisma ./node_modul
 COPY --from=builder --chown=nestjs:nodejs /app/src/infra/database/prisma ./src/infra/database/prisma
 COPY --from=builder --chown=nestjs:nodejs /app/scripts ./scripts
 
+RUN chmod +x /app/scripts/docker-entrypoint.sh
+
 # Mudar para usuário não-root
 USER nestjs
 
@@ -59,5 +61,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Comando para iniciar a aplicação
+# Entrypoint: migrações automáticas + comando (node dist/main.js)
+ENTRYPOINT ["/app/scripts/docker-entrypoint.sh"]
 CMD ["node", "dist/main.js"]

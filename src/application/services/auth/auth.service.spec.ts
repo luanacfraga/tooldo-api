@@ -8,6 +8,7 @@ import {
 } from '@/core/domain/shared/enums';
 import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
 import { User } from '@/core/domain/user/user.entity';
+import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
@@ -63,6 +64,16 @@ describe('AuthService', () => {
       countByAdminIdRoleAndStatus: jest.fn(),
     };
 
+    const mockCompanyRepository: jest.Mocked<CompanyRepository> = {
+      create: jest.fn(),
+      findById: jest.fn().mockResolvedValue(null),
+      findByAdminId: jest.fn().mockResolvedValue([]),
+      findAll: jest.fn(),
+      countByAdminId: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+
     const mockPasswordHasher = {
       hash: jest.fn(),
       compare: jest.fn(),
@@ -94,6 +105,10 @@ describe('AuthService', () => {
         {
           provide: 'CompanyUserRepository',
           useValue: mockCompanyUserRepository,
+        },
+        {
+          provide: 'CompanyRepository',
+          useValue: mockCompanyRepository,
         },
         {
           provide: 'PasswordHasher',

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsPositive, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 
 export class CreatePlanDto {
   @ApiProperty({
@@ -15,7 +15,9 @@ export class CreatePlanDto {
     example: 10,
   })
   @IsInt({ message: 'O número máximo de empresas deve ser um inteiro' })
-  @IsPositive({ message: 'O número máximo de empresas deve ser positivo' })
+  @Min(0, {
+    message: 'O número máximo de empresas deve ser maior ou igual a 0',
+  })
   maxCompanies!: number;
 
   @ApiProperty({
@@ -23,7 +25,9 @@ export class CreatePlanDto {
     example: 50,
   })
   @IsInt({ message: 'O número máximo de gerentes deve ser um inteiro' })
-  @IsPositive({ message: 'O número máximo de gerentes deve ser positivo' })
+  @Min(0, {
+    message: 'O número máximo de gerentes deve ser maior ou igual a 0',
+  })
   maxManagers!: number;
 
   @ApiProperty({
@@ -31,7 +35,9 @@ export class CreatePlanDto {
     example: 100,
   })
   @IsInt({ message: 'O número máximo de executores deve ser um inteiro' })
-  @IsPositive({ message: 'O número máximo de executores deve ser positivo' })
+  @Min(0, {
+    message: 'O número máximo de executores deve ser maior ou igual a 0',
+  })
   maxExecutors!: number;
 
   @ApiProperty({
@@ -39,14 +45,16 @@ export class CreatePlanDto {
     example: 30,
   })
   @IsInt({ message: 'O número máximo de consultores deve ser um inteiro' })
-  @IsPositive({ message: 'O número máximo de consultores deve ser positivo' })
+  @Min(0, {
+    message: 'O número máximo de consultores deve ser maior ou igual a 0',
+  })
   maxConsultants!: number;
 
   @ApiProperty({
-    description: 'Limite de chamadas de IA por mês',
+    description: 'Limite de chamadas de IA por mês (0 = sem chamadas de IA)',
     example: 1000,
   })
   @IsInt({ message: 'O limite de chamadas de IA deve ser um inteiro' })
-  @IsPositive({ message: 'O limite de chamadas de IA deve ser positivo' })
+  @Min(0, { message: 'O limite de chamadas de IA deve ser maior ou igual a 0' })
   iaCallsLimit!: number;
 }

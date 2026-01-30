@@ -5,8 +5,11 @@ import { CreateCompanyService } from '@/application/services/company/create-comp
 import { DeleteCompanyService } from '@/application/services/company/delete-company.service';
 import { GetCompanyDashboardSummaryService } from '@/application/services/company/get-company-dashboard-summary.service';
 import { GetExecutorDashboardService } from '@/application/services/company/get-executor-dashboard.service';
+import { ListActiveCompaniesWithPlansService } from '@/application/services/company/list-active-companies-with-plans.service';
 import { ListCompaniesService } from '@/application/services/company/list-companies.service';
 import { UpdateCompanyService } from '@/application/services/company/update-company.service';
+import { SetCompanyBlockedService } from '@/application/services/company/set-company-blocked.service';
+import { UpdateSubscriptionPlanByCompanyService } from '@/application/services/company/update-subscription-plan-by-company.service';
 import { Company } from '@/core/domain/company/company.entity';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { EntityNotFoundException } from '@/core/domain/shared/exceptions/domain.exception';
@@ -26,6 +29,7 @@ import {
   HttpStatus,
   Inject,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -39,7 +43,9 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { PlanResponseDto } from '../plan/dto/plan-response.dto';
 import { EmployeeResponseDto } from '../employee/dto/employee-response.dto';
+import { ActiveCompanyWithPlanResponseDto } from './dto/active-company-with-plan-response.dto';
 import { CompanyDashboardSummaryResponseDto } from './dto/company-dashboard-summary-response.dto';
 import { CompanyResponseDto } from './dto/company-response.dto';
 import { CompanySettingsResponseDto } from './dto/company-settings-response.dto';
@@ -47,6 +53,8 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { ExecutorDashboardQueryDto } from './dto/executor-dashboard-query.dto';
 import { ExecutorDashboardResponseDto } from './dto/executor-dashboard-response.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { SetCompanyBlockedDto } from './dto/set-company-blocked.dto';
+import { UpdateCompanyPlanDto } from './dto/update-company-plan.dto';
 
 @ApiTags('Company')
 @Controller('companies')
@@ -54,7 +62,10 @@ export class CompanyController {
   constructor(
     private readonly createCompanyService: CreateCompanyService,
     private readonly listCompaniesService: ListCompaniesService,
+    private readonly listActiveCompaniesWithPlansService: ListActiveCompaniesWithPlansService,
     private readonly updateCompanyService: UpdateCompanyService,
+    private readonly updateSubscriptionPlanByCompanyService: UpdateSubscriptionPlanByCompanyService,
+    private readonly setCompanyBlockedService: SetCompanyBlockedService,
     private readonly deleteCompanyService: DeleteCompanyService,
     private readonly getCompanyDashboardSummaryService: GetCompanyDashboardSummaryService,
     private readonly getExecutorDashboardService: GetExecutorDashboardService,
@@ -156,6 +167,36 @@ export class CompanyController {
     return companies
       .filter((company): company is Company => company !== null)
       .map((company) => CompanyResponseDto.fromDomain(company));
+  }
+
+  @Get('active')
+  @Roles(UserRole.MASTER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'List active companies with plan (Master only)',
+    description:
+      'Lista empresas com assinatura ativa e plano atual. Apenas usuários master podem acessar.',
+  })
+  @ApiOkResponse({
+    description: 'Active companies with plan successfully retrieved',
+    type: [ActiveCompanyWithPlanResponseDto],
+  })
+  async listActiveWithPlans(): Promise<ActiveCompanyWithPlanResponseDto[]> {
+    const result = await this.listActiveCompaniesWithPlansService.execute();
+    return result.items.map((item) => {
+      const dto = new ActiveCompanyWithPlanResponseDto();
+      dto.company = CompanyResponseDto.fromDomain(item.company);
+      dto.subscription = {
+        id: item.subscription.id,
+        adminId: item.subscription.adminId,
+        planId: item.subscription.planId,
+        startedAt: item.subscription.startedAt.toISOString(),
+        isActive: item.subscription.isActive,
+      };
+      dto.plan = PlanResponseDto.fromDomain(item.plan);
+      dto.adminName = item.adminName;
+      return dto;
+    });
   }
 
   @Get('admin/:adminId')
@@ -485,6 +526,66 @@ export class CompanyController {
     }
 
     return [];
+  }
+
+  @Patch(':id/plan')
+  @Roles(UserRole.MASTER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Update company plan (Master only)',
+    description:
+      'Altera o plano da assinatura ativa do administrador da empresa. Apenas usuários master podem alterar.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Plano atualizado com sucesso',
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Empresa, assinatura ou plano não encontrado',
+  })
+  async updateCompanyPlan(
+    @Param('id') id: string,
+    @Body() dto: UpdateCompanyPlanDto,
+  ): Promise<{ subscriptionId: string; planId: string }> {
+    return this.updateSubscriptionPlanByCompanyService.execute({
+      companyId: id,
+      planId: dto.planId,
+    });
+  }
+
+  @Patch(':id/block')
+  @Roles(UserRole.MASTER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Block or unblock company access (Master only)',
+    description:
+      'Bloqueia ou desbloqueia o acesso da empresa. Quando bloqueada, nenhum usuário (admin, gestor, executor, consultor) consegue fazer login. Apenas master pode alterar.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Empresa bloqueada/desbloqueada com sucesso',
+    type: CompanyResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Empresa não encontrada',
+  })
+  async setCompanyBlocked(
+    @Param('id') id: string,
+    @Body() dto: SetCompanyBlockedDto,
+  ): Promise<CompanyResponseDto> {
+    const result = await this.setCompanyBlockedService.execute({
+      companyId: id,
+      blocked: dto.blocked,
+    });
+    return CompanyResponseDto.fromDomain(result.company);
   }
 
   @Put(':id')

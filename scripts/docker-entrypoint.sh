@@ -15,6 +15,13 @@ if [ -z "$DATABASE_URL" ] && [ -n "$DB_HOST" ] && [ -n "$DB_USER" ] && [ -n "$DB
     echo "✅ DATABASE_URL construída a partir de variáveis individuais (com senha encodada)"
 fi
 
+# Rodar migrações do Prisma antes de subir a aplicação (idempotente; seguro com múltiplas réplicas)
+if [ -n "$DATABASE_URL" ]; then
+    echo "🔄 Aplicando migrações do banco..."
+    npm run prisma:migrate:deploy
+    echo "✅ Migrações aplicadas."
+fi
+
 # Executar o comando original
 exec "$@"
 

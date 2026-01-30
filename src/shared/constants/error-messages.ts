@@ -102,6 +102,8 @@ export const ErrorMessages = {
       'Token de convite inválido. Este token foi gerado antes da atualização do sistema. Por favor, solicite um novo convite.',
     USER_SUSPENDED:
       'Sua conta está suspensa. Entre em contato com o administrador.',
+    COMPANY_BLOCKED:
+      'O acesso desta empresa foi bloqueado. Entre em contato com o suporte.',
   },
 
   ACTION: {

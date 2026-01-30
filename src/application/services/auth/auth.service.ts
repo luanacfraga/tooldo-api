@@ -1,6 +1,7 @@
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
+import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
 import { ErrorMessages } from '@/shared/constants/error-messages';
@@ -38,6 +39,8 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     @Inject('CompanyUserRepository')
     private readonly companyUserRepository: CompanyUserRepository,
+    @Inject('CompanyRepository')
+    private readonly companyRepository: CompanyRepository,
     @Inject('PasswordHasher')
     private readonly passwordHasher: PasswordHasher,
     private readonly jwtService: JwtService,
@@ -112,6 +115,8 @@ export class AuthService {
       }
     }
 
+    await this.assertNoBlockedCompanyAccess(user.id, user.role);
+
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -148,6 +153,8 @@ export class AuthService {
       throw new AuthenticationException(ErrorMessages.AUTH.INVALID_CREDENTIALS);
     }
 
+    await this.assertNoBlockedCompanyAccess(user.id, user.role);
+
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -180,5 +187,35 @@ export class AuthService {
 
   async logout(userId: string): Promise<void> {
     await this.userRepository.updateRefreshToken(userId, null, null);
+  }
+
+  private async assertNoBlockedCompanyAccess(
+    userId: string,
+    role: UserRole,
+  ): Promise<void> {
+    if (role === UserRole.MASTER) {
+      return;
+    }
+
+    const companyIds: string[] = [];
+
+    if (role === UserRole.ADMIN) {
+      const adminCompanies = await this.companyRepository.findByAdminId(userId);
+      companyIds.push(...adminCompanies.map((c) => c.id));
+    } else {
+      const companyUsers =
+        await this.companyUserRepository.findByUserId(userId);
+      const activeMemberships = companyUsers.filter(
+        (cu) => cu.status === CompanyUserStatus.ACTIVE,
+      );
+      companyIds.push(...activeMemberships.map((cu) => cu.companyId));
+    }
+
+    for (const companyId of companyIds) {
+      const company = await this.companyRepository.findById(companyId);
+      if (company?.isBlocked) {
+        throw new AuthenticationException(ErrorMessages.AUTH.COMPANY_BLOCKED);
+      }
+    }
   }
 }

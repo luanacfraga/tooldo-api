@@ -47,6 +47,14 @@ export class SubscriptionPrismaRepository implements SubscriptionRepository {
     return subscription ? this.mapToDomain(subscription) : null;
   }
 
+  async updatePlanId(id: string, planId: string): Promise<Subscription> {
+    const updated = await this.prisma.subscription.update({
+      where: { id },
+      data: { planId },
+    });
+    return this.mapToDomain(updated);
+  }
+
   private mapToDomain(prismaSubscription: PrismaSubscription): Subscription {
     return new Subscription(
       prismaSubscription.id,
