@@ -8,6 +8,7 @@ export class Company extends Entity {
     public readonly name: string,
     public readonly description: string | null,
     public readonly adminId: string,
+    public readonly isBlocked: boolean,
   ) {
     super(id);
     this.validate();
@@ -18,12 +19,14 @@ export class Company extends Entity {
     name: string;
     description?: string | null;
     adminId: string;
+    isBlocked?: boolean;
   }): Company {
     return new Company(
       params.id,
       params.name,
       params.description ?? null,
       params.adminId,
+      params.isBlocked ?? false,
     );
   }
 
@@ -44,6 +47,7 @@ export class Company extends Entity {
 }
 
 export type UpdateCompanyData = {
-  name: string;
-  description: string | null;
+  name?: string;
+  description?: string | null;
+  isBlocked?: boolean;
 };

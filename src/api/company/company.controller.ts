@@ -8,6 +8,7 @@ import { GetExecutorDashboardService } from '@/application/services/company/get-
 import { ListActiveCompaniesWithPlansService } from '@/application/services/company/list-active-companies-with-plans.service';
 import { ListCompaniesService } from '@/application/services/company/list-companies.service';
 import { UpdateCompanyService } from '@/application/services/company/update-company.service';
+import { SetCompanyBlockedService } from '@/application/services/company/set-company-blocked.service';
 import { UpdateSubscriptionPlanByCompanyService } from '@/application/services/company/update-subscription-plan-by-company.service';
 import { Company } from '@/core/domain/company/company.entity';
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
@@ -52,6 +53,7 @@ import { CreateCompanyDto } from './dto/create-company.dto';
 import { ExecutorDashboardQueryDto } from './dto/executor-dashboard-query.dto';
 import { ExecutorDashboardResponseDto } from './dto/executor-dashboard-response.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { SetCompanyBlockedDto } from './dto/set-company-blocked.dto';
 import { UpdateCompanyPlanDto } from './dto/update-company-plan.dto';
 
 @ApiTags('Company')
@@ -63,6 +65,7 @@ export class CompanyController {
     private readonly listActiveCompaniesWithPlansService: ListActiveCompaniesWithPlansService,
     private readonly updateCompanyService: UpdateCompanyService,
     private readonly updateSubscriptionPlanByCompanyService: UpdateSubscriptionPlanByCompanyService,
+    private readonly setCompanyBlockedService: SetCompanyBlockedService,
     private readonly deleteCompanyService: DeleteCompanyService,
     private readonly getCompanyDashboardSummaryService: GetCompanyDashboardSummaryService,
     private readonly getExecutorDashboardService: GetExecutorDashboardService,
@@ -552,6 +555,37 @@ export class CompanyController {
       companyId: id,
       planId: dto.planId,
     });
+  }
+
+  @Patch(':id/block')
+  @Roles(UserRole.MASTER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Block or unblock company access (Master only)',
+    description:
+      'Bloqueia ou desbloqueia o acesso da empresa. Quando bloqueada, nenhum usuário (admin, gestor, executor, consultor) consegue fazer login. Apenas master pode alterar.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID da empresa',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiOkResponse({
+    description: 'Empresa bloqueada/desbloqueada com sucesso',
+    type: CompanyResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'Not Found - Empresa não encontrada',
+  })
+  async setCompanyBlocked(
+    @Param('id') id: string,
+    @Body() dto: SetCompanyBlockedDto,
+  ): Promise<CompanyResponseDto> {
+    const result = await this.setCompanyBlockedService.execute({
+      companyId: id,
+      blocked: dto.blocked,
+    });
+    return CompanyResponseDto.fromDomain(result.company);
   }
 
   @Put(':id')

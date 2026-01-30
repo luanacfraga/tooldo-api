@@ -19,6 +19,7 @@ export class CompanyPrismaRepository implements CompanyRepository {
         name: company.name,
         description: company.description,
         adminId: company.adminId,
+        isBlocked: company.isBlocked,
       },
     });
 
@@ -65,12 +66,13 @@ export class CompanyPrismaRepository implements CompanyRepository {
     tx?: unknown,
   ): Promise<Company> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.isBlocked !== undefined) updateData.isBlocked = data.isBlocked;
     const updated = await client.company.update({
       where: { id },
-      data: {
-        name: data.name,
-        description: data.description,
-      },
+      data: updateData,
     });
 
     return this.mapToDomain(updated);
@@ -89,6 +91,7 @@ export class CompanyPrismaRepository implements CompanyRepository {
       name: prismaCompany.name,
       description: prismaCompany.description,
       adminId: prismaCompany.adminId,
+      isBlocked: prismaCompany.isBlocked,
     });
   }
 }

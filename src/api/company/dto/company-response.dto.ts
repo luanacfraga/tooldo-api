@@ -28,12 +28,18 @@ export class CompanyResponseDto {
   })
   adminId!: string;
 
+  @ApiProperty({
+    description: 'Se o acesso da empresa está bloqueado',
+  })
+  isBlocked!: boolean;
+
   static fromDomain(company: Company): CompanyResponseDto {
     const response = new CompanyResponseDto();
     response.id = company.id;
     response.name = company.name;
     response.description = company.description;
     response.adminId = company.adminId;
+    response.isBlocked = company.isBlocked;
     return response;
   }
 }
