@@ -43,6 +43,14 @@ export class CompanyPrismaRepository implements CompanyRepository {
     return companies.map((company) => this.mapToDomain(company));
   }
 
+  async findAll(tx?: unknown): Promise<Company[]> {
+    const client = (tx as typeof this.prisma) ?? this.prisma;
+    const companies = await client.company.findMany({
+      orderBy: { name: 'asc' },
+    });
+    return companies.map((company) => this.mapToDomain(company));
+  }
+
   async countByAdminId(adminId: string): Promise<number> {
     return this.prisma.company.count({
       where: {
