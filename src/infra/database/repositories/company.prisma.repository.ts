@@ -67,9 +67,15 @@ export class CompanyPrismaRepository implements CompanyRepository {
   ): Promise<Company> {
     const client = (tx as typeof this.prisma) ?? this.prisma;
     const updateData: Record<string, unknown> = {};
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.isBlocked !== undefined) updateData.isBlocked = data.isBlocked;
+    if (data.name !== undefined) {
+      updateData.name = data.name;
+    }
+    if (data.description !== undefined) {
+      updateData.description = data.description;
+    }
+    if (data.isBlocked !== undefined) {
+      updateData.isBlocked = data.isBlocked;
+    }
     const updated = await client.company.update({
       where: { id },
       data: updateData,

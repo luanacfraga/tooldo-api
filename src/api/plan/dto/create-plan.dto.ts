@@ -15,7 +15,9 @@ export class CreatePlanDto {
     example: 10,
   })
   @IsInt({ message: 'O número máximo de empresas deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de empresas deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de empresas deve ser maior ou igual a 0',
+  })
   maxCompanies!: number;
 
   @ApiProperty({
@@ -23,7 +25,9 @@ export class CreatePlanDto {
     example: 50,
   })
   @IsInt({ message: 'O número máximo de gerentes deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de gerentes deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de gerentes deve ser maior ou igual a 0',
+  })
   maxManagers!: number;
 
   @ApiProperty({
@@ -31,7 +35,9 @@ export class CreatePlanDto {
     example: 100,
   })
   @IsInt({ message: 'O número máximo de executores deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de executores deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de executores deve ser maior ou igual a 0',
+  })
   maxExecutors!: number;
 
   @ApiProperty({
@@ -39,7 +45,9 @@ export class CreatePlanDto {
     example: 30,
   })
   @IsInt({ message: 'O número máximo de consultores deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de consultores deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de consultores deve ser maior ou igual a 0',
+  })
   maxConsultants!: number;
 
   @ApiProperty({

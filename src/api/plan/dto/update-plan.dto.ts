@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsInt,
-  IsNotEmpty,
-  IsString,
-  IsUUID,
-  Min,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, IsUUID, Min } from 'class-validator';
 
 export class UpdatePlanDto {
   @ApiProperty({
@@ -29,7 +23,9 @@ export class UpdatePlanDto {
     example: 10,
   })
   @IsInt({ message: 'O número máximo de empresas deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de empresas deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de empresas deve ser maior ou igual a 0',
+  })
   maxCompanies!: number;
 
   @ApiProperty({
@@ -37,7 +33,9 @@ export class UpdatePlanDto {
     example: 50,
   })
   @IsInt({ message: 'O número máximo de gerentes deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de gerentes deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de gerentes deve ser maior ou igual a 0',
+  })
   maxManagers!: number;
 
   @ApiProperty({
@@ -45,7 +43,9 @@ export class UpdatePlanDto {
     example: 100,
   })
   @IsInt({ message: 'O número máximo de executores deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de executores deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de executores deve ser maior ou igual a 0',
+  })
   maxExecutors!: number;
 
   @ApiProperty({
@@ -53,7 +53,9 @@ export class UpdatePlanDto {
     example: 30,
   })
   @IsInt({ message: 'O número máximo de consultores deve ser um inteiro' })
-  @Min(0, { message: 'O número máximo de consultores deve ser maior ou igual a 0' })
+  @Min(0, {
+    message: 'O número máximo de consultores deve ser maior ou igual a 0',
+  })
   maxConsultants!: number;
 
   @ApiProperty({

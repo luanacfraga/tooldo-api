@@ -1,7 +1,7 @@
 import { CompanyUserStatus, UserRole } from '@/core/domain/shared/enums';
 import { AuthenticationException } from '@/core/domain/shared/exceptions/domain.exception';
-import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { CompanyUserRepository } from '@/core/ports/repositories/company-user.repository';
+import type { CompanyRepository } from '@/core/ports/repositories/company.repository';
 import type { UserRepository } from '@/core/ports/repositories/user.repository';
 import type { PasswordHasher } from '@/core/ports/services/password-hasher.port';
 import { ErrorMessages } from '@/shared/constants/error-messages';
@@ -200,14 +200,11 @@ export class AuthService {
     const companyIds: string[] = [];
 
     if (role === UserRole.ADMIN) {
-      const adminCompanies = await this.companyRepository.findByAdminId(
-        userId,
-      );
+      const adminCompanies = await this.companyRepository.findByAdminId(userId);
       companyIds.push(...adminCompanies.map((c) => c.id));
     } else {
-      const companyUsers = await this.companyUserRepository.findByUserId(
-        userId,
-      );
+      const companyUsers =
+        await this.companyUserRepository.findByUserId(userId);
       const activeMemberships = companyUsers.filter(
         (cu) => cu.status === CompanyUserStatus.ACTIVE,
       );
@@ -217,9 +214,7 @@ export class AuthService {
     for (const companyId of companyIds) {
       const company = await this.companyRepository.findById(companyId);
       if (company?.isBlocked) {
-        throw new AuthenticationException(
-          ErrorMessages.AUTH.COMPANY_BLOCKED,
-        );
+        throw new AuthenticationException(ErrorMessages.AUTH.COMPANY_BLOCKED);
       }
     }
   }
