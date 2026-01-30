@@ -1,6 +1,6 @@
 import { Action } from '@/core/domain/action/action.entity';
 import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
-import { ActionPriority } from '@/core/domain/shared/enums';
+import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
 import {
   DomainValidationException,
   EntityNotFoundException,
@@ -77,47 +77,142 @@ export class UpdateActionService {
       );
     }
 
+    let newStatus = action.status;
+
+    if (input.actualEndDate && !action.actualEndDate) {
+      newStatus = ActionStatus.DONE;
+    } else if (input.actualStartDate && !action.actualStartDate) {
+      if (action.status === ActionStatus.TODO) {
+        newStatus = ActionStatus.IN_PROGRESS;
+      }
+    }
+
+    const statusChanged = newStatus !== action.status;
+
     const updated = await this.transactionManager.execute(async (tx) => {
-      const updatedAction = await this.actionRepository.update(
-        input.actionId,
-        {
-          rootCause: input.rootCause,
-          title: input.title,
-          description: input.description,
-          priority: input.priority,
-          estimatedStartDate: input.estimatedStartDate,
-          estimatedEndDate: input.estimatedEndDate,
-          actualStartDate: input.actualStartDate,
-          actualEndDate: input.actualEndDate,
-          responsibleId: input.responsibleId,
-          teamId: input.teamId,
-        },
-        tx,
-      );
+      if (statusChanged) {
+        const lastInColumn =
+          await this.actionRepository.findLastKanbanOrderInColumn(
+            newStatus,
+            tx,
+          );
+        const newPosition = lastInColumn ? lastInColumn.position + 1 : 0;
 
-      if (input.checklistItems) {
-        await this.checklistItemRepository.deleteByActionId(input.actionId, tx);
-
-        for (let index = 0; index < input.checklistItems.length; index++) {
-          const itemInput = input.checklistItems[index];
-          const isCompleted = itemInput.isCompleted ?? false;
-          const completedAt = isCompleted ? new Date() : null;
-          const order = itemInput.order ?? index;
-
-          const checklistItem = new ChecklistItem(
-            randomUUID(),
+        const currentKanbanOrder =
+          await this.actionRepository.findKanbanOrderByActionId(
             input.actionId,
-            itemInput.description,
-            isCompleted,
-            completedAt,
-            order,
+            tx,
           );
 
-          await this.checklistItemRepository.create(checklistItem, tx);
-        }
-      }
+        await this.actionRepository.updateActionsPositionInColumn(
+          newStatus,
+          newPosition,
+          1,
+          tx,
+        );
 
-      return updatedAction;
+        if (currentKanbanOrder?.position !== undefined) {
+          await this.actionRepository.updateActionsPositionInColumn(
+            action.status,
+            currentKanbanOrder.position + 1,
+            -1,
+            tx,
+          );
+        }
+
+        const updatedAction = await this.actionRepository.updateWithKanbanOrder(
+          input.actionId,
+          {
+            rootCause: input.rootCause,
+            title: input.title,
+            description: input.description,
+            status: newStatus,
+            priority: input.priority,
+            estimatedStartDate: input.estimatedStartDate,
+            estimatedEndDate: input.estimatedEndDate,
+            actualStartDate: input.actualStartDate,
+            actualEndDate: input.actualEndDate,
+            responsibleId: input.responsibleId,
+            teamId: input.teamId,
+          },
+          {
+            column: newStatus,
+            position: newPosition,
+          },
+          tx,
+        );
+
+        if (input.checklistItems) {
+          await this.checklistItemRepository.deleteByActionId(
+            input.actionId,
+            tx,
+          );
+
+          for (let index = 0; index < input.checklistItems.length; index++) {
+            const itemInput = input.checklistItems[index];
+            const isCompleted = itemInput.isCompleted ?? false;
+            const completedAt = isCompleted ? new Date() : null;
+            const order = itemInput.order ?? index;
+
+            const checklistItem = new ChecklistItem(
+              randomUUID(),
+              input.actionId,
+              itemInput.description,
+              isCompleted,
+              completedAt,
+              order,
+            );
+
+            await this.checklistItemRepository.create(checklistItem, tx);
+          }
+        }
+
+        return updatedAction;
+      } else {
+        const updatedAction = await this.actionRepository.update(
+          input.actionId,
+          {
+            rootCause: input.rootCause,
+            title: input.title,
+            description: input.description,
+            priority: input.priority,
+            estimatedStartDate: input.estimatedStartDate,
+            estimatedEndDate: input.estimatedEndDate,
+            actualStartDate: input.actualStartDate,
+            actualEndDate: input.actualEndDate,
+            responsibleId: input.responsibleId,
+            teamId: input.teamId,
+          },
+          tx,
+        );
+
+        if (input.checklistItems) {
+          await this.checklistItemRepository.deleteByActionId(
+            input.actionId,
+            tx,
+          );
+
+          for (let index = 0; index < input.checklistItems.length; index++) {
+            const itemInput = input.checklistItems[index];
+            const isCompleted = itemInput.isCompleted ?? false;
+            const completedAt = isCompleted ? new Date() : null;
+            const order = itemInput.order ?? index;
+
+            const checklistItem = new ChecklistItem(
+              randomUUID(),
+              input.actionId,
+              itemInput.description,
+              isCompleted,
+              completedAt,
+              order,
+            );
+
+            await this.checklistItemRepository.create(checklistItem, tx);
+          }
+        }
+
+        return updatedAction;
+      }
     });
 
     return {
