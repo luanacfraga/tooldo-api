@@ -1,6 +1,10 @@
 import { Action } from '@/core/domain/action/action.entity';
 import { ChecklistItem } from '@/core/domain/action/checklist-item.entity';
-import { ActionPriority, ActionStatus } from '@/core/domain/shared/enums';
+import {
+  ActionPriority,
+  ActionStatus,
+  UserRole,
+} from '@/core/domain/shared/enums';
 import {
   DomainValidationException,
   EntityNotFoundException,
@@ -140,6 +144,14 @@ export class CreateActionService {
     const creator = await this.userRepository.findById(input.creatorId);
     if (!creator) {
       throw new EntityNotFoundException('Usuário criador', input.creatorId);
+    }
+
+    const isAdminOrMaster =
+      creator.role === UserRole.ADMIN || creator.role === UserRole.MASTER;
+    if (!isAdminOrMaster && !input.teamId) {
+      throw new DomainValidationException(
+        'Você precisa estar vinculado a uma equipe para criar ações. Entre em contato com o administrador da empresa.',
+      );
     }
 
     const responsible = await this.userRepository.findById(input.responsibleId);
