@@ -23,6 +23,16 @@ export class ListActionsQueryDto {
   @IsOptional()
   teamId?: string;
 
+  @ApiProperty({
+    required: false,
+    description: 'Filtrar apenas ações sem equipe',
+    type: Boolean,
+  })
+  @Type(() => Boolean)
+  @IsBoolean({ message: 'noTeam deve ser boolean' })
+  @IsOptional()
+  noTeam?: boolean;
+
   @ApiProperty({ required: false, description: 'Filtrar por responsável' })
   @IsOptional()
   responsibleId?: string;

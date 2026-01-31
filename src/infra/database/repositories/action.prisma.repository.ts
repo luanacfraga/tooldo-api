@@ -607,7 +607,7 @@ export class ActionPrismaRepository implements ActionRepository {
       where.responsibleId = filters.responsibleId;
     }
 
-    if (filters.teamId) {
+    if (filters.teamId !== undefined) {
       where.teamId = filters.teamId;
     }
 
