@@ -10,7 +10,7 @@ export interface ActionFilters {
   status?: ActionStatus | ActionStatus[];
   priority?: ActionPriority;
   responsibleId?: string;
-  teamId?: string | null;
+  teamId?: string;
   lateStatus?: ActionLateStatus | ActionLateStatus[];
   isLate?: boolean;
   isBlocked?: boolean;

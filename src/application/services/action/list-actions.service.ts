@@ -16,7 +16,6 @@ import { Inject, Injectable } from '@nestjs/common';
 export interface ListActionsInput {
   companyId?: string;
   teamId?: string;
-  noTeam?: boolean;
   responsibleId?: string;
   creatorId?: string;
   status?: ActionStatus;
@@ -77,7 +76,7 @@ export class ListActionsService {
         {
           status: input.statuses?.length ? undefined : input.status,
           priority: input.priority,
-          teamId: input.noTeam ? null : input.teamId,
+          teamId: input.teamId,
           responsibleId: input.responsibleId,
           isBlocked: wantsLateOrBlocked ? undefined : input.isBlocked,
         },
