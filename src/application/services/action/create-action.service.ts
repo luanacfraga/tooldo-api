@@ -154,6 +154,12 @@ export class CreateActionService {
       );
     }
 
+    if (!input.teamId && input.responsibleId !== input.creatorId) {
+      throw new DomainValidationException(
+        ErrorMessages.ACTION.RESPONSIBLE_MUST_BE_CREATOR_WHEN_NO_TEAM,
+      );
+    }
+
     const responsible = await this.userRepository.findById(input.responsibleId);
     if (!responsible) {
       throw new EntityNotFoundException(

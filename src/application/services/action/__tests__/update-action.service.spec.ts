@@ -18,7 +18,10 @@ describe('UpdateActionService - Date-Driven Status Transitions', () => {
     status: ActionStatus,
     actualStartDate: Date | null = null,
     actualEndDate: Date | null = null,
+    options?: { withTeam?: boolean },
   ): Action => {
+    const teamId = options?.withTeam ? 'team-123' : null;
+    const responsibleId = teamId ? mockResponsibleId : mockUserId;
     return new Action(
       mockActionId,
       'Root Cause',
@@ -34,9 +37,9 @@ describe('UpdateActionService - Date-Driven Status Transitions', () => {
       false,
       null,
       mockCompanyId,
-      null,
+      teamId,
       mockUserId,
-      mockResponsibleId,
+      responsibleId,
       null,
     );
   };
