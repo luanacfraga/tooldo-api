@@ -80,7 +80,9 @@ export class UpdateActionService {
     const effectiveTeamId =
       input.teamId !== undefined ? input.teamId : action.teamId;
     const effectiveResponsibleId =
-      input.responsibleId !== undefined ? input.responsibleId : action.responsibleId;
+      input.responsibleId !== undefined
+        ? input.responsibleId
+        : action.responsibleId;
     if (!effectiveTeamId && effectiveResponsibleId !== action.creatorId) {
       throw new DomainValidationException(
         ErrorMessages.ACTION.RESPONSIBLE_MUST_BE_CREATOR_WHEN_NO_TEAM,
