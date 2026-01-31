@@ -126,6 +126,8 @@ export const ErrorMessages = {
     BLOCKED_REASON_REQUIRED:
       'O motivo do bloqueio é obrigatório quando a ação está bloqueada',
     NOT_FOUND: 'Ação não encontrada',
+    RESPONSIBLE_MUST_BE_CREATOR_WHEN_NO_TEAM:
+      'Para ação sem equipe, somente o administrador (criador) pode ser o responsável.',
   },
 
   CHECKLIST_ITEM: {
